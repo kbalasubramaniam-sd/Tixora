@@ -8,6 +8,10 @@ public class PartnerProduct
     public Guid PartnerId { get; set; }
     public ProductCode ProductCode { get; set; }
     public LifecycleState LifecycleState { get; set; } = LifecycleState.None;
+    /// <summary>
+    /// Company code assigned to this partner on this product. Set during T-02 submission. Null until then.
+    /// </summary>
+    public string? CompanyCode { get; set; }
     public DateTime StateChangedAt { get; set; }
     public DateTime CreatedAt { get; set; }
 

@@ -134,7 +134,8 @@ A multi-step wizard for creating a new ticket. The flow: Product Selection → T
 │  ┌─────────────────────────────────────────────────┐    │
 │  │ Partner Information                              │    │
 │  │                                                  │    │
-│  │ Partner Name        [________________]           │    │
+│  │ Partner Name        [▼ Select Partner ]           │    │
+│  │ Company Code        ABC-INS-001 (read-only)      │    │
 │  └─────────────────────────────────────────────────┘    │
 │                                                         │
 │  ┌─────────────────────────────────────────────────┐    │
@@ -195,21 +196,38 @@ A multi-step wizard for creating a new ticket. The flow: Product Selection → T
 - Each required doc: label on left, drop zone below
 - Accepted formats: PDF, DOCX, XLSX, PNG, JPG. Max 10MB.
 
+### Partner Name & Company Code (all task forms)
+Partners are created in a **separate admin screen** (see `11-admin.md`), not during ticket creation. All ticket forms use:
+- **Partner Name** — dropdown (required). Populated from partners registered on the selected product, filtered by required lifecycle state.
+- **Company Code** — read-only text, auto-populated when partner is selected (from PartnerProduct.CompanyCode).
+
+| Task | Partner dropdown filter | Company Code shown? |
+|------|------------------------|-------------------|
+| T-01 | All partners on this product (any lifecycle) | Yes (read-only) |
+| T-02 | Partners with lifecycle = Onboarded | Yes (read-only) |
+| T-03 | Partners with lifecycle = UatActive | Yes (read-only) |
+| T-05 | Partners with lifecycle = Live | Yes (read-only) |
+
+When a partner is selected, Company Code fills automatically. If a partner has no Company Code assigned yet, show "—" (dash).
+
+### T-01 Form: Agreement Validation & Sign-off
+- **Partner Name** — dropdown (required)
+- **Company Code** — read-only (auto-populated)
+- **Documents:** See layout above — 4 required uploads.
+
 ### T-02 Form: UAT Access Creation
-- **Partner Name** — lookup/select (required)
+- **Partner Name** — dropdown (required, Onboarded partners)
+- **Company Code** — read-only (auto-populated)
 - **UAT User Details:**
   - Full Name (text, required)
   - Email (email, required)
   - Mobile (tel, numeric only, required)
   - Designation (text, required)
-  - Company Code (text, required)
 
 ### T-03 Form: Production Account Creation
-Partner Name and Company Code are **inferred from lifecycle** — displayed as disabled/prepopulated fields, not user input.
-
-- **Account Info:**
-  - Company Code (text, disabled — prepopulated from T-02)
-  - API Opt-In Selection (toggle for "Both" products; always on for API-only products)
+- **Partner Name** — dropdown (required, UatActive partners)
+- **Company Code** — read-only (auto-populated)
+- **API Opt-In Selection** — toggle for "Both" products; always on for API-only products
 
 - **Portal Admin User:**
   - Full Name (text, required)
@@ -239,6 +257,8 @@ Partner Name and Company Code are **inferred from lifecycle** — displayed as d
   - For API-only products (Wtheeq, Mulem): no toggle, API path always selected
 
 ### T-05 Form: Access & Credential Support
+- **Partner Name** — dropdown (required, Live partners)
+- **Company Code** — read-only (auto-populated)
 - **Issue Type** — dropdown driven by product access type:
   - Both products: "Portal login issue" | "API credential issue"
   - API products: "Portal password reset" | "API credential issue"
@@ -270,6 +290,7 @@ Partner Name and Company Code are **inferred from lifecycle** — displayed as d
 │  ┌─────────────────────────────────────────────────┐    │
 │  │ Partner Information                              │    │
 │  │ Partner Name: ABC Insurance Co.                  │    │
+│  │ Company Code: RBT-ABC-001                        │    │
 │  └─────────────────────────────────────────────────┘    │
 │                                                         │
 │  ┌─────────────────────────────────────────────────┐    │

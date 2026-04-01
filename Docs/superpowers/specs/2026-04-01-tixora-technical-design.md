@@ -335,6 +335,7 @@ public class PartnerProduct
     public Guid PartnerId { get; set; }
     public ProductCode ProductCode { get; set; }
     public LifecycleState LifecycleState { get; set; }
+    public string? CompanyCode { get; set; }           // assigned during T-02, null until then
     public DateTime StateChangedAt { get; set; }
     public DateTime CreatedAt { get; set; }
 
@@ -992,9 +993,9 @@ Seeded with the default workflow matrix:
 ### 9.5 Sample Partners (for demo)
 
 Seed 3-4 sample partners at various lifecycle states to demonstrate the system:
-- Partner A: LIVE on Rabet (all tasks completed — T-01, T-02, T-03)
-- Partner B: UAT_ACTIVE on Rhoon (T-01 + T-02 Ph1 done)
-- Partner C: None on Wtheeq (no T-01 yet)
+- Partner A ("Alpha Insurance", alias "ALPHA"): LIVE on Rabet, CompanyCode = "RBT-ALPHA-001"
+- Partner B ("Beta Trading", alias "BETA"): UAT_ACTIVE on Rhoon, CompanyCode = "RHN-BETA-001"
+- Partner C ("Gamma Holdings", alias "GAMMA"): None on Wtheeq, CompanyCode = "WTQ-GAMMA-001"
 
 ---
 
@@ -1024,12 +1025,30 @@ Constraints enforced at the API layer:
 
 `GET /api/products/{code}/form-schema/{taskType}` returns the field definitions for the dynamic form. The response drives the frontend — fields, types, validation, required documents, and conditional logic.
 
-### 11.2 T-01: Agreement Validation & Sign-off
+### 11.2 Partner Name & Company Code (All Task Forms)
+
+Partners are **seeded data** in MVP 1. Admin partner management (add/edit partners via UI) is deferred to MVP 2. Partners and their company codes are created via seed data at startup.
+
+All ticket forms use:
+- **Partner Name** — dropdown, populated from PartnerProducts on the selected product, filtered by lifecycle state
+- **Company Code** — read-only, auto-populated when partner is selected (from `PartnerProduct.CompanyCode`)
+
+| Task | Partner dropdown filter | Company Code |
+|------|------------------------|-------------|
+| T-01 | All partners on this product (any lifecycle) | Read-only |
+| T-02 | LifecycleState = Onboarded | Read-only |
+| T-03 | LifecycleState = UatActive | Read-only |
+| T-05 | LifecycleState = Live | Read-only |
+
+The ticket stores `PartnerProductId` (FK) — not the partner name or company code as form data.
+
+### 11.3 T-01: Agreement Validation & Sign-off
 
 **Fields:**
 | Field | Key | Type | Required | Notes |
 |-------|-----|------|----------|-------|
-| Partner Name | `partnerName` | lookup | Yes | Autocomplete against existing partners |
+| Partner Name | `partnerProductId` | dropdown | Yes | All partners on selected product |
+| Company Code | — | read-only | Auto | From PartnerProduct.CompanyCode |
 
 **Required Documents:**
 | Document | Key | Required |
@@ -1041,45 +1060,42 @@ Constraints enforced at the API layer:
 
 **FormData JSON example:**
 ```json
-{
-  "partnerName": "ABC Insurance Co."
-}
+{}
 ```
 
-### 11.3 T-02: UAT Access Creation
+Note: T-01 has no FormData fields — partner selection is stored as `Ticket.PartnerProductId`, documents are stored as Document entities.
+
+### 11.4 T-02: UAT Access Creation
 
 **Fields:**
 | Field | Key | Type | Required | Notes |
 |-------|-----|------|----------|-------|
-| Partner Name | `partnerName` | lookup | Yes | Must be Onboarded on this product |
+| Partner Name | `partnerProductId` | dropdown | Yes | Partners with LifecycleState = Onboarded |
+| Company Code | — | read-only | Auto | From PartnerProduct.CompanyCode |
 | UAT User Full Name | `uatUserFullName` | text | Yes | |
 | Email | `uatUserEmail` | email | Yes | |
 | Mobile | `uatUserMobile` | tel | Yes | Numeric only (digits, +, spaces, dashes) |
 | Designation | `uatUserDesignation` | text | Yes | |
-| Company Code | `companyCode` | text | Yes | |
 
 **Required Documents:** None
 
 **FormData JSON example:**
 ```json
 {
-  "partnerName": "ABC Insurance Co.",
   "uatUserFullName": "Ahmed Ali",
   "uatUserEmail": "ahmed@partner.com",
   "uatUserMobile": "+971501234567",
-  "uatUserDesignation": "IT Manager",
-  "companyCode": "ABC-INS-001"
+  "uatUserDesignation": "IT Manager"
 }
 ```
 
-### 11.4 T-03: Production Account Creation
-
-Partner Name and Company Code are **inferred from lifecycle context** — displayed as disabled fields, not user input. The backend resolves them from the PartnerProduct record.
+### 11.5 T-03: Production Account Creation
 
 **Fields:**
 | Field | Key | Type | Required | Notes |
 |-------|-----|------|----------|-------|
-| Company Code | `companyCode` | text (disabled) | Auto | Inferred from T-02 FormData |
+| Partner Name | `partnerProductId` | dropdown | Yes | Partners with LifecycleState = UatActive |
+| Company Code | — | read-only | Auto | From PartnerProduct.CompanyCode |
 | API Opt-In | `apiOptIn` | toggle | No | Both products: user chooses. ApiOnly: always true (hidden). |
 | Portal Admin Full Name | `portalAdminFullName` | text | Yes | |
 | Portal Admin Email | `portalAdminEmail` | email | Yes | |
@@ -1097,7 +1113,6 @@ Partner Name and Company Code are **inferred from lifecycle context** — displa
 **FormData JSON example:**
 ```json
 {
-  "companyCode": "ABC-INS-001",
   "apiOptIn": true,
   "portalAdminFullName": "Sara Khan",
   "portalAdminEmail": "sara@partner.com",
@@ -1119,11 +1134,13 @@ Partner Name and Company Code are **inferred from lifecycle context** — displa
 }
 ```
 
-### 11.5 T-05: Access & Credential Support
+### 11.6 T-05: Access & Credential Support
 
 **Fields:**
 | Field | Key | Type | Required | Notes |
 |-------|-----|------|----------|-------|
+| Partner Name | `partnerProductId` | dropdown | Yes | Partners with LifecycleState = Live |
+| Company Code | — | read-only | Auto | From PartnerProduct.CompanyCode |
 | Issue Type | `issueType` | dropdown | Yes | Values depend on product access mode (see IssueType enum) |
 | Description | `description` | textarea | Yes | Free text, max 2000 chars |
 
@@ -1137,7 +1154,7 @@ Partner Name and Company Code are **inferred from lifecycle context** — displa
 }
 ```
 
-### 11.6 Fulfilment Record Structure
+### 11.7 Fulfilment Record Structure
 
 When a ticket is completed, the provisioning/integration team records structured completion data in `FulfilmentRecord.RecordData` (JSON).
 
@@ -1147,16 +1164,6 @@ When a ticket is completed, the provisioning/integration team records structured
 | T-02 | UAT environment URL, UAT credentials issued, access confirmation |
 | T-03 | Portal account ID, portal URL, API key (if opted in), API endpoint URL, user account IDs, login emails |
 | T-05 | Resolution summary, action taken (reset/regenerated/unlocked) |
-
-### 11.7 CompanyCode Inference for T-03
-
-When creating a T-03 ticket, the backend:
-1. Looks up the PartnerProduct for the selected partner + product
-2. Finds the most recent completed T-02 ticket for that PartnerProduct
-3. Extracts `companyCode` from T-02's FormData JSON
-4. Returns it as a read-only pre-populated field in the form schema response
-
-If no completed T-02 exists, T-03 creation is blocked by lifecycle enforcement (requires UatActive).
 
 ### 11.8 Phone Number Storage
 
@@ -1204,6 +1211,7 @@ Everything described in this spec, including:
 - Cancel (pre-action only)
 
 ### MVP 2 (Post-Hackathon)
+- Admin partner management (add/edit partners and company codes via UI)
 - Draft management (auto-save, resume, delete)
 - Real SSO/auth integration (Azure AD / Entra ID)
 - Email notifications (choose provider: SES, Resend, SendGrid, or SMTP — wire up IEmailSender implementation)

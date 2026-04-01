@@ -10,6 +10,8 @@ Four admin sub-pages accessible from the sidebar under "Admin" section:
 3. SLA Settings
 4. Business Hours
 
+> **MVP 2:** Partner Management (add/edit partners and company codes via UI). For MVP 1, partners are seeded data.
+
 ---
 
 ## Admin: Users
