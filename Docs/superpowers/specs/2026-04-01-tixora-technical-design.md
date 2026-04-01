@@ -16,10 +16,10 @@ Tixora is an internal operations portal for managing partner-facing requests acr
 ### Tech Stack
 | Component | Technology |
 |-----------|-----------|
-| Backend | ASP.NET Core 10 Web API (C#) |
+| Backend | ASP.NET Core 8 Web API (C#) |
 | Frontend | React (built separately via Google Stitch) |
 | Database | SQL Server (local for hackathon, cloud-ready) |
-| ORM | Entity Framework Core 10 |
+| ORM | Entity Framework Core 8 |
 | Email | In-app notifications only (MVP 1); email provider TBD (MVP 2) |
 | Auth | Fake auth layer (seeded users + JWT), real SSO later |
 
@@ -165,8 +165,7 @@ Tixora/
 │   │   │   ├── NotificationRepository.cs
 │   │   │   └── SlaRepository.cs
 │   │   ├── Email/
-│   │   │   ├── SesEmailSender.cs
-│   │   │   └── EmailTemplates/
+│   │   │   └── NoOpEmailSender.cs
 │   │   ├── FileStorage/
 │   │   │   └── LocalFileStorage.cs
 │   │   └── Seed/
@@ -238,7 +237,7 @@ public enum TicketStatus
     Cancelled
 }
 
-public enum LifecycleState { Agreed, UatActive, Onboarded, Live }
+public enum LifecycleState { None, Agreed, UatActive, Onboarded, Live }
 
 public enum StageType { Review, Approval, Provisioning, PhaseGate }
 
@@ -425,8 +424,6 @@ public class SlaTracker
     public double BusinessHoursElapsed { get; set; }
     public SlaStatus Status { get; set; }
     public DateTime StartedAt { get; set; }
-    public DateTime? PausedAt { get; set; }        // when returned for clarification
-    public DateTime? ResumedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     public bool IsBreach { get; set; }
     public int WarningThreshold75 { get; set; }    // hours
@@ -436,6 +433,18 @@ public class SlaTracker
     public bool BreachSent { get; set; }
 
     public Ticket Ticket { get; set; }
+    public ICollection<SlaPause> Pauses { get; set; }
+}
+
+public class SlaPause
+{
+    public Guid Id { get; set; }
+    public Guid SlaTrackerId { get; set; }
+    public DateTime PausedAt { get; set; }
+    public DateTime? ResumedAt { get; set; }
+    public double PausedBusinessHours { get; set; } // calculated on resume
+
+    public SlaTracker SlaTracker { get; set; }
 }
 ```
 
@@ -553,8 +562,6 @@ public class StageDefinition
     public StageType StageType { get; set; }
     public UserRole AssignedRole { get; set; }
     public int SlaBusinessHours { get; set; }
-    public bool IsParallel { get; set; }           // true for T-03 Portal+API parallel stages
-    public string? ParallelGroup { get; set; }     // groups parallel stages together
 
     public WorkflowDefinition WorkflowDefinition { get; set; }
 }
@@ -716,10 +723,10 @@ ProvisioningPath resolved at submission:
 Workflow routing:
     PortalOnly:  Partner Ops → Director → Provisioning Team → Complete
     ApiOnly:     Partner Ops → Director → Integration Team → Complete
-    PortalAndApi: Partner Ops → Director → [Provisioning + Integration parallel] → Both done → Complete
+    PortalAndApi: Partner Ops → Director → Provisioning → Integration → Complete (sequential, order configurable via seed data)
 ```
 
-For PortalAndApi: the engine creates two parallel stages (StageDefinition.IsParallel = true, same ParallelGroup). The ticket advances to Complete only when both parallel stages are resolved.
+For PortalAndApi: stages run sequentially. The stage order is defined in seed data and can be adjusted without code changes.
 
 ### 4.5 Lifecycle Prerequisite Enforcement
 
