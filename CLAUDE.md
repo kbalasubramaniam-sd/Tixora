@@ -36,20 +36,42 @@ src/
 
 - T-01: Agreement Validation & Sign-off
 - T-02: UAT Access Creation (two-phase)
-- T-03: Partner Account Creation (product-driven access path)
-- T-04: User Account Creation
+- T-03: Production Account Creation (merged partner account + user setup, with API opt-in)
 - T-05: Access & Credential Support
+
+## Partner Lifecycle
+
+```
+None → [T-01] → Onboarded → [T-02] → UatActive → [T-03] → Live
+```
+
+- Partners are seeded data (MVP 1). Admin partner management deferred to MVP 2.
+- Partner.Name = company name (shared). PartnerProduct.CompanyCode = per product.
+- All ticket forms: Partner Name = dropdown, Company Code = read-only.
 
 ## Key Conventions
 
 - **No external workflow packages** — custom WorkflowEngine.cs, pure service
 - **Workflow rules are seeded** — no dynamic editing in MVP 1
+- **All workflows are sequential** — no parallel stages, stage order from seed data
 - **Generic naming** — clear, plain language over technical jargon
 - **Product-level attributes** — variations driven by product config, not per-ticket toggles
 - **Fully internal** — no external user visibility, no "internal notes" concept
 - **SLA in business hours** — Sun-Thu, 08:00-17:00 GST
+- **SLA = 0 means no tracking** — for external wait gates (e.g., UAT signal)
 - **Ticket ID format:** SPM-[PRODUCT]-[TASK]-[YYYYMMDD]-[SEQ]
 - **Aggressive MVP scoping** — defer non-essential features to MVP 2
+- **Guid.CreateVersion7()** — use for all entity IDs (.NET 10 time-ordered GUIDs)
+- **Explicit enum values** — all enums have hardcoded int values (DB safety)
+- **Phone fields** — tel input, numeric only (digits, +, spaces, dashes)
+
+## dotnet-claude-kit Overrides
+
+The dotnet-claude-kit plugin is installed. These project-specific rules OVERRIDE plugin defaults:
+
+- **USE repository pattern** — this project uses ITicketRepository, IPartnerRepository, etc. Do NOT use DbContext directly in services. The plugin says "no repositories" — ignore that for this project.
+- **USE Swashbuckle** — the plugin prefers built-in OpenAPI. We use Swashbuckle for Swagger UI.
+- **Controllers, not minimal APIs** — this project uses controller-based endpoints, not minimal APIs.
 
 ## Commands
 
