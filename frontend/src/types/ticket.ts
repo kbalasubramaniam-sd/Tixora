@@ -15,11 +15,17 @@ export interface TicketSummary {
   updatedAt: string
 }
 
+export interface StatEntry {
+  label: string
+  value: number | string
+  highlight?: 'amber' | 'red'
+}
+
 export interface DashboardStats {
-  stat1: { label: string; value: number | string }
-  stat2: { label: string; value: number | string; highlight?: 'amber' | 'red' }
-  stat3: { label: string; value: number | string }
-  stat4: { label: string; value: number | string }
+  stat1: StatEntry
+  stat2: StatEntry
+  stat3: StatEntry
+  stat4: StatEntry
 }
 
 export interface ActivityEntry {
