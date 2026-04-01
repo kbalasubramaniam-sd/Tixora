@@ -977,11 +977,13 @@ Seeded with the default workflow matrix:
 | Task | Total SLA (business hours) |
 |------|---------------------------|
 | T-01 | 48 (16 per stage) |
-| T-02 | 8 (Phase 1), 24 (Phase 2 — from UAT signal to sign-off; configurable by admin) |
+| T-02 | Product Review: 8, Integration Ph1: 8, UAT Signal: 0 (no SLA — external wait), Integration Ph2: 24 |
 | T-03 Portal | 24 |
 | T-03 API / Both | 48 |
 | T-04 | 8 |
 | T-05 | 2 |
+
+**Convention:** `SlaBusinessHours = 0` on a StageDefinition means no SLA tracking for that stage. The workflow engine skips SlaTracker creation. Used for external wait gates (e.g. awaiting partner UAT completion). The UatReminderService handles nudges for overdue waits.
 
 ### 9.4 Business Hours Default
 
