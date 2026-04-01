@@ -86,13 +86,9 @@ A multi-step wizard for creating a new ticket. The flow: Product Selection → T
 │  └─────────────────────────────────────────────────┘    │
 │                                                         │
 │  ┌─────────────────────────────────────────────────┐    │
-│  │ T-03 · Partner Account Creation                 │    │
-│  │ Create a partner account on the platform        │    │
-│  └─────────────────────────────────────────────────┘    │
-│                                                         │
-│  ┌─────────────────────────────────────────────────┐    │
-│  │ T-04 · User Account Creation                    │    │
-│  │ Create user accounts for an existing partner    │    │
+│  │ T-03 · Production Account Creation              │    │
+│  │ Set up production accounts and users for a      │    │
+│  │ partner                                         │    │
 │  └─────────────────────────────────────────────────┘    │
 │                                                         │
 │  ┌─────────────────────────────────────────────────┐    │
@@ -139,20 +135,15 @@ A multi-step wizard for creating a new ticket. The flow: Product Selection → T
 │  │ Partner Information                              │    │
 │  │                                                  │    │
 │  │ Partner Name        [________________]           │    │
-│  │ Scope               [________________]           │    │
-│  │ Effective Date      [____/____/______]           │    │
-│  │ Commercial Terms    [________________]           │    │
-│  │ Signatory Name      [________________]           │    │
-│  │ Signatory Title     [________________]           │    │
 │  └─────────────────────────────────────────────────┘    │
 │                                                         │
 │  ┌─────────────────────────────────────────────────┐    │
 │  │ Required Documents                               │    │
 │  │                                                  │    │
-│  │ Agreement Copy      [Upload] ✓ uploaded          │    │
-│  │ Term Letter         [Upload]                     │    │
+│  │ Trade License       [Upload] ✓ uploaded          │    │
 │  │ VAT Certificate     [Upload]                     │    │
 │  │ Power of Attorney   [Upload]                     │    │
+│  │ Duly Filled Agreement [Upload]                   │    │
 │  └─────────────────────────────────────────────────┘    │
 │                                                         │
 │  [ ← Back ]                    [ Review & Submit → ]    │
@@ -181,22 +172,54 @@ A multi-step wizard for creating a new ticket. The flow: Product Selection → T
 - Accepted formats: PDF, DOCX, XLSX, PNG, JPG. Max 10MB.
 - Drag-and-drop zone: dashed `outline-variant` at 20% opacity, teal text "Drop file here"
 
-### T-03 Conditional: API Opt-In (only for "Both" products — Rabet, Rhoon)
-- A toggle switch at the top of the form: "Does this partner also require API access?"
-- Toggle OFF: only portal fields shown
-- Toggle ON: additional section slides in with fields:
-  - API Use Case (textarea)
-  - Expected Call Volume (dropdown: Low/Medium/High)
-  - Technical Contact Name (text)
-  - Technical Contact Email (email)
-  - IP Addresses for Whitelisting (textarea, one per line)
-  - Preferred Environment (dropdown)
-- For API-only products (Wtheeq, Mulem): no toggle, API fields always shown
+### T-02 Form: UAT Access Creation
+- **Partner Name** — lookup/select (required)
+- **UAT User Details:**
+  - Full Name (text, required)
+  - Email (email, required)
+  - Mobile (text, required)
+  - Designation (text, required)
+  - Company Code (text, required)
 
-### T-05 Conditional: Issue Type
-- Dropdown "Issue Type" driven by product access type:
+### T-03 Form: Production Account Creation
+Partner Name and Company Code are **inferred from lifecycle** — displayed as disabled/prepopulated fields, not user input.
+
+- **Account Info:**
+  - Company Code (text, disabled — prepopulated from T-02)
+  - API Opt-In Selection (toggle for "Both" products; always on for API-only products)
+
+- **Portal Admin User:**
+  - Full Name (text, required)
+  - Email (email, required)
+  - Mobile (text, required)
+  - Designation (text, required)
+
+- **Network:**
+  - IP Addresses for Whitelisting (textarea, one per line)
+
+- **Invoicing Information:**
+  - Emails (dynamic list — add/remove email inputs, at least one required)
+  - Phone Numbers (dynamic list — add/remove phone inputs, at least one required)
+  - Dynamic: "Add Email" / "Add Phone" buttons with teal icon, remove (x) per row
+
+- **Customer Support Contact Information:**
+  - "Required for our CX team to handle incoming customer cases"
+  - **First Level Contact** — dynamic list of { Name, Mobile, Email } (at least one required)
+  - **First Level Escalation** — dynamic list of { Name, Mobile, Email } (at least one required)
+  - **Second Level Escalation** — dynamic list of { Name, Mobile, Email } (at least one required)
+  - Each contact row: 3 inline fields + remove (x) button. "Add Contact" below each level.
+
+- **API Opt-In section** (only for "Both" products — Rabet, Rhoon):
+  - Toggle: "Does this partner also require API access?"
+  - Toggle OFF: API fields hidden
+  - Toggle ON: additional section slides in (no extra fields beyond IP whitelisting above)
+  - For API-only products (Wtheeq, Mulem): no toggle, API path always selected
+
+### T-05 Form: Access & Credential Support
+- **Issue Type** — dropdown driven by product access type:
   - Both products: "Portal login issue" | "API credential issue"
   - API products: "Portal password reset" | "API credential issue"
+- **Description** — textarea for additional details about the issue (required)
 
 ### Navigation
 - **Back button:** Tertiary, returns to Step 2
@@ -224,17 +247,14 @@ A multi-step wizard for creating a new ticket. The flow: Product Selection → T
 │  ┌─────────────────────────────────────────────────┐    │
 │  │ Partner Information                              │    │
 │  │ Partner Name: ABC Insurance Co.                  │    │
-│  │ Scope: Full data exchange                        │    │
-│  │ Effective Date: 15 Apr 2026                      │    │
-│  │ ...                                              │    │
 │  └─────────────────────────────────────────────────┘    │
 │                                                         │
 │  ┌─────────────────────────────────────────────────┐    │
 │  │ Documents (4 attached)                           │    │
-│  │ ✓ Agreement Copy — agreement.pdf (2.1 MB)       │    │
-│  │ ✓ Term Letter — TL_2026.pdf (1.4 MB)            │    │
+│  │ ✓ Trade License — trade_lic.pdf (2.1 MB)        │    │
 │  │ ✓ VAT Certificate — vat.pdf (0.8 MB)            │    │
 │  │ ✓ Power of Attorney — poa.pdf (1.1 MB)          │    │
+│  │ ✓ Duly Filled Agreement — agreement.pdf (1.4 MB)│    │
 │  └─────────────────────────────────────────────────┘    │
 │                                                         │
 │  [ ← Edit ]                          [ Submit → ]      │

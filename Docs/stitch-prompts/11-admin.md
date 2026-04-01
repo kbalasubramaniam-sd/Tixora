@@ -70,13 +70,9 @@ Four admin sub-pages accessible from the sidebar under "Admin" section:
 │  │ Stages: Product Review → Integration (Ph1 → Ph2) │   │
 │  │ [ Edit ]                                         │    │
 │  ├─────────────────────────────────────────────────┤    │
-│  │ T-03 · Partner Account Creation                  │    │
+│  │ T-03 · Production Account Creation                │    │
 │  │ Portal: Partner Ops → Director → Provisioning    │    │
 │  │ API: Partner Ops → Director → Integration        │    │
-│  │ [ Edit ]                                         │    │
-│  ├─────────────────────────────────────────────────┤    │
-│  │ T-04 · User Account Creation                     │    │
-│  │ Stages: Partner Ops → Provisioning               │    │
 │  │ [ Edit ]                                         │    │
 │  ├─────────────────────────────────────────────────┤    │
 │  │ T-05 · Access & Credential Support               │    │
