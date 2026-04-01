@@ -1,17 +1,37 @@
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import { TopBar } from './TopBar'
 import { Sidebar } from './Sidebar'
 import { ErrorBoundary } from './ErrorBoundary'
+import { useSidebar } from '@/hooks/useSidebar'
+import { cn } from '@/utils/cn'
 
 export function AppShell() {
+  const { mode, isOverlayOpen, toggleOverlay, setOverlayOpen } = useSidebar()
+  const location = useLocation()
+
+  const mainMargin =
+    mode === 'full' ? 'ml-60' : mode === 'collapsed' ? 'ml-16' : 'ml-0'
+
   return (
     <div className="min-h-svh bg-surface">
-      <TopBar />
-      <Sidebar />
-      <main className="ml-60 pt-16 min-h-svh">
+      <TopBar
+        showMenuButton={mode === 'mobile'}
+        onMenuToggle={toggleOverlay}
+      />
+      <Sidebar
+        mode={mode}
+        isOverlayOpen={isOverlayOpen}
+        onClose={() => setOverlayOpen(false)}
+      />
+      <main className={cn('pt-16 min-h-svh transition-all duration-200', mainMargin)}>
         <div className="p-8">
           <ErrorBoundary>
-            <Outlet />
+            <div
+              key={location.pathname}
+              className="animate-[fadeIn_200ms_ease-out]"
+            >
+              <Outlet />
+            </div>
           </ErrorBoundary>
         </div>
       </main>

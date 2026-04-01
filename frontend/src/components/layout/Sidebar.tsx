@@ -11,6 +11,12 @@ interface NavItem {
   isPrimary?: boolean
 }
 
+interface SidebarProps {
+  mode: 'full' | 'collapsed' | 'mobile'
+  isOverlayOpen?: boolean
+  onClose?: () => void
+}
+
 const navItems: NavItem[] = [
   { label: 'Dashboard', icon: 'dashboard', to: '/' },
   { label: 'My Tickets', icon: 'confirmation_number', to: '/my-tickets' },
@@ -46,7 +52,38 @@ const reportItem: NavItem = {
   roles: [UserRole.Reviewer, UserRole.Approver, UserRole.SystemAdministrator],
 }
 
-export function Sidebar() {
+function NavItemLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
+  return (
+    <NavLink
+      key={item.to}
+      to={item.to}
+      end={item.to === '/'}
+      title={collapsed ? item.label : undefined}
+      className={({ isActive }) =>
+        cn(
+          'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
+          collapsed && 'justify-center px-2',
+          isActive
+            ? 'text-primary-container bg-surface-container-lowest'
+            : 'text-on-surface-variant hover:bg-surface-container-highest',
+          item.isPrimary && !collapsed && 'text-primary-container',
+        )
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {isActive && (
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
+          )}
+          <span className="material-symbols-outlined text-xl flex-shrink-0">{item.icon}</span>
+          {!collapsed && item.label}
+        </>
+      )}
+    </NavLink>
+  )
+}
+
+function SidebarContent({ collapsed, onClose, showClose }: { collapsed: boolean; onClose?: () => void; showClose?: boolean }) {
   const { user } = useAuth()
   const role = user?.role
 
@@ -57,65 +94,39 @@ export function Sidebar() {
   const showReports = role ? reportItem.roles?.includes(role) : false
 
   return (
-    <aside className="fixed left-0 top-16 bottom-6 w-60 bg-surface-container-low rounded-br-3xl z-30 flex flex-col py-4 px-3 overflow-y-auto">
+    <aside
+      className={cn(
+        'fixed left-0 top-16 bottom-6 bg-surface-container-low rounded-br-3xl z-30 flex flex-col py-4 overflow-y-auto transition-all duration-200',
+        collapsed ? 'w-16 px-1' : 'w-60 px-3',
+      )}
+    >
+      {showClose && (
+        <button
+          onClick={onClose}
+          className="self-end mb-2 p-2 rounded-lg hover:bg-surface-container-high transition-colors"
+          aria-label="Close navigation menu"
+        >
+          <span className="material-symbols-outlined text-on-surface-variant">close</span>
+        </button>
+      )}
+
       <nav className="flex flex-col gap-1 flex-1">
         {visibleNav.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
-                isActive
-                  ? 'text-primary-container bg-surface-container-lowest'
-                  : 'text-on-surface-variant hover:bg-surface-container-highest',
-                item.isPrimary && !isActive && 'text-primary-container',
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
-                )}
-                <span className="material-symbols-outlined text-xl">{item.icon}</span>
-                {item.label}
-              </>
-            )}
-          </NavLink>
+          <NavItemLink key={item.to} item={item} collapsed={collapsed} />
         ))}
 
         {showAdmin && (
           <>
-            <div className="mt-4 mb-1 px-3">
-              <span className="text-[0.6875rem] font-semibold text-on-surface-variant uppercase tracking-wider">
-                Admin
-              </span>
+            <div className={cn('mt-4 mb-1 px-3', collapsed && 'px-1')}>
+              {!collapsed && (
+                <span className="text-[0.6875rem] font-semibold text-on-surface-variant uppercase tracking-wider">
+                  Admin
+                </span>
+              )}
+              {collapsed && <div className="border-t border-outline-variant my-1" />}
             </div>
             {adminItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  cn(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
-                    isActive
-                      ? 'text-primary-container bg-surface-container-lowest'
-                      : 'text-on-surface-variant hover:bg-surface-container-highest',
-                  )
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
-                    )}
-                    <span className="material-symbols-outlined text-xl">{item.icon}</span>
-                    {item.label}
-                  </>
-                )}
-              </NavLink>
+              <NavItemLink key={item.to} item={item} collapsed={collapsed} />
             ))}
           </>
         )}
@@ -125,29 +136,146 @@ export function Sidebar() {
 
         {/* Reports at bottom */}
         {showReports && (
-          <NavLink
-            to="/reports"
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
-                isActive
-                  ? 'text-primary-container bg-surface-container-lowest'
-                  : 'text-on-surface-variant hover:bg-surface-container-highest',
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
-                )}
-                <span className="material-symbols-outlined text-xl">{reportItem.icon}</span>
-                {reportItem.label}
-              </>
-            )}
-          </NavLink>
+          <NavItemLink item={reportItem} collapsed={collapsed} />
         )}
       </nav>
     </aside>
+  )
+}
+
+export function Sidebar({ mode, isOverlayOpen, onClose }: SidebarProps) {
+  if (mode === 'mobile') {
+    if (!isOverlayOpen) return null
+    return (
+      <>
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 bg-black/40 z-40"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+        {/* Overlay sidebar */}
+        <div className="fixed left-0 top-0 bottom-0 w-60 bg-surface-container-low z-50 flex flex-col py-4 px-3 overflow-y-auto shadow-2xl">
+          <div className="flex items-center justify-between mb-4 pt-2">
+            <span className="text-lg font-bold text-primary-container">Tixora</span>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-surface-container-high transition-colors"
+              aria-label="Close navigation menu"
+            >
+              <span className="material-symbols-outlined text-on-surface-variant">close</span>
+            </button>
+          </div>
+          <SidebarInner onClose={onClose} />
+        </div>
+      </>
+    )
+  }
+
+  return <SidebarContent collapsed={mode === 'collapsed'} />
+}
+
+function SidebarInner({ onClose }: { onClose?: () => void }) {
+  const { user } = useAuth()
+  const role = user?.role
+
+  const visibleNav = navItems.filter(
+    (item) => !item.roles || (role && item.roles.includes(role)),
+  )
+  const showAdmin = role === UserRole.SystemAdministrator
+  const showReports = role ? reportItem.roles?.includes(role) : false
+
+  return (
+    <nav className="flex flex-col gap-1 flex-1">
+      {visibleNav.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          end={item.to === '/'}
+          onClick={onClose}
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
+              isActive
+                ? 'text-primary-container bg-surface-container-lowest'
+                : 'text-on-surface-variant hover:bg-surface-container-highest',
+              item.isPrimary && !isActive && 'text-primary-container',
+            )
+          }
+        >
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
+              )}
+              <span className="material-symbols-outlined text-xl">{item.icon}</span>
+              {item.label}
+            </>
+          )}
+        </NavLink>
+      ))}
+
+      {showAdmin && (
+        <>
+          <div className="mt-4 mb-1 px-3">
+            <span className="text-[0.6875rem] font-semibold text-on-surface-variant uppercase tracking-wider">
+              Admin
+            </span>
+          </div>
+          {adminItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={onClose}
+              className={({ isActive }) =>
+                cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
+                  isActive
+                    ? 'text-primary-container bg-surface-container-lowest'
+                    : 'text-on-surface-variant hover:bg-surface-container-highest',
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
+                  )}
+                  <span className="material-symbols-outlined text-xl">{item.icon}</span>
+                  {item.label}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </>
+      )}
+
+      <div className="flex-1" />
+
+      {showReports && (
+        <NavLink
+          to="/reports"
+          onClick={onClose}
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
+              isActive
+                ? 'text-primary-container bg-surface-container-lowest'
+                : 'text-on-surface-variant hover:bg-surface-container-highest',
+            )
+          }
+        >
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
+              )}
+              <span className="material-symbols-outlined text-xl">{reportItem.icon}</span>
+              {reportItem.label}
+            </>
+          )}
+        </NavLink>
+      )}
+    </nav>
   )
 }
