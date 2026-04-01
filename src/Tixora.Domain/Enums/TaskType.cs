@@ -1,7 +1,7 @@
 namespace Tixora.Domain.Enums;
 
 /// <summary>
-/// The five request types that drive the partner onboarding lifecycle.
+/// The four request types that drive the partner onboarding lifecycle.
 /// </summary>
 public enum TaskType
 {
@@ -11,11 +11,10 @@ public enum TaskType
     /// <summary>UAT Access Creation — two-phase (provision then sign-off).</summary>
     T02 = 1,
 
-    /// <summary>Partner Account Creation — access path driven by product.</summary>
+    /// <summary>Production Account Creation — partner account + user setup, with API opt-in.</summary>
     T03 = 2,
 
-    /// <summary>User Account Creation.</summary>
-    T04 = 3,
+    // T04 removed — merged into T03 (Production Account Creation)
 
     /// <summary>Access and Credential Support (password reset, key regen, etc.).</summary>
     T05 = 4
