@@ -35,6 +35,9 @@
 
   /* Font */
   --font-sans: 'Manrope', sans-serif;
+  --font-headline: 'Manrope', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+  --font-label: 'Manrope', sans-serif;
 
   /* Shadows */
   --shadow-ambient: 0 10px 40px rgba(23, 29, 28, 0.06);
