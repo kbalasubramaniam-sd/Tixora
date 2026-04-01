@@ -23,11 +23,11 @@ export interface TaskOption {
 export interface FormFieldDefinition {
   name: string
   label: string
-  type: 'text' | 'email' | 'textarea' | 'select' | 'date' | 'toggle' | 'file'
+  type: 'text' | 'email' | 'textarea' | 'select' | 'date' | 'toggle' | 'file' | 'readonly' | 'radio-card'
   required: boolean
   placeholder?: string
   helperText?: string
-  options?: { label: string; value: string }[]
+  options?: { label: string; value: string; icon?: string }[]
   section: string
   conditional?: { field: string; value: string | boolean }
 }
@@ -35,13 +35,24 @@ export interface FormFieldDefinition {
 export interface FormSectionMeta {
   name: string
   icon?: string
+  iconBg?: string  // e.g. 'bg-primary-container/20' for icon container background
   columns?: 1 | 2
   colorAccent?: string // e.g. 'bg-primary' or 'bg-tertiary' for the left bar
+  subtitle?: string
+}
+
+export interface RequiredDocument {
+  name: string
+  label: string
+  description?: string
+  icon?: string
+  required?: boolean  // true = required (shows error icon), false/undefined = optional
+  variant?: 'primary' | 'dashed'  // 'dashed' = special dashed-border style for main agreement
 }
 
 export interface FormSchema {
   fields: FormFieldDefinition[]
-  requiredDocuments: { name: string; label: string }[]
+  requiredDocuments: RequiredDocument[]
   sectionMeta?: FormSectionMeta[]
 }
 

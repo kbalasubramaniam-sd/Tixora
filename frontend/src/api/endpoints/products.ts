@@ -43,112 +43,327 @@ const mockTasks: Record<string, TaskOption[]> = {
 // ---------------------------------------------------------------------------
 
 // T-01: Agreement Validation & Sign-off — same across all products
+// From Stitch V2: Partner Information (select + readonly code) + Required Documents grid
 const schemaT01: FormSchema = {
   fields: [
-    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Partner Information' },
-    { name: 'effectiveDate', label: 'Effective Date', type: 'date', required: true, section: 'Partner Information' },
+    {
+      name: 'partnerName',
+      label: 'Partner Name',
+      type: 'select',
+      required: true,
+      placeholder: 'Select an active partner...',
+      section: 'Partner Information',
+    },
+    {
+      name: 'companyCode',
+      label: 'Company Code',
+      type: 'readonly',
+      required: false,
+      section: 'Partner Information',
+    },
   ],
   requiredDocuments: [
-    { name: 'tradeLicense', label: 'Trade License' },
-    { name: 'vatCertificate', label: 'VAT Certificate' },
-    { name: 'powerOfAttorney', label: 'Power of Attorney' },
-    { name: 'dulyFilledAgreement', label: 'Duly Filled Agreement' },
+    {
+      name: 'tradeLicense',
+      label: 'Trade License',
+      description: 'Valid for at least 6 months from current date.',
+      icon: 'badge',
+      required: true,
+    },
+    {
+      name: 'vatCertificate',
+      label: 'VAT Certificate',
+      description: 'Official tax registration document.',
+      icon: 'receipt_long',
+      required: true,
+    },
+    {
+      name: 'powerOfAttorney',
+      label: 'Power of Attorney',
+      description: 'Required if signing on behalf of owners.',
+      icon: 'gavel',
+      required: false,
+    },
+    {
+      name: 'dulyFilledAgreement',
+      label: 'Duly Filled Agreement',
+      description: 'Signed & Stamped T-01 Form',
+      icon: 'edit_document',
+      required: true,
+      variant: 'dashed',
+    },
   ],
   sectionMeta: [
-    { name: 'Partner Information', icon: 'handshake', columns: 2, colorAccent: 'bg-primary' },
+    { name: 'Partner Information', icon: 'handshake', iconBg: 'bg-gradient-to-br from-[#00696a] to-[#23a2a3]', columns: 2, colorAccent: 'text-white' },
   ],
 }
 
 // T-02: UAT Access Creation — same across all products
+// From Stitch V2: Partner Information (select + readonly code) + UAT User Details (Full Name, Email, Mobile, Designation select)
 const schemaT02: FormSchema = {
   fields: [
-    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select a partner...', section: 'Request Details' },
-    { name: 'companyCode', label: 'Company Code', type: 'text', required: true, placeholder: 'e.g. GLC-9921', section: 'Request Details' },
-    { name: 'fullName', label: 'Full Name', type: 'text', required: true, placeholder: "Enter user's full name", section: 'UAT User Details' },
-    { name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'name@company.com', section: 'UAT User Details' },
-    { name: 'mobile', label: 'Mobile', type: 'text', required: true, placeholder: 'Phone number', section: 'UAT User Details' },
-    { name: 'designation', label: 'Designation', type: 'text', required: true, placeholder: 'e.g. Operations Specialist', section: 'UAT User Details' },
+    {
+      name: 'partnerName',
+      label: 'Partner Name',
+      type: 'select',
+      required: true,
+      placeholder: 'Select onboarded partner...',
+      section: 'Partner Information',
+    },
+    {
+      name: 'companyCode',
+      label: 'Company Code',
+      type: 'readonly',
+      required: false,
+      section: 'Partner Information',
+    },
+    {
+      name: 'fullName',
+      label: 'Full Name',
+      type: 'text',
+      required: true,
+      placeholder: 'e.g. Sarah Jenkins',
+      section: 'UAT User Details',
+    },
+    {
+      name: 'emailAddress',
+      label: 'Email Address',
+      type: 'email',
+      required: true,
+      placeholder: 'sarah.j@company.com',
+      section: 'UAT User Details',
+    },
+    {
+      name: 'mobileNumber',
+      label: 'Mobile Number',
+      type: 'text',
+      required: true,
+      placeholder: '+1 (555) 000-0000',
+      section: 'UAT User Details',
+    },
+    {
+      name: 'designation',
+      label: 'Designation',
+      type: 'select',
+      required: true,
+      placeholder: 'Select role...',
+      options: [
+        { label: 'QA Engineer', value: 'qa' },
+        { label: 'Product Manager', value: 'pm' },
+        { label: 'Lead Developer', value: 'dev' },
+        { label: 'Operations Specialist', value: 'ops' },
+      ],
+      section: 'UAT User Details',
+    },
   ],
   requiredDocuments: [],
   sectionMeta: [
-    { name: 'Request Details', icon: 'corporate_fare', columns: 2, colorAccent: 'bg-primary' },
-    { name: 'UAT User Details', icon: 'person_add', columns: 2, colorAccent: 'bg-secondary' },
+    { name: 'Partner Information', icon: 'corporate_fare', iconBg: 'bg-primary-container/20', columns: 2, colorAccent: 'text-primary' },
+    { name: 'UAT User Details', icon: 'person_add', iconBg: 'bg-tertiary-container/20', columns: 2, colorAccent: 'text-tertiary' },
   ],
 }
 
-// T-03: Partner Account Creation — Both-access products (RBT, RHN)
-const schemaT03Both: FormSchema = {
+// T-03: Production Account Creation — unified schema from Stitch V3
+// Sections: Partner Information, API Opt-In, Portal Admin User, Network, Invoicing Contacts, Customer Support
+const schemaT03: FormSchema = {
   fields: [
-    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Partner Details' },
-    { name: 'registrationNumber', label: 'Registration Number', type: 'text', required: true, placeholder: 'e.g. CN-20240001', section: 'Partner Details' },
-    { name: 'contactEmail', label: 'Contact Email', type: 'email', required: true, placeholder: 'contact@company.com', section: 'Partner Details' },
-    { name: 'adminUsername', label: 'Admin Username', type: 'text', required: true, placeholder: 'e.g. admin.company', section: 'Portal Access' },
-    { name: 'adminEmail', label: 'Admin Email', type: 'email', required: true, placeholder: 'admin@company.com', section: 'Portal Access' },
-    { name: 'apiAccess', label: 'Does this partner require API access?', type: 'toggle', required: false, section: 'Access Configuration' },
-    { name: 'apiUseCase', label: 'API Use Case', type: 'textarea', required: false, placeholder: 'Describe the intended API use case', section: 'API Access', conditional: { field: 'apiAccess', value: true } },
-    { name: 'expectedCallVolume', label: 'Expected Call Volume', type: 'select', required: false, options: [{ label: 'Low', value: 'low' }, { label: 'Medium', value: 'medium' }, { label: 'High', value: 'high' }], section: 'API Access', conditional: { field: 'apiAccess', value: true } },
-    { name: 'technicalContactName', label: 'Technical Contact Name', type: 'text', required: false, placeholder: 'Full name', section: 'API Access', conditional: { field: 'apiAccess', value: true } },
-    { name: 'technicalContactEmail', label: 'Technical Contact Email', type: 'email', required: false, placeholder: 'tech@company.com', section: 'API Access', conditional: { field: 'apiAccess', value: true } },
-    { name: 'ipAddresses', label: 'IP Addresses', type: 'textarea', required: false, placeholder: 'One IP per line', helperText: 'Whitelisted IPs for API calls', section: 'API Access', conditional: { field: 'apiAccess', value: true } },
+    // Partner Information
+    {
+      name: 'partnerName',
+      label: 'Partner Name',
+      type: 'select',
+      required: true,
+      placeholder: 'Select Active UAT Partner',
+      section: 'Partner Information',
+    },
+    {
+      name: 'companyCode',
+      label: 'Company Code',
+      type: 'readonly',
+      required: false,
+      section: 'Partner Information',
+    },
+    // API Opt-In
+    {
+      name: 'apiOptIn',
+      label: 'Enable automated programmatic access for this production account.',
+      type: 'toggle',
+      required: false,
+      section: 'API Opt-In Selection',
+    },
+    // Portal Admin User
+    {
+      name: 'adminFullName',
+      label: 'Full Name',
+      type: 'text',
+      required: true,
+      placeholder: 'Johnathan Doe',
+      section: 'Portal Admin User',
+    },
+    {
+      name: 'adminEmail',
+      label: 'Email Address',
+      type: 'email',
+      required: true,
+      placeholder: 'j.doe@company.com',
+      section: 'Portal Admin User',
+    },
+    {
+      name: 'adminMobile',
+      label: 'Mobile Number',
+      type: 'text',
+      required: true,
+      placeholder: '+1 (555) 000-0000',
+      section: 'Portal Admin User',
+    },
+    {
+      name: 'adminDesignation',
+      label: 'Designation',
+      type: 'text',
+      required: true,
+      placeholder: 'Operations Manager',
+      section: 'Portal Admin User',
+    },
+    // Network
+    {
+      name: 'ipAddresses',
+      label: 'IP Addresses for Whitelisting',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Enter comma-separated IP addresses (e.g., 192.168.1.1, 10.0.0.12)',
+      helperText: 'Please specify all static IPs that will communicate with the Tixora Production environment.',
+      section: 'Network',
+    },
+    // Invoicing Contacts
+    {
+      name: 'invoicingName',
+      label: 'Contact Name',
+      type: 'text',
+      required: true,
+      placeholder: 'Finance Dept',
+      section: 'Invoicing Contacts',
+    },
+    {
+      name: 'invoicingEmail',
+      label: 'Email',
+      type: 'email',
+      required: true,
+      placeholder: 'billing@company.com',
+      section: 'Invoicing Contacts',
+    },
+    {
+      name: 'invoicingPhone',
+      label: 'Phone',
+      type: 'text',
+      required: true,
+      placeholder: '+1 (555) 123-4567',
+      section: 'Invoicing Contacts',
+    },
+    // Customer Support Contact
+    {
+      name: 'supportPrimaryName',
+      label: 'Primary Contact Name',
+      type: 'text',
+      required: true,
+      placeholder: 'Name',
+      section: 'Customer Support Contact',
+    },
+    {
+      name: 'supportPrimaryMobile',
+      label: 'Primary Contact Mobile',
+      type: 'text',
+      required: true,
+      placeholder: 'Mobile',
+      section: 'Customer Support Contact',
+    },
+    {
+      name: 'supportPrimaryEmail',
+      label: 'Primary Contact Email',
+      type: 'email',
+      required: true,
+      placeholder: 'Email',
+      section: 'Customer Support Contact',
+    },
+    {
+      name: 'supportEscalationName',
+      label: 'Escalation Contact Name',
+      type: 'text',
+      required: false,
+      placeholder: 'Name',
+      section: 'Customer Support Contact',
+    },
+    {
+      name: 'supportEscalationMobile',
+      label: 'Escalation Contact Mobile',
+      type: 'text',
+      required: false,
+      placeholder: 'Mobile',
+      section: 'Customer Support Contact',
+    },
+    {
+      name: 'supportEscalationEmail',
+      label: 'Escalation Contact Email',
+      type: 'email',
+      required: false,
+      placeholder: 'Email',
+      section: 'Customer Support Contact',
+    },
   ],
   requiredDocuments: [],
   sectionMeta: [
-    { name: 'Partner Details', icon: 'domain', columns: 2, colorAccent: 'bg-primary' },
-    { name: 'Portal Access', icon: 'admin_panel_settings', columns: 2, colorAccent: 'bg-secondary' },
-    { name: 'Access Configuration', icon: 'toggle_on', columns: 1, colorAccent: 'bg-tertiary' },
-    { name: 'API Access', icon: 'api', columns: 2, colorAccent: 'bg-tertiary' },
+    { name: 'Partner Information', icon: 'corporate_fare', iconBg: 'bg-transparent', columns: 2, colorAccent: 'text-primary' },
+    { name: 'API Opt-In Selection', icon: 'api', iconBg: 'bg-primary-container/10', columns: 1, colorAccent: 'text-primary' },
+    { name: 'Portal Admin User', icon: 'admin_panel_settings', iconBg: 'bg-transparent', columns: 2, colorAccent: 'text-primary' },
+    { name: 'Network', icon: 'lan', iconBg: 'bg-transparent', columns: 1, colorAccent: 'text-primary' },
+    { name: 'Invoicing Contacts', icon: 'receipt_long', iconBg: 'bg-transparent', columns: 2, colorAccent: 'text-primary' },
+    { name: 'Customer Support Contact', icon: 'support_agent', iconBg: 'bg-transparent', columns: 2, colorAccent: 'text-primary', subtitle: 'First & escalation contacts' },
   ],
 }
 
-// T-03: Partner Account Creation — API-only products (WTQ, MLM)
-const schemaT03Api: FormSchema = {
+// T-04: Access & Credential Support — unified schema from Stitch V2
+// From Stitch V2: Partner Information (select + readonly code) + Support Details (radio-card issue type + description textarea)
+const schemaT04: FormSchema = {
   fields: [
-    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Partner Details' },
-    { name: 'registrationNumber', label: 'Registration Number', type: 'text', required: true, placeholder: 'e.g. CN-20240001', section: 'Partner Details' },
-    { name: 'contactEmail', label: 'Contact Email', type: 'email', required: true, placeholder: 'contact@company.com', section: 'Partner Details' },
-    { name: 'apiUseCase', label: 'API Use Case', type: 'textarea', required: true, placeholder: 'Describe the intended API use case', section: 'API Integration' },
-    { name: 'expectedCallVolume', label: 'Expected Call Volume', type: 'select', required: true, options: [{ label: 'Low', value: 'low' }, { label: 'Medium', value: 'medium' }, { label: 'High', value: 'high' }], section: 'API Integration' },
-    { name: 'technicalContactName', label: 'Technical Contact Name', type: 'text', required: true, placeholder: 'Full name', section: 'API Integration' },
-    { name: 'technicalContactEmail', label: 'Technical Contact Email', type: 'email', required: true, placeholder: 'tech@company.com', section: 'API Integration' },
-    { name: 'ipAddresses', label: 'IP Addresses', type: 'textarea', required: true, placeholder: 'One IP per line', helperText: 'Whitelisted IPs for API calls', section: 'API Integration' },
-    { name: 'preferredEnvironment', label: 'Preferred Environment', type: 'select', required: true, options: [{ label: 'Staging', value: 'staging' }, { label: 'Production', value: 'production' }], section: 'API Integration' },
+    {
+      name: 'partnerName',
+      label: 'Partner Name',
+      type: 'select',
+      required: true,
+      placeholder: 'Select Live Partner...',
+      section: 'Partner Information',
+    },
+    {
+      name: 'companyCode',
+      label: 'Company Code',
+      type: 'readonly',
+      required: false,
+      section: 'Partner Information',
+    },
+    {
+      name: 'issueType',
+      label: 'Issue Type',
+      type: 'radio-card',
+      required: true,
+      options: [
+        { label: 'Portal Login / Reset', value: 'portal_login', icon: 'login' },
+        { label: 'API Credentials', value: 'api_credentials', icon: 'key' },
+      ],
+      section: 'Support Details',
+    },
+    {
+      name: 'description',
+      label: 'Description',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Describe the issue or required permissions in detail...',
+      helperText: 'Include any error codes received during authentication.',
+      section: 'Support Details',
+    },
   ],
   requiredDocuments: [],
   sectionMeta: [
-    { name: 'Partner Details', icon: 'domain', columns: 2, colorAccent: 'bg-primary' },
-    { name: 'API Integration', icon: 'api', columns: 2, colorAccent: 'bg-tertiary' },
-  ],
-}
-
-// T-04: Access & Credential Support — Both-access products (RBT, RHN)
-const schemaT04Both: FormSchema = {
-  fields: [
-    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Affected User' },
-    { name: 'userEmail', label: 'User Email', type: 'email', required: true, placeholder: 'user@company.com', section: 'Affected User' },
-    { name: 'userFullName', label: 'User Full Name', type: 'text', required: true, placeholder: 'Enter full name', section: 'Affected User' },
-    { name: 'issueType', label: 'Issue Type', type: 'select', required: true, options: [{ label: 'Portal login issue', value: 'portal_login' }, { label: 'API credential issue', value: 'api_credential' }], section: 'Issue Details' },
-    { name: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Describe the issue in detail', section: 'Issue Details' },
-  ],
-  requiredDocuments: [],
-  sectionMeta: [
-    { name: 'Affected User', icon: 'manage_accounts', columns: 2, colorAccent: 'bg-primary' },
-    { name: 'Issue Details', icon: 'support_agent', columns: 1, colorAccent: 'bg-tertiary' },
-  ],
-}
-
-// T-04: Access & Credential Support — API-only products (WTQ, MLM)
-const schemaT04Api: FormSchema = {
-  fields: [
-    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Affected User' },
-    { name: 'userEmail', label: 'User Email', type: 'email', required: true, placeholder: 'user@company.com', section: 'Affected User' },
-    { name: 'userFullName', label: 'User Full Name', type: 'text', required: true, placeholder: 'Enter full name', section: 'Affected User' },
-    { name: 'issueType', label: 'Issue Type', type: 'select', required: true, options: [{ label: 'Portal password reset', value: 'portal_password_reset' }, { label: 'API credential issue', value: 'api_credential' }], section: 'Issue Details' },
-    { name: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Describe the issue in detail', section: 'Issue Details' },
-  ],
-  requiredDocuments: [],
-  sectionMeta: [
-    { name: 'Affected User', icon: 'manage_accounts', columns: 2, colorAccent: 'bg-primary' },
-    { name: 'Issue Details', icon: 'support_agent', columns: 1, colorAccent: 'bg-tertiary' },
+    { name: 'Partner Information', icon: 'corporate_fare', iconBg: 'bg-surface-container-highest', columns: 2, colorAccent: 'text-primary', subtitle: 'Details regarding the entity requesting technical credentials.' },
+    { name: 'Support Details', icon: 'emergency_home', iconBg: 'bg-surface-container-highest', columns: 1, colorAccent: 'text-primary', subtitle: 'Specify the exact nature of the access issue or request.' },
   ],
 }
 
@@ -163,19 +378,11 @@ const mockFormSchemas: Record<string, FormSchema> = {
   // T-02: shared across all products — use task-level key only
   [TaskType.T02]: schemaT02,
 
-  // T-03: Both-access products
-  [`${ProductCode.RBT}-${TaskType.T03}`]: schemaT03Both,
-  [`${ProductCode.RHN}-${TaskType.T03}`]: schemaT03Both,
-  // T-03: API-only products
-  [`${ProductCode.WTQ}-${TaskType.T03}`]: schemaT03Api,
-  [`${ProductCode.MLM}-${TaskType.T03}`]: schemaT03Api,
+  // T-03: unified schema across all products (Stitch V3)
+  [TaskType.T03]: schemaT03,
 
-  // T-04: Both-access products
-  [`${ProductCode.RBT}-${TaskType.T04}`]: schemaT04Both,
-  [`${ProductCode.RHN}-${TaskType.T04}`]: schemaT04Both,
-  // T-04: API-only products
-  [`${ProductCode.WTQ}-${TaskType.T04}`]: schemaT04Api,
-  [`${ProductCode.MLM}-${TaskType.T04}`]: schemaT04Api,
+  // T-04: unified schema across all products (Stitch V2)
+  [TaskType.T04]: schemaT04,
 }
 
 // Default fallback schema for any Product × Task not explicitly defined
