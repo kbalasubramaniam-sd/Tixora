@@ -42,23 +42,164 @@ const mockTasks: Record<string, TaskOption[]> = {
   ],
 }
 
+// ---------------------------------------------------------------------------
+// Shared task-level schemas (used as fallback when no product-specific key)
+// ---------------------------------------------------------------------------
+
+// T-01: Agreement Validation & Sign-off — same across all products
+const schemaT01: FormSchema = {
+  fields: [
+    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Partner Information' },
+    { name: 'effectiveDate', label: 'Effective Date', type: 'date', required: true, section: 'Partner Information' },
+  ],
+  requiredDocuments: [
+    { name: 'tradeLicense', label: 'Trade License' },
+    { name: 'vatCertificate', label: 'VAT Certificate' },
+    { name: 'powerOfAttorney', label: 'Power of Attorney' },
+    { name: 'dulyFilledAgreement', label: 'Duly Filled Agreement' },
+  ],
+  sectionMeta: [
+    { name: 'Partner Information', icon: 'handshake', columns: 2, colorAccent: 'bg-primary' },
+  ],
+}
+
+// T-02: UAT Access Creation — same across all products
+const schemaT02: FormSchema = {
+  fields: [
+    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select a partner...', section: 'Request Details' },
+    { name: 'companyCode', label: 'Company Code', type: 'text', required: true, placeholder: 'e.g. GLC-9921', section: 'Request Details' },
+    { name: 'fullName', label: 'Full Name', type: 'text', required: true, placeholder: "Enter user's full name", section: 'UAT User Details' },
+    { name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'name@company.com', section: 'UAT User Details' },
+    { name: 'mobile', label: 'Mobile', type: 'text', required: true, placeholder: 'Phone number', section: 'UAT User Details' },
+    { name: 'designation', label: 'Designation', type: 'text', required: true, placeholder: 'e.g. Operations Specialist', section: 'UAT User Details' },
+  ],
+  requiredDocuments: [],
+  sectionMeta: [
+    { name: 'Request Details', icon: 'corporate_fare', columns: 2, colorAccent: 'bg-primary' },
+    { name: 'UAT User Details', icon: 'person_add', columns: 2, colorAccent: 'bg-secondary' },
+  ],
+}
+
+// T-03: Partner Account Creation — Both-access products (RBT, RHN)
+const schemaT03Both: FormSchema = {
+  fields: [
+    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Partner Details' },
+    { name: 'registrationNumber', label: 'Registration Number', type: 'text', required: true, placeholder: 'e.g. CN-20240001', section: 'Partner Details' },
+    { name: 'contactEmail', label: 'Contact Email', type: 'email', required: true, placeholder: 'contact@company.com', section: 'Partner Details' },
+    { name: 'adminUsername', label: 'Admin Username', type: 'text', required: true, placeholder: 'e.g. admin.company', section: 'Portal Access' },
+    { name: 'adminEmail', label: 'Admin Email', type: 'email', required: true, placeholder: 'admin@company.com', section: 'Portal Access' },
+    { name: 'apiAccess', label: 'Does this partner require API access?', type: 'toggle', required: false, section: 'Access Configuration' },
+    { name: 'apiUseCase', label: 'API Use Case', type: 'textarea', required: false, placeholder: 'Describe the intended API use case', section: 'API Access', conditional: { field: 'apiAccess', value: true } },
+    { name: 'expectedCallVolume', label: 'Expected Call Volume', type: 'select', required: false, options: [{ label: 'Low', value: 'low' }, { label: 'Medium', value: 'medium' }, { label: 'High', value: 'high' }], section: 'API Access', conditional: { field: 'apiAccess', value: true } },
+    { name: 'technicalContactName', label: 'Technical Contact Name', type: 'text', required: false, placeholder: 'Full name', section: 'API Access', conditional: { field: 'apiAccess', value: true } },
+    { name: 'technicalContactEmail', label: 'Technical Contact Email', type: 'email', required: false, placeholder: 'tech@company.com', section: 'API Access', conditional: { field: 'apiAccess', value: true } },
+    { name: 'ipAddresses', label: 'IP Addresses', type: 'textarea', required: false, placeholder: 'One IP per line', helperText: 'Whitelisted IPs for API calls', section: 'API Access', conditional: { field: 'apiAccess', value: true } },
+  ],
+  requiredDocuments: [],
+  sectionMeta: [
+    { name: 'Partner Details', icon: 'domain', columns: 2, colorAccent: 'bg-primary' },
+    { name: 'Portal Access', icon: 'admin_panel_settings', columns: 2, colorAccent: 'bg-secondary' },
+    { name: 'Access Configuration', icon: 'toggle_on', columns: 1, colorAccent: 'bg-tertiary' },
+    { name: 'API Access', icon: 'api', columns: 2, colorAccent: 'bg-tertiary' },
+  ],
+}
+
+// T-03: Partner Account Creation — API-only products (WTQ, MLM)
+const schemaT03Api: FormSchema = {
+  fields: [
+    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Partner Details' },
+    { name: 'registrationNumber', label: 'Registration Number', type: 'text', required: true, placeholder: 'e.g. CN-20240001', section: 'Partner Details' },
+    { name: 'contactEmail', label: 'Contact Email', type: 'email', required: true, placeholder: 'contact@company.com', section: 'Partner Details' },
+    { name: 'apiUseCase', label: 'API Use Case', type: 'textarea', required: true, placeholder: 'Describe the intended API use case', section: 'API Integration' },
+    { name: 'expectedCallVolume', label: 'Expected Call Volume', type: 'select', required: true, options: [{ label: 'Low', value: 'low' }, { label: 'Medium', value: 'medium' }, { label: 'High', value: 'high' }], section: 'API Integration' },
+    { name: 'technicalContactName', label: 'Technical Contact Name', type: 'text', required: true, placeholder: 'Full name', section: 'API Integration' },
+    { name: 'technicalContactEmail', label: 'Technical Contact Email', type: 'email', required: true, placeholder: 'tech@company.com', section: 'API Integration' },
+    { name: 'ipAddresses', label: 'IP Addresses', type: 'textarea', required: true, placeholder: 'One IP per line', helperText: 'Whitelisted IPs for API calls', section: 'API Integration' },
+    { name: 'preferredEnvironment', label: 'Preferred Environment', type: 'select', required: true, options: [{ label: 'Staging', value: 'staging' }, { label: 'Production', value: 'production' }], section: 'API Integration' },
+  ],
+  requiredDocuments: [],
+  sectionMeta: [
+    { name: 'Partner Details', icon: 'domain', columns: 2, colorAccent: 'bg-primary' },
+    { name: 'API Integration', icon: 'api', columns: 2, colorAccent: 'bg-tertiary' },
+  ],
+}
+
+// T-04: User Account Creation — same across all products
+const schemaT04: FormSchema = {
+  fields: [
+    { name: 'partnerAccount', label: 'Partner Account', type: 'select', required: true, placeholder: 'Select partner account', section: 'Partner Reference' },
+    { name: 'product', label: 'Product', type: 'text', required: true, placeholder: 'Filled from context', helperText: 'Pre-filled based on your product selection', section: 'Partner Reference' },
+    { name: 'fullName', label: 'Full Name', type: 'text', required: true, placeholder: 'Enter full name', section: 'User Details' },
+    { name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'user@company.com', section: 'User Details' },
+    { name: 'designation', label: 'Designation', type: 'text', required: true, placeholder: 'e.g. Operations Manager', section: 'User Details' },
+    { name: 'accessRole', label: 'Access Role', type: 'select', required: true, options: [{ label: 'Admin', value: 'admin' }, { label: 'Operator', value: 'operator' }, { label: 'ReadOnly', value: 'readonly' }], section: 'User Details' },
+  ],
+  requiredDocuments: [],
+  sectionMeta: [
+    { name: 'Partner Reference', icon: 'link', columns: 2, colorAccent: 'bg-secondary' },
+    { name: 'User Details', icon: 'badge', columns: 2, colorAccent: 'bg-primary' },
+  ],
+}
+
+// T-05: Access & Credential Support — Both-access products (RBT, RHN)
+const schemaT05Both: FormSchema = {
+  fields: [
+    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Affected User' },
+    { name: 'userEmail', label: 'User Email', type: 'email', required: true, placeholder: 'user@company.com', section: 'Affected User' },
+    { name: 'userFullName', label: 'User Full Name', type: 'text', required: true, placeholder: 'Enter full name', section: 'Affected User' },
+    { name: 'issueType', label: 'Issue Type', type: 'select', required: true, options: [{ label: 'Portal login issue', value: 'portal_login' }, { label: 'API credential issue', value: 'api_credential' }], section: 'Issue Details' },
+    { name: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Describe the issue in detail', section: 'Issue Details' },
+  ],
+  requiredDocuments: [],
+  sectionMeta: [
+    { name: 'Affected User', icon: 'manage_accounts', columns: 2, colorAccent: 'bg-primary' },
+    { name: 'Issue Details', icon: 'support_agent', columns: 1, colorAccent: 'bg-tertiary' },
+  ],
+}
+
+// T-05: Access & Credential Support — API-only products (WTQ, MLM)
+const schemaT05Api: FormSchema = {
+  fields: [
+    { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Affected User' },
+    { name: 'userEmail', label: 'User Email', type: 'email', required: true, placeholder: 'user@company.com', section: 'Affected User' },
+    { name: 'userFullName', label: 'User Full Name', type: 'text', required: true, placeholder: 'Enter full name', section: 'Affected User' },
+    { name: 'issueType', label: 'Issue Type', type: 'select', required: true, options: [{ label: 'Portal password reset', value: 'portal_password_reset' }, { label: 'API credential issue', value: 'api_credential' }], section: 'Issue Details' },
+    { name: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Describe the issue in detail', section: 'Issue Details' },
+  ],
+  requiredDocuments: [],
+  sectionMeta: [
+    { name: 'Affected User', icon: 'manage_accounts', columns: 2, colorAccent: 'bg-primary' },
+    { name: 'Issue Details', icon: 'support_agent', columns: 1, colorAccent: 'bg-tertiary' },
+  ],
+}
+
+// ---------------------------------------------------------------------------
+// mockFormSchemas — product-specific keys take priority over task-level keys
+// ---------------------------------------------------------------------------
+
 const mockFormSchemas: Record<string, FormSchema> = {
-  [`${ProductCode.RBT}-${TaskType.T01}`]: {
-    fields: [
-      { name: 'partnerName', label: 'Partner Name', type: 'text', required: true, placeholder: 'Enter partner company name', section: 'Partner Information' },
-      { name: 'scope', label: 'Scope', type: 'text', required: true, placeholder: 'Full data exchange, partial, etc.', section: 'Partner Information' },
-      { name: 'effectiveDate', label: 'Effective Date', type: 'date', required: true, section: 'Partner Information' },
-      { name: 'commercialTerms', label: 'Commercial Terms', type: 'textarea', required: true, placeholder: 'Describe commercial terms', section: 'Partner Information' },
-      { name: 'signatoryName', label: 'Signatory Name', type: 'text', required: true, placeholder: 'Full name of signatory', section: 'Signatory Details' },
-      { name: 'signatoryTitle', label: 'Signatory Title', type: 'text', required: true, placeholder: 'Title / designation', section: 'Signatory Details' },
-    ],
-    requiredDocuments: [
-      { name: 'agreementCopy', label: 'Agreement Copy' },
-      { name: 'termLetter', label: 'Term Letter' },
-      { name: 'vatCertificate', label: 'VAT Certificate' },
-      { name: 'powerOfAttorney', label: 'Power of Attorney' },
-    ],
-  },
+  // T-01: shared across all products — use task-level key only
+  [TaskType.T01]: schemaT01,
+
+  // T-02: shared across all products — use task-level key only
+  [TaskType.T02]: schemaT02,
+
+  // T-03: Both-access products
+  [`${ProductCode.RBT}-${TaskType.T03}`]: schemaT03Both,
+  [`${ProductCode.RHN}-${TaskType.T03}`]: schemaT03Both,
+  // T-03: API-only products
+  [`${ProductCode.WTQ}-${TaskType.T03}`]: schemaT03Api,
+  [`${ProductCode.MLM}-${TaskType.T03}`]: schemaT03Api,
+
+  // T-04: shared across all products — use task-level key only
+  [TaskType.T04]: schemaT04,
+
+  // T-05: Both-access products
+  [`${ProductCode.RBT}-${TaskType.T05}`]: schemaT05Both,
+  [`${ProductCode.RHN}-${TaskType.T05}`]: schemaT05Both,
+  // T-05: API-only products
+  [`${ProductCode.WTQ}-${TaskType.T05}`]: schemaT05Api,
+  [`${ProductCode.MLM}-${TaskType.T05}`]: schemaT05Api,
 }
 
 // Default fallback schema for any Product × Task not explicitly defined
@@ -96,7 +237,12 @@ export async function fetchFormSchema(productCode: string, taskType: string): Pr
     const res = await apiClient.get<FormSchema>(`/products/${productCode}/form-schema/${taskType}`)
     return res.data
   } catch {
-    return mockFormSchemas[`${productCode}-${taskType}`] ?? defaultFormSchema
+    // Try product-specific key first, then task-level fallback, then default
+    return (
+      mockFormSchemas[`${productCode}-${taskType}`] ??
+      mockFormSchemas[taskType] ??
+      defaultFormSchema
+    )
   }
 }
 

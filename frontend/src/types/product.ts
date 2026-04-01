@@ -32,9 +32,17 @@ export interface FormFieldDefinition {
   conditional?: { field: string; value: string | boolean }
 }
 
+export interface FormSectionMeta {
+  name: string
+  icon?: string
+  columns?: 1 | 2
+  colorAccent?: string // e.g. 'bg-primary' or 'bg-tertiary' for the left bar
+}
+
 export interface FormSchema {
   fields: FormFieldDefinition[]
   requiredDocuments: { name: string; label: string }[]
+  sectionMeta?: FormSectionMeta[]
 }
 
 export interface TicketCreateRequest {
