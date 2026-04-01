@@ -200,20 +200,23 @@ The system becomes feature-complete for MVP 1. Dashboards give each role a landi
 
 | # | Story | Acceptance Criteria | Dependencies |
 |---|-------|-------------------|--------------|
-| 4.1 | **My Tickets dashboard** — GET `/api/dashboard/my-tickets`. Tickets created by current user, grouped by status. Summary counts. | Requester logs in → sees their tickets with status breakdown | E3 complete |
-| 4.2 | **Team queue** — GET `/api/dashboard/team-queue`. Tickets assigned to current user's role, sorted by SLA urgency (breached first). Filterable by product, task type, status. | Reviewer logs in → sees all tickets awaiting review, worst SLA first | E3 complete |
-| 4.3 | **Global search** — GET `/api/search?q={query}`. Searches ticket ID, partner name, partner alias. Ranked results with type indicator. | Search "RBT" → returns matching tickets and partners | E3 complete |
-| 4.4 | **Advanced search** — POST `/api/search/advanced`. Filter by product, task type, status, date range, assigned user, SLA status. Paginated. | Filter product=RBT + status=InReview → correct results, paginated | 4.3 |
-| 4.5 | **Saved filters** — CRUD on SavedFilter. Per-user. | Save → appears in list → re-apply → same results → delete | 4.4 |
-| 4.6 | **Reports — overview** — GET `/api/reports/overview`. Aggregated metrics: tickets by status/product/task type, average resolution time, SLA compliance %, breach count. Date range filter. | JSON metrics match actual ticket data | E3 complete |
-| 4.7 | **Reports — CSV export** — GET `/api/reports/export`. Exports filtered ticket data as CSV. | Download CSV → opens in Excel with correct data | 4.6 |
-| 4.8 | **Admin — user management** — GET/POST/PUT `/api/admin/users`. List, create, deactivate. Role assignment. System Admin role required. | Create user → can log in. Deactivate → login fails. | E3 complete |
-| 4.9 | **Admin — SLA config** — GET/PUT `/api/admin/sla-config`. View and update SLA targets per product × task type. | Change T-01 SLA to 20 hours → new tickets use 20 | E3 complete |
-| 4.10 | **Admin — business hours & holidays** — GET/PUT business hours. POST/DELETE holidays. | Add holiday → SLA calculation skips that date | E3 complete |
-| 4.11 | **Admin — delegates** — GET/POST/DELETE `/api/admin/delegates`. Delegate approval with optional date range. | Create delegate → delegate can act for primary user | E3 complete |
-| 4.12 | **Admin — workflow config (read-only)** — GET `/api/admin/workflow-config`. Displays routing matrix. No PUT in MVP 1. | Admin sees all workflow definitions with stages. Read-only. | E3 complete |
-| 4.13 | **Pagination & common patterns** — PagedResult<T>, consistent query params (page, pageSize, sortBy, sortDir). Retrofit E1-E3 list endpoints. | All list endpoints support pagination with consistent shape | 4.1-4.12 |
-| 4.14 | **Tests** — Dashboard, search, report aggregation, admin CRUD, pagination tests. | `dotnet test` passes. Search correct. Reports match data. | 4.13 |
+| 4.1 | **Dashboard — stats** — GET `/api/dashboard/stats`. Role-adaptive stat cards: open count, SLA breaches, compliance %, avg resolution time. Different metrics per role (Requester vs Reviewer vs Admin etc.). | Each role sees relevant stats matching frontend spec. | E3 complete |
+| 4.2 | **Dashboard — action required** — GET `/api/dashboard/action-required`. Tickets needing current user's action (clarification for Requester, queue items for Reviewer, SLA breaches for Admin). Max 5, sorted by urgency. | Requester sees clarification requests. Reviewer sees queue. Admin sees breaches. | E3 complete |
+| 4.3 | **Dashboard — activity** — GET `/api/dashboard/activity`. Recent activity timeline for current user, derived from audit entries. Max 10 entries. | Shows recent actions: "You approved SPM-RBT-T01-..." with timestamps. | E3 complete |
+| 4.4 | **My Tickets** — GET `/api/dashboard/my-tickets`. Tickets created by current user, grouped by status. Summary counts. | Requester logs in → sees their tickets with status breakdown | E3 complete |
+| 4.5 | **Team queue** — GET `/api/dashboard/team-queue`. Tickets for current user's role, sorted by SLA urgency (breached first). Filterable by product, task type, status. | Reviewer logs in → sees all tickets awaiting review, worst SLA first | E3 complete |
+| 4.6 | **Global search** — GET `/api/search?q={query}`. Searches ticket ID, partner name, partner alias. Ranked results with type indicator. | Search "RBT" → returns matching tickets and partners | E3 complete |
+| 4.7 | **Advanced search** — POST `/api/search/advanced`. Filter by product, task type, status, date range, assigned user, SLA status. Paginated. | Filter product=RBT + status=InReview → correct results, paginated | 4.6 |
+| 4.8 | **Saved filters** — CRUD on SavedFilter. Per-user. | Save → appears in list → re-apply → same results → delete | 4.7 |
+| 4.9 | **Reports — overview** — GET `/api/reports/overview`. Aggregated metrics: tickets by status/product/task type, average resolution time, SLA compliance %, breach count. Date range filter. | JSON metrics match actual ticket data | E3 complete |
+| 4.10 | **Reports — CSV export** — GET `/api/reports/export`. Exports filtered ticket data as CSV. | Download CSV → opens in Excel with correct data | 4.9 |
+| 4.11 | **Admin — user management** — GET/POST/PUT `/api/admin/users`. List, create, deactivate. Role assignment. System Admin role required. | Create user → can log in. Deactivate → login fails. | E3 complete |
+| 4.12 | **Admin — SLA config** — GET/PUT `/api/admin/sla-config`. View and update SLA targets per product × task type. | Change T-01 SLA to 20 hours → new tickets use 20 | E3 complete |
+| 4.13 | **Admin — business hours & holidays** — GET/PUT business hours. POST/DELETE holidays. | Add holiday → SLA calculation skips that date | E3 complete |
+| 4.14 | **Admin — delegates** — GET/POST/DELETE `/api/admin/delegates`. Delegate approval with optional date range. | Create delegate → delegate can act for primary user | E3 complete |
+| 4.15 | **Admin — workflow config (read-only)** — GET `/api/admin/workflow-config`. Displays routing matrix. No PUT in MVP 1. | Admin sees all workflow definitions with stages. Read-only. | E3 complete |
+| 4.16 | **Pagination & common patterns** — PagedResult<T>, consistent query params (page, pageSize, sortBy, sortDir). Retrofit E1-E3 list endpoints. | All list endpoints support pagination with consistent shape | 4.1-4.15 |
+| 4.17 | **Tests** — Dashboard (stats, action-required, activity), search, report aggregation, admin CRUD, pagination tests. | `dotnet test` passes. Search correct. Reports match data. | 4.16 |
 
 ### Dependency Graph
 
