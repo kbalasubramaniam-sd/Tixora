@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'react'
 import { cn } from '@/utils/cn'
 
-type ChipVariant = 'default' | 'success' | 'warning' | 'error' | 'info'
+export type ChipVariant = 'default' | 'success' | 'warning' | 'error' | 'info'
 
 interface ChipProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: ChipVariant
