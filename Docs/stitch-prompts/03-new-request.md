@@ -239,16 +239,78 @@ When a partner is selected, Company Code fills automatically. If a partner has n
   - IP Addresses for Whitelisting (textarea, one per line)
 
 - **Invoicing Information:**
-  - Emails (dynamic list — add/remove email inputs, at least one required)
-  - Phone Numbers (dynamic list — add/remove tel inputs, numeric only, at least one required)
-  - Dynamic: "Add Email" / "Add Phone" buttons with teal icon, remove (x) per row
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ Invoicing Information                                    │
+│                                                          │
+│ Emails *                                                 │
+│ ┌──────────────────────────────────────────────┐         │
+│ │ billing@partner.com                       ×  │         │
+│ └──────────────────────────────────────────────┘         │
+│ ┌──────────────────────────────────────────────┐         │
+│ │ finance@partner.com                       ×  │         │
+│ └──────────────────────────────────────────────┘         │
+│ [ + Add Email ]                                          │
+│                                                          │
+│ Phone Numbers *                                          │
+│ ┌──────────────────────────────────────────────┐         │
+│ │ +971 4 123 4567                           ×  │         │
+│ └──────────────────────────────────────────────┘         │
+│ [ + Add Phone ]                                          │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+  - **Emails:** Each row is an email input + remove (×) button. At least one required — cannot remove the last row. "Add Email" button below the list adds a new empty row.
+  - **Phone Numbers:** Same pattern. Tel input (numeric only) + remove (×). "Add Phone" button adds a new row.
+  - Add buttons: secondary style, teal text, `+` icon left of text.
+  - Remove (×): 20px icon button, `#3d4949` at 50%, hover → `#d32f2f`. Hidden when only one row remains.
+  - New rows animate in with slide-down (200ms ease).
 
 - **Customer Support Contact Information:**
-  - "Required for our CX team to handle incoming customer cases"
-  - **First Level Contact** — dynamic list of { Name (text), Mobile (tel, numeric only), Email (email) } (at least one required)
-  - **First Level Escalation** — dynamic list of { Name (text), Mobile (tel, numeric only), Email (email) } (at least one required)
-  - **Second Level Escalation** — dynamic list of { Name (text), Mobile (tel, numeric only), Email (email) } (at least one required)
-  - Each contact row: 3 inline fields + remove (×) button. "Add Contact" below each level.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ Customer Support Contact Information                     │
+│ "Required for our CX team to handle incoming cases"      │
+│                                                          │
+│ First Level Contact *                                    │
+│ ┌────────────────┬────────────────┬────────────────┐     │
+│ │ Name           │ Mobile         │ Email          │ ×   │
+│ │ [Ali Hassan   ]│ [+971 50 111 ]│ [ali@partn... ]│     │
+│ └────────────────┴────────────────┴────────────────┘     │
+│ ┌────────────────┬────────────────┬────────────────┐     │
+│ │ Name           │ Mobile         │ Email          │ ×   │
+│ │ [Fatima Omar  ]│ [+971 50 222 ]│ [fatima@pa... ]│     │
+│ └────────────────┴────────────────┴────────────────┘     │
+│ [ + Add Contact ]                                        │
+│                                                          │
+│ First Level Escalation *                                 │
+│ ┌────────────────┬────────────────┬────────────────┐     │
+│ │ Name           │ Mobile         │ Email          │ ×   │
+│ │ [Omar Saeed   ]│ [+971 50 333 ]│ [omar@part... ]│     │
+│ └────────────────┴────────────────┴────────────────┘     │
+│ [ + Add Contact ]                                        │
+│                                                          │
+│ Second Level Escalation *                                │
+│ ┌────────────────┬────────────────┬────────────────┐     │
+│ │ Name           │ Mobile         │ Email          │ ×   │
+│ │ [Huda Al-R... ]│ [+971 50 444 ]│ [huda@part... ]│     │
+│ └────────────────┴────────────────┴────────────────┘     │
+│ [ + Add Contact ]                                        │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+  - Each escalation level is its own section with a label and "Add Contact" button.
+  - Each contact row: 3 inline fields (Name text, Mobile tel, Email email) + remove (×) button on the right.
+  - At least one contact required per level — cannot remove the last row.
+  - "Add Contact" adds a new empty 3-field row below.
+  - Field labels shown above the first row only (not repeated per row).
+  - Mobile fields: `tel` input, numeric only (digits, +, spaces, dashes).
+  - Row spacing: `spacing-3` (0.75rem) between rows within a level.
+  - Level spacing: `spacing-6` (1.5rem) between escalation levels.
 
 - **API Opt-In section** (only for "Both" products — Rabet, Rhoon):
   - Toggle: "Does this partner also require API access?"
