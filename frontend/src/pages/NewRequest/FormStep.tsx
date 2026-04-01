@@ -5,7 +5,8 @@ import { z } from 'zod'
 import { useFormSchema } from '@/api/hooks/useProducts'
 import { useAuth } from '@/contexts/AuthContext'
 import { cn } from '@/utils/cn'
-import type { Product, TaskOption, FormFieldDefinition, FormSectionMeta, RequiredDocument } from '@/types/product'
+import { FileUpload } from '@/components/ui/FileUpload'
+import type { Product, TaskOption, FormFieldDefinition, FormSectionMeta } from '@/types/product'
 
 interface FormStepProps {
   product: Product
@@ -217,128 +218,6 @@ function FormField({
   )
 }
 
-// Document upload card — Stitch T-01 grid card style
-function DocUploadCard({
-  doc,
-  file,
-  onFileSelect,
-}: {
-  doc: RequiredDocument
-  file: File | null
-  onFileSelect: (f: File | null) => void
-}) {
-  const inputRef = { current: null as HTMLInputElement | null }
-
-  function handleClick() {
-    inputRef.current?.click()
-  }
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null
-    onFileSelect(f)
-    e.target.value = ''
-  }
-
-  function handleRemove(e: React.MouseEvent) {
-    e.stopPropagation()
-    onFileSelect(null)
-  }
-
-  if (doc.variant === 'dashed') {
-    return (
-      <div className="bg-surface-container-lowest p-6 rounded-xl border-2 border-dashed border-outline-variant/30 flex flex-col justify-center items-center text-center">
-        <div className="mb-4">
-          <span className="material-symbols-outlined text-primary text-4xl">{doc.icon ?? 'edit_document'}</span>
-        </div>
-        <h3 className="font-bold mb-1">{doc.label}</h3>
-        <p className="text-xs text-on-surface-variant mb-6">{doc.description}</p>
-        {file ? (
-          <div className="w-full space-y-2">
-            <p className="text-xs text-primary font-medium truncate">{file.name}</p>
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="w-full py-3 bg-error/10 text-error text-sm font-bold rounded-lg flex items-center justify-center gap-2 transition-colors"
-            >
-              <span className="material-symbols-outlined text-sm">close</span>
-              Remove
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleClick}
-            className="w-full py-3 bg-gradient-to-br from-[#00696a] to-[#23a2a3] text-white text-sm font-bold rounded-lg shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-          >
-            <span className="material-symbols-outlined text-sm">add</span>
-            Select File
-          </button>
-        )}
-        <input
-          ref={(el) => { inputRef.current = el }}
-          type="file"
-          accept=".pdf,.png,.jpg,.jpeg"
-          className="hidden"
-          onChange={handleChange}
-        />
-      </div>
-    )
-  }
-
-  return (
-    <div className="bg-surface-container-lowest p-6 rounded-xl group transition-all duration-300 hover:shadow-xl hover:shadow-primary/5">
-      <div className="mb-6 flex justify-between items-start">
-        <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">
-          {doc.icon ?? 'description'}
-        </span>
-        {doc.required ? (
-          <span
-            className="material-symbols-outlined text-error text-sm"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            priority_high
-          </span>
-        ) : (
-          <span className="text-xs text-on-surface-variant font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-            OPTIONAL
-          </span>
-        )}
-      </div>
-      <h3 className="font-bold mb-1">{doc.label}</h3>
-      <p className="text-xs text-on-surface-variant mb-6 leading-relaxed">{doc.description}</p>
-      {file ? (
-        <div className="space-y-2">
-          <p className="text-xs text-primary font-medium truncate">{file.name}</p>
-          <button
-            type="button"
-            onClick={handleRemove}
-            className="w-full py-3 bg-error/10 text-error text-sm font-bold rounded-lg flex items-center justify-center gap-2 transition-colors"
-          >
-            <span className="material-symbols-outlined text-sm">close</span>
-            Remove
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={handleClick}
-          className="w-full py-3 bg-surface-container-low text-on-surface text-sm font-bold rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center gap-2"
-        >
-          <span className="material-symbols-outlined text-sm">upload</span>
-          Upload
-        </button>
-      )}
-      <input
-        ref={(el) => { inputRef.current = el }}
-        type="file"
-        accept=".pdf,.png,.jpg,.jpeg"
-        className="hidden"
-        onChange={handleChange}
-      />
-    </div>
-  )
-}
-
 export function FormStep({ product, task, initialData, onSubmit, onBack }: FormStepProps) {
   const { data: schema, isLoading } = useFormSchema(product.code, task.type)
   const { user } = useAuth()
@@ -487,13 +366,16 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                   All uploads must be PDF or High-Res Image
                 </span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {schema.requiredDocuments.map((doc) => (
-                  <DocUploadCard
+                  <FileUpload
                     key={doc.name}
-                    doc={doc}
+                    label={doc.label}
+                    icon={doc.icon ?? 'description'}
                     file={files[doc.name] ?? null}
                     onFileSelect={(f) => setFiles((prev) => ({ ...prev, [doc.name]: f }))}
+                    accept=".pdf,.docx,.xlsx,.png,.jpg,.jpeg"
+                    maxSizeMB={10}
                   />
                 ))}
               </div>
