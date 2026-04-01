@@ -54,7 +54,7 @@ function getSectionMeta(
 function ReadonlyField({ field }: { field: FormFieldDefinition }) {
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+      <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant">
         {field.label}
       </label>
       <div className="w-full h-12 flex items-center px-4 bg-surface-container-high rounded-lg text-secondary font-mono text-sm">
@@ -145,12 +145,12 @@ function FormField({
 
   const inputClass = cn(
     'w-full bg-surface-container-lowest border-none rounded-lg h-12 px-4',
-    'text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 shadow-sm transition-all',
+    'text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 shadow-sm transition-all font-medium',
   )
 
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+      <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant">
         {field.label}
         {field.required && <span className="text-error ml-0.5"> *</span>}
       </label>
@@ -179,7 +179,7 @@ function FormField({
               </option>
             ))}
           </select>
-          <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">
+          <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-sm">
             expand_more
           </span>
         </div>
@@ -195,7 +195,7 @@ function FormField({
             <option value="partner_2">Apex Solutions Ltd</option>
             <option value="partner_3">Summit Enterprise Group</option>
           </select>
-          <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">
+          <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-sm">
             expand_more
           </span>
         </div>
@@ -309,12 +309,12 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
             return (
               <section
                 key={sectionName}
-                className="bg-surface-container-low rounded-xl p-8 transition-all hover:bg-surface-container-high/50"
+                className="bg-surface-container-low rounded-xl p-10 transition-all hover:bg-surface-container-high/50"
               >
                 {/* Section header */}
                 <div className={cn('flex items-center gap-4', isToggleOnlySection ? 'mb-0' : 'mb-8')}>
                   {icon ? (
-                    <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center shrink-0', iconBg, iconColor)}>
+                    <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shrink-0', iconBg, iconColor)}>
                       <span className="material-symbols-outlined">{icon}</span>
                     </div>
                   ) : null}
@@ -366,7 +366,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                   All uploads must be PDF or High-Res Image
                 </span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {schema.requiredDocuments.map((doc) => (
                   <FileUpload
                     key={doc.name}

@@ -17,7 +17,7 @@ export function TopBar({ notificationCount = 0, onMenuToggle, showMenuButton }: 
     : '??'
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 glass z-40 flex items-center px-6 gap-4">
+    <header className="fixed top-0 left-0 right-0 h-16 glass z-50 shadow-sm flex items-center px-6 gap-4">
       {/* Hamburger menu for mobile */}
       {showMenuButton && (
         <button
@@ -31,7 +31,7 @@ export function TopBar({ notificationCount = 0, onMenuToggle, showMenuButton }: 
 
       {/* Logo */}
       <div className="flex flex-col mr-4">
-        <span className="text-2xl font-bold tracking-tighter text-primary leading-tight">Tixora</span>
+        <span className="text-xl font-bold tracking-tight text-primary leading-tight">Tixora</span>
         <span className="text-[0.6875rem] text-on-surface-variant leading-tight hidden sm:block">
           Powering Every Request
         </span>

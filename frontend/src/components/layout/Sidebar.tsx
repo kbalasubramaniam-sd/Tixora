@@ -61,11 +61,11 @@ function NavItemLink({ item, collapsed }: { item: NavItem; collapsed: boolean })
       title={collapsed ? item.label : undefined}
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
+          'flex items-center gap-3 px-4 py-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors relative',
           collapsed && 'justify-center px-2',
           isActive
             ? 'text-primary-container bg-surface-container-lowest'
-            : 'text-on-surface-variant hover:bg-surface-container-highest',
+            : 'text-on-surface-variant hover:bg-surface-container-highest hover:translate-x-1 transition-transform',
           item.isPrimary && !collapsed && 'text-primary-container',
         )
       }
@@ -119,7 +119,7 @@ function SidebarContent({ collapsed, onClose, showClose }: { collapsed: boolean;
           <>
             <div className={cn('mt-4 mb-1 px-3', collapsed && 'px-1')}>
               {!collapsed && (
-                <span className="text-[0.6875rem] font-semibold text-on-surface-variant uppercase tracking-wider">
+                <span className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
                   Admin
                 </span>
               )}
@@ -195,10 +195,10 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
           onClick={onClose}
           className={({ isActive }) =>
             cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
+              'flex items-center gap-3 px-4 py-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors relative',
               isActive
                 ? 'text-primary-container bg-surface-container-lowest'
-                : 'text-on-surface-variant hover:bg-surface-container-highest',
+                : 'text-on-surface-variant hover:bg-surface-container-highest hover:translate-x-1 transition-transform',
               item.isPrimary && !isActive && 'text-primary-container',
             )
           }
@@ -218,7 +218,7 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
       {showAdmin && (
         <>
           <div className="mt-4 mb-1 px-3">
-            <span className="text-[0.6875rem] font-semibold text-on-surface-variant uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
               Admin
             </span>
           </div>
@@ -229,10 +229,10 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
               onClick={onClose}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
+                  'flex items-center gap-3 px-4 py-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors relative',
                   isActive
                     ? 'text-primary-container bg-surface-container-lowest'
-                    : 'text-on-surface-variant hover:bg-surface-container-highest',
+                    : 'text-on-surface-variant hover:bg-surface-container-highest hover:translate-x-1 transition-transform',
                 )
               }
             >
@@ -258,10 +258,10 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
           onClick={onClose}
           className={({ isActive }) =>
             cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
+              'flex items-center gap-3 px-4 py-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors relative',
               isActive
                 ? 'text-primary-container bg-surface-container-lowest'
-                : 'text-on-surface-variant hover:bg-surface-container-highest',
+                : 'text-on-surface-variant hover:bg-surface-container-highest hover:translate-x-1 transition-transform',
             )
           }
         >

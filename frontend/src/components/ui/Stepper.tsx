@@ -41,13 +41,13 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
                         check
                       </span>
                     ) : (
-                      stepNumber
+                      stepNumber.toString().padStart(2, '0')
                     )}
                   </div>
                   <span
                     className={cn(
-                      'text-[10px] font-semibold uppercase tracking-wider mt-2',
-                      (isCompleted || isActive) ? 'text-primary' : 'text-on-surface-variant',
+                      'text-[10px] font-bold uppercase tracking-widest mt-2',
+                      (isCompleted || isActive) ? 'text-primary' : 'text-slate-400',
                     )}
                   >
                     {step.label}
@@ -58,7 +58,7 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
                 {i < steps.length - 1 && (
                   <div
                     className={cn(
-                      'w-24 h-[2px] mx-2 -mt-5',
+                      'w-24 h-[2px] mx-2 -mt-6',
                       i < currentStep ? 'bg-primary' : 'bg-surface-container-highest',
                     )}
                   />
