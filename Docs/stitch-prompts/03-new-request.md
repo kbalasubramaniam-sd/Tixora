@@ -165,19 +165,42 @@ A multi-step wizard for creating a new ticket. The flow: Product Selection → T
 - **Validation error:** Field gets a soft red underline (2px, `#d32f2f` at 60%), error message below in `label-sm` red
 - **Field spacing:** `spacing-4` (1rem) between fields
 
+### Field Input Types & Validation
+
+| Input Type | HTML Type | Validation | Error Message |
+|------------|-----------|-----------|---------------|
+| **Text** | `text` | Required if marked * | "This field is required" |
+| **Email** | `email` | Valid email format | "Enter a valid email address" |
+| **Mobile / Phone** | `tel` | Numeric only (digits, +, spaces, dashes). `inputmode="numeric"`. Strip non-digits on submit. | "Enter a valid phone number" |
+| **Date** | `date` | Valid date, not in the past (where applicable) | "Enter a valid date" |
+| **Textarea** | `textarea` | Max 2000 chars | "Maximum 2000 characters" |
+| **Dropdown** | `select` | Must select a value | "Select an option" |
+| **Toggle** | `checkbox` (styled as switch) | No validation | — |
+| **Lookup** | Custom autocomplete | Must match an existing record | "Select a valid partner" |
+
+**Mobile/Phone field specifics:**
+- Only accept digits, `+`, spaces, and dashes during input
+- Display with formatting (e.g., `+971 4 123 4567`)
+- Store as digits-only string in FormData
+- Placeholder: `+971 XX XXX XXXX`
+
+**Dynamic list fields (T-03 invoicing emails, phone numbers, support contacts):**
+- "Add" button below the list: secondary style, teal icon + text ("+ Add Email", "+ Add Contact")
+- Each row has a remove (×) button on the right
+- At least one entry required — cannot remove the last row
+- New rows animate in with a subtle slide-down (200ms ease)
+
 ### Document Upload
-- Each required doc: label on left, upload button on right
-- Upload button: secondary style (ghost border + teal text), "Upload" with upload icon
-- After upload: filename shown with checkmark icon (teal) and a remove (x) button
+- See `13-file-upload.md` for full component spec
+- Each required doc: label on left, drop zone below
 - Accepted formats: PDF, DOCX, XLSX, PNG, JPG. Max 10MB.
-- Drag-and-drop zone: dashed `outline-variant` at 20% opacity, teal text "Drop file here"
 
 ### T-02 Form: UAT Access Creation
 - **Partner Name** — lookup/select (required)
 - **UAT User Details:**
   - Full Name (text, required)
   - Email (email, required)
-  - Mobile (text, required)
+  - Mobile (tel, numeric only, required)
   - Designation (text, required)
   - Company Code (text, required)
 
@@ -191,7 +214,7 @@ Partner Name and Company Code are **inferred from lifecycle** — displayed as d
 - **Portal Admin User:**
   - Full Name (text, required)
   - Email (email, required)
-  - Mobile (text, required)
+  - Mobile (tel, numeric only, required)
   - Designation (text, required)
 
 - **Network:**
@@ -199,15 +222,15 @@ Partner Name and Company Code are **inferred from lifecycle** — displayed as d
 
 - **Invoicing Information:**
   - Emails (dynamic list — add/remove email inputs, at least one required)
-  - Phone Numbers (dynamic list — add/remove phone inputs, at least one required)
+  - Phone Numbers (dynamic list — add/remove tel inputs, numeric only, at least one required)
   - Dynamic: "Add Email" / "Add Phone" buttons with teal icon, remove (x) per row
 
 - **Customer Support Contact Information:**
   - "Required for our CX team to handle incoming customer cases"
-  - **First Level Contact** — dynamic list of { Name, Mobile, Email } (at least one required)
-  - **First Level Escalation** — dynamic list of { Name, Mobile, Email } (at least one required)
-  - **Second Level Escalation** — dynamic list of { Name, Mobile, Email } (at least one required)
-  - Each contact row: 3 inline fields + remove (x) button. "Add Contact" below each level.
+  - **First Level Contact** — dynamic list of { Name (text), Mobile (tel, numeric only), Email (email) } (at least one required)
+  - **First Level Escalation** — dynamic list of { Name (text), Mobile (tel, numeric only), Email (email) } (at least one required)
+  - **Second Level Escalation** — dynamic list of { Name (text), Mobile (tel, numeric only), Email (email) } (at least one required)
+  - Each contact row: 3 inline fields + remove (×) button. "Add Contact" below each level.
 
 - **API Opt-In section** (only for "Both" products — Rabet, Rhoon):
   - Toggle: "Does this partner also require API access?"
