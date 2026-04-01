@@ -32,7 +32,7 @@ export function ReviewStep({ product, task, formData, onSubmit, onBack, isSubmit
             {product.name} · {product.code}
           </span>
           <span className="text-on-surface-variant text-sm">
-            {task.label}
+            {task.name}
           </span>
         </div>
       </div>

@@ -49,11 +49,11 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
     reset,
-    watch,
   } = useForm<FieldValues>({
-    resolver: zodResolver(zodSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(zodSchema) as any,
     mode: 'onChange',
     defaultValues: initialData ?? {},
   })
