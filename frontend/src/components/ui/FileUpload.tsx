@@ -8,6 +8,7 @@ interface FileUploadProps {
   onFileSelect: (file: File | null) => void
   accept?: string // e.g. '.pdf,.docx,.xlsx,.png,.jpg'
   maxSizeMB?: number // default 10
+  showError?: boolean // only show "Missing required file" when true (e.g. after submit attempt)
 }
 
 function formatFileSize(bytes: number): string {
@@ -24,6 +25,7 @@ export function FileUpload({
   onFileSelect,
   accept,
   maxSizeMB = 10,
+  showError = false,
 }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +60,7 @@ export function FileUpload({
     <div className="flex flex-col gap-1">
       {file ? (
         // Uploaded state
-        <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-lg group transition-all h-[80px]">
+        <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl group transition-all min-h-[80px]">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm shrink-0">
               <span className="material-symbols-outlined">description</span>
@@ -91,7 +93,7 @@ export function FileUpload({
       ) : (
         // Pending state
         <div
-          className="flex items-center justify-between p-4 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-all cursor-pointer h-[80px]"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 gap-3 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-all cursor-pointer min-h-[80px]"
           onClick={handleUploadClick}
         >
           <div className="flex items-center gap-4">
@@ -100,8 +102,8 @@ export function FileUpload({
             </div>
             <div>
               <p className="text-sm font-bold text-on-surface">{label}</p>
-              <p className={cn('text-xs font-medium', error ? 'text-error' : 'text-outline-variant')}>
-                {error ?? 'Missing required file'}
+              <p className={cn('text-xs font-medium', error ? 'text-error' : showError ? 'text-error' : 'text-outline-variant')}>
+                {error ?? (showError ? 'Missing required file' : 'Click to upload')}
               </p>
             </div>
           </div>
