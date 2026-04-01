@@ -16,29 +16,25 @@ const mockTasks: Record<string, TaskOption[]> = {
     { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Formal review and digital signature processing for partnership agreements and service level commitments.', enabled: true, icon: 'description' },
     { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request sandbox credentials for User Acceptance Testing environments to validate integrations.', enabled: true, icon: 'person_add' },
     { type: TaskType.T03, name: 'Partner Account Creation', description: 'Initiate live environment provisioning and primary administrator account setup for the portal.', enabled: true, icon: 'key' },
-    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner organisation already provisioned on the platform.', enabled: false, disabledReason: 'Requires completed Partner Account (T-03)', icon: 'group_add' },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: false, disabledReason: 'Requires partner in ONBOARDED state', icon: 'support_agent' },
+    { type: TaskType.T04, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: false, disabledReason: 'Requires partner in ONBOARDED state', icon: 'support_agent' },
   ],
   [ProductCode.RHN]: [
     { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Formal review and digital signature processing for partnership agreements and service level commitments.', enabled: true, icon: 'description' },
     { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request sandbox credentials for User Acceptance Testing environments to validate integrations.', enabled: true, icon: 'person_add' },
     { type: TaskType.T03, name: 'Partner Account Creation', description: 'Initiate live environment provisioning and primary administrator account setup for the portal.', enabled: true, icon: 'key' },
-    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner organisation already provisioned on the platform.', enabled: true, icon: 'group_add' },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: true, icon: 'support_agent' },
+    { type: TaskType.T04, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: true, icon: 'support_agent' },
   ],
   [ProductCode.WTQ]: [
     { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Formal review and digital signature processing for partnership agreements and service level commitments.', enabled: true, icon: 'description' },
     { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request sandbox credentials for User Acceptance Testing environments to validate integrations.', enabled: true, icon: 'person_add' },
     { type: TaskType.T03, name: 'Partner Account Creation', description: 'Initiate live environment provisioning and primary administrator account setup for the portal.', enabled: true, icon: 'key' },
-    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner organisation already provisioned on the platform.', enabled: true, icon: 'group_add' },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: true, icon: 'support_agent' },
+    { type: TaskType.T04, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: true, icon: 'support_agent' },
   ],
   [ProductCode.MLM]: [
     { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Formal review and digital signature processing for partnership agreements and service level commitments.', enabled: true, icon: 'description' },
     { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request sandbox credentials for User Acceptance Testing environments to validate integrations.', enabled: true, icon: 'person_add' },
     { type: TaskType.T03, name: 'Partner Account Creation', description: 'Initiate live environment provisioning and primary administrator account setup for the portal.', enabled: true, icon: 'key' },
-    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner organisation already provisioned on the platform.', enabled: true, icon: 'group_add' },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: true, icon: 'support_agent' },
+    { type: TaskType.T04, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: true, icon: 'support_agent' },
   ],
 }
 
@@ -124,25 +120,8 @@ const schemaT03Api: FormSchema = {
   ],
 }
 
-// T-04: User Account Creation — same across all products
-const schemaT04: FormSchema = {
-  fields: [
-    { name: 'partnerAccount', label: 'Partner Account', type: 'select', required: true, placeholder: 'Select partner account', section: 'Partner Reference' },
-    { name: 'product', label: 'Product', type: 'text', required: true, placeholder: 'Filled from context', helperText: 'Pre-filled based on your product selection', section: 'Partner Reference' },
-    { name: 'fullName', label: 'Full Name', type: 'text', required: true, placeholder: 'Enter full name', section: 'User Details' },
-    { name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'user@company.com', section: 'User Details' },
-    { name: 'designation', label: 'Designation', type: 'text', required: true, placeholder: 'e.g. Operations Manager', section: 'User Details' },
-    { name: 'accessRole', label: 'Access Role', type: 'select', required: true, options: [{ label: 'Admin', value: 'admin' }, { label: 'Operator', value: 'operator' }, { label: 'ReadOnly', value: 'readonly' }], section: 'User Details' },
-  ],
-  requiredDocuments: [],
-  sectionMeta: [
-    { name: 'Partner Reference', icon: 'link', columns: 2, colorAccent: 'bg-secondary' },
-    { name: 'User Details', icon: 'badge', columns: 2, colorAccent: 'bg-primary' },
-  ],
-}
-
-// T-05: Access & Credential Support — Both-access products (RBT, RHN)
-const schemaT05Both: FormSchema = {
+// T-04: Access & Credential Support — Both-access products (RBT, RHN)
+const schemaT04Both: FormSchema = {
   fields: [
     { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Affected User' },
     { name: 'userEmail', label: 'User Email', type: 'email', required: true, placeholder: 'user@company.com', section: 'Affected User' },
@@ -157,8 +136,8 @@ const schemaT05Both: FormSchema = {
   ],
 }
 
-// T-05: Access & Credential Support — API-only products (WTQ, MLM)
-const schemaT05Api: FormSchema = {
+// T-04: Access & Credential Support — API-only products (WTQ, MLM)
+const schemaT04Api: FormSchema = {
   fields: [
     { name: 'partnerName', label: 'Partner Name', type: 'select', required: true, placeholder: 'Select partner entity', section: 'Affected User' },
     { name: 'userEmail', label: 'User Email', type: 'email', required: true, placeholder: 'user@company.com', section: 'Affected User' },
@@ -191,15 +170,12 @@ const mockFormSchemas: Record<string, FormSchema> = {
   [`${ProductCode.WTQ}-${TaskType.T03}`]: schemaT03Api,
   [`${ProductCode.MLM}-${TaskType.T03}`]: schemaT03Api,
 
-  // T-04: shared across all products — use task-level key only
-  [TaskType.T04]: schemaT04,
-
-  // T-05: Both-access products
-  [`${ProductCode.RBT}-${TaskType.T05}`]: schemaT05Both,
-  [`${ProductCode.RHN}-${TaskType.T05}`]: schemaT05Both,
-  // T-05: API-only products
-  [`${ProductCode.WTQ}-${TaskType.T05}`]: schemaT05Api,
-  [`${ProductCode.MLM}-${TaskType.T05}`]: schemaT05Api,
+  // T-04: Both-access products
+  [`${ProductCode.RBT}-${TaskType.T04}`]: schemaT04Both,
+  [`${ProductCode.RHN}-${TaskType.T04}`]: schemaT04Both,
+  // T-04: API-only products
+  [`${ProductCode.WTQ}-${TaskType.T04}`]: schemaT04Api,
+  [`${ProductCode.MLM}-${TaskType.T04}`]: schemaT04Api,
 }
 
 // Default fallback schema for any Product × Task not explicitly defined

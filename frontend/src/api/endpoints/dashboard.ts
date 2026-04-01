@@ -75,9 +75,9 @@ const mockTickets: TicketSummary[] = [
   },
   {
     id: '3',
-    ticketId: 'SPM-WTQ-T05-20260401-0011',
+    ticketId: 'SPM-WTQ-T04-20260401-0011',
     productCode: ProductCode.WTQ,
-    taskType: TaskType.T05,
+    taskType: TaskType.T04,
     partnerName: 'Oman Insurance',
     requesterName: 'Omar R.',
     status: TicketStatus.InProvisioning,
@@ -103,9 +103,9 @@ const mockTickets: TicketSummary[] = [
   },
   {
     id: '5',
-    ticketId: 'SPM-RBT-T04-20260401-0008',
+    ticketId: 'SPM-RBT-T03-20260401-0008',
     productCode: ProductCode.RBT,
-    taskType: TaskType.T04,
+    taskType: TaskType.T03,
     partnerName: 'Takaful Emarat',
     requesterName: 'Ahmed K.',
     status: TicketStatus.Submitted,
@@ -120,7 +120,7 @@ const mockTickets: TicketSummary[] = [
 const mockActivity: ActivityEntry[] = [
   { id: '1', title: 'System Patch v4.2.1 Deployed', description: 'Global infrastructure update successfully finalized across all regions.', timestamp: '24 mins ago', icon: 'sync', iconBg: 'bg-primary-container', iconColor: 'text-on-primary-container' },
   { id: '2', title: 'New Partner: National Bank of Fujairah', description: 'Onboarding workflow initiated. API documentation shared.', timestamp: '2 hours ago', icon: 'person_add', iconBg: 'bg-warning-container', iconColor: 'text-warning' },
-  { id: '3', title: 'SLA Threshold Reached', description: 'Ticket SPM-WTQ-T05-20260401-0011 has entered the critical zone.', timestamp: '4 hours ago', icon: 'priority_high', iconBg: 'bg-error-container', iconColor: 'text-error' },
+  { id: '3', title: 'SLA Threshold Reached', description: 'Ticket SPM-WTQ-T04-20260401-0011 has entered the critical zone.', timestamp: '4 hours ago', icon: 'priority_high', iconBg: 'bg-error-container', iconColor: 'text-error' },
   { id: '4', title: 'Q1 Report Generated', description: 'Automated system compliance report is ready for download.', timestamp: 'Yesterday, 18:45', icon: 'description', iconBg: 'bg-secondary-container', iconColor: 'text-on-secondary-container' },
   { id: '5', title: 'User Access Granted', description: 'Ahmed K. granted reviewer access to Rabet product.', timestamp: 'Yesterday, 14:20', icon: 'person_add', iconBg: 'bg-primary-container', iconColor: 'text-on-primary-container' },
 ]

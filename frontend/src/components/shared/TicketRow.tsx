@@ -11,8 +11,7 @@ const taskLabel: Record<string, string> = {
   T01: 'Agreement',
   T02: 'UAT Access',
   T03: 'Partner Account',
-  T04: 'User Account',
-  T05: 'Access Support',
+  T04: 'Access Support',
 }
 
 const productLabel: Record<string, string> = {

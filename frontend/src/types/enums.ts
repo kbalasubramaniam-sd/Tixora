@@ -11,7 +11,6 @@ export const TaskType = {
   T02: 'T02',
   T03: 'T03',
   T04: 'T04',
-  T05: 'T05',
 } as const
 export type TaskType = (typeof TaskType)[keyof typeof TaskType]
 
