@@ -68,6 +68,30 @@ dotnet ef migrations add <Name> --project src/Tixora.Infrastructure --startup-pr
 dotnet ef database update --project src/Tixora.Infrastructure --startup-project src/Tixora.API
 ```
 
+## Frontend Screen Build Workflow (MANDATORY)
+
+When building or modifying any frontend screen, follow this process exactly:
+
+### 1. Pull Stitch Reference
+- Download the Stitch HTML for the screen to `frontend/.stitch-ref/<screen-name>.html`
+- Pull the Stitch screenshot and view it for visual context
+- Stitch project ID: `14130211189051506529`
+
+### 2. Build from Stitch HTML (not summaries)
+- The subagent/implementer MUST read the Stitch HTML file directly
+- Copy exact Tailwind classes from Stitch HTML to React components — do NOT translate or summarize
+- Every element must match: font size, font weight, tracking, colors, padding, margin, gap, radius, shadow
+- When Stitch uses a custom Tailwind color (e.g. `text-teal-800`), map it to the closest design token or use the exact class
+
+### 3. Post-Build Visual Audit
+- After building, a review subagent compares the Stitch HTML element-by-element against the React output
+- Check: colors, font sizes/weights, spacing (padding/margin/gap), border-radius, shadows, hover effects
+- Any mismatch = fix before committing
+
+### Stitch Reference Files
+- Location: `frontend/.stitch-ref/` (gitignored, ephemeral)
+- Screen map is in `Docs/superpowers/specs/2026-04-01-frontend-architecture-design.md` Section 1
+
 ## Docs
 
 - Product spec: `Docs/spm_portal_story.md`
