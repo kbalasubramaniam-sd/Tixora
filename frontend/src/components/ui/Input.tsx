@@ -28,7 +28,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               'h-12 w-full px-4 rounded-lg bg-surface-container-lowest text-sm text-on-surface',
               'placeholder:text-on-surface-variant/50 outline-none transition-shadow',
               'focus-glow',
-              error && 'shadow-[inset_0_-2px_0_0_rgba(211,47,47,0.6)]',
+              error && 'shadow-[0_0_0_4px_rgba(211,47,47,0.1)]',
               endAdornment && 'pr-12',
               className,
             )}
