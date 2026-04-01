@@ -11,11 +11,22 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
   const [loading, setLoading] = useState(false)
+
+  function validate() {
+    const errors: { email?: string; password?: string } = {}
+    if (!email.trim()) errors.email = 'Email is required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Enter a valid email'
+    if (!password) errors.password = 'Password is required'
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
+    if (!validate()) return
     setLoading(true)
 
     try {
@@ -43,13 +54,13 @@ export default function Login() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
           <Input
             type="email"
             placeholder="Email address"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            onChange={(e) => { setEmail(e.target.value); setFieldErrors((prev) => ({ ...prev, email: undefined })) }}
+            error={fieldErrors.email}
             autoFocus
             autoComplete="email"
           />
@@ -58,8 +69,8 @@ export default function Login() {
             type={showPassword ? 'text' : 'password'}
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            onChange={(e) => { setPassword(e.target.value); setFieldErrors((prev) => ({ ...prev, password: undefined })) }}
+            error={fieldErrors.password}
             autoComplete="current-password"
             endAdornment={
               <button
