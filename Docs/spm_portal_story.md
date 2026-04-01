@@ -167,7 +167,7 @@ Four task types are supported across all products. Each carries its own form sch
 
 ---
 
-### T-05 · Access & Credential Support
+### T-04 · Access & Credential Support
 
 **Purpose:** Resolve access and credential issues for a named partner user — covering portal login problems (password reset, account unlock) or API credential issues (key regeneration, certificate renewal) depending on the product's access type.
 
@@ -204,7 +204,7 @@ The combination of **Product × Task** determines the exact workflow path. SLA t
 │ T-03 Production Account Creation │ Partner Ops             │ Partner Director     │ Provisioning (Portal + Users) +│ 48        │
 │       — Portal + API path        │                         │                      │ Integration (API) [parallel]   │           │
 ├──────────────────────────────────┼─────────────────────────┼──────────────────────┼────────────────────────────────┼───────────┤
-│ T-05 Access & Credential Support │ —                       │ —                    │ Provisioning Team              │ 2         │
+│ T-04 Access & Credential Support │ —                       │ —                    │ Provisioning Team              │ 2         │
 │                                  │                         │                      │ (Verify + Resolve + Confirm)   │           │
 └──────────────────────────────────┴─────────────────────────┴──────────────────────┴────────────────────────────────┴───────────┘
 ```
@@ -240,7 +240,7 @@ Every partner on a given product progresses through a defined lifecycle. Each st
 **Lifecycle rules:**
 - T-02 cannot be raised unless the partner is in **ONBOARDED** state or later for the same product.
 - T-03 cannot be raised unless the partner is in **UAT ACTIVE** state (T-02 Phase 2 signed off) for the same product.
-- T-05 (Access & Credential Support) is available at any lifecycle state from **LIVE** onwards — it does not advance the lifecycle.
+- T-04 (Access & Credential Support) is available at any lifecycle state from **LIVE** onwards — it does not advance the lifecycle.
 - A partner's lifecycle state is tracked per product. A partner onboarded to Rabet may be at a different lifecycle stage on Mulem.
 - Agreements are **auto-renewed** and do not expire. Each product carries its own independent agreement — a partner operating across multiple products holds a separate T-01 agreement record per product.
 
@@ -258,7 +258,7 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 |---|---|
 | `SPM-RBT-T01-20260401-0001` | Rabet · Agreement Validation · 1 Apr 2026 · First ticket of the day |
 | `SPM-MLM-T03-20260401-0042` | Mulem · Production Account Creation · 1 Apr 2026 · 42nd ticket of the day |
-| `SPM-WTQ-T05-20260401-0011` | Wtheeq · Access & Credential Support · 1 Apr 2026 · 11th ticket of the day |
+| `SPM-WTQ-T04-20260401-0011` | Wtheeq · Access & Credential Support · 1 Apr 2026 · 11th ticket of the day |
 
 ---
 
@@ -288,7 +288,7 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 
 **Acceptance Criteria:**
 - Each Task renders its own pre-configured field schema; no generic free-text submission is permitted.
-- Conditional fields appear or hide based on prior answers (e.g., API opt-in fields in T-03 on "Both" products, issue type in T-05 based on the product's access type).
+- Conditional fields appear or hide based on prior answers (e.g., API opt-in fields in T-03 on "Both" products, issue type in T-04 based on the product's access type).
 - Fields include contextual helper text explaining what is required and why.
 - Form state is auto-saved as a draft every 60 seconds.
 
@@ -357,7 +357,7 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
   - **T-02 Phase 1:** UAT environment URL, credentials issued (username only — passwords sent securely out-of-band), access permissions granted.
   - **T-03 Portal:** Partner account ID, portal URL, admin username created, all user account IDs and login emails provisioned.
   - **T-03 API:** IP addresses whitelisted, API key reference (not the key itself), certificate thumbprint, environment provisioned.
-  - **T-05:** Confirmation of issue type (portal login / API credential), user affected, resolution action taken.
+  - **T-04:** Confirmation of issue type (portal login / API credential), user affected, resolution action taken.
 - Fulfilment details are permanently stored on the ticket and included in the audit trail.
 - Sensitive credentials (passwords, full API keys) are **never** stored in the ticket — only references and confirmation that delivery occurred via a secure channel.
 
@@ -424,7 +424,7 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 **Acceptance Criteria:**
 - On submission, the system evaluates the Product × Task matrix (and API opt-in status for T-03) and routes the ticket to the correct first-stage queue without manual intervention.
 - The assigned team receives an email and in-portal notification.
-- If a stage has no approval gate (T-02, T-05), routing skips directly to Provisioning or Integration.
+- If a stage has no approval gate (T-02, T-04), routing skips directly to Provisioning or Integration.
 
 ---
 
@@ -448,7 +448,7 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 **Acceptance Criteria:**
 - When a T-02 is raised, the system checks that the partner is in **ONBOARDED** state for the same product. If not, submission is **blocked** with a clear message: *"This partner does not have a completed agreement (T-01) on [Product]. An agreement must be signed off before UAT access can be requested."*
 - When a T-03 is raised, the system checks that the partner is in **UAT ACTIVE** state (T-02 Phase 2 signed off) for the same product. If not met, submission is **blocked**.
-- T-05 requires the partner to be in **LIVE** state; submission is blocked otherwise.
+- T-04 requires the partner to be in **LIVE** state; submission is blocked otherwise.
 - The blocking message includes a link to the partner's current lifecycle state and any in-progress prerequisite tickets.
 - Lifecycle checks are enforced at the system level and cannot be overridden by any user role.
 
@@ -542,7 +542,7 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 | T-02 UAT Completion Reminder (configurable window) | Requester |
 | T-03 Portal Account Provisioned | Requester, Partner Contact |
 | T-03 API Credentials Issued | Requester, Technical Contact |
-| T-05 Access Issue Resolved | Requester |
+| T-04 Access Issue Resolved | Requester |
 | Request Rejected | Requester |
 | Request Cancelled | Assigned Stage Owner(s) |
 | Ticket Reassigned | New Assignee, Requester |

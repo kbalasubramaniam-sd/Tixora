@@ -14,8 +14,6 @@ public enum TaskType
     /// <summary>Production Account Creation — partner account + user setup, with API opt-in.</summary>
     T03 = 2,
 
-    // T04 removed — merged into T03 (Production Account Creation)
-
     /// <summary>Access and Credential Support (password reset, key regen, etc.).</summary>
-    T05 = 4
+    T04 = 3
 }

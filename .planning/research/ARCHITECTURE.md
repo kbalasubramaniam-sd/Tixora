@@ -148,7 +148,7 @@ The custom `WorkflowEngine` is a pure service in the Application layer. No exter
 
 ```
 WorkflowConfig
-  - TaskType (T-01 … T-05)
+  - TaskType (T-01 … T-04)
   - ProductCode (RBT, RHN, WTQ, MLM)
   - StageSequence[]
       - StageOrder (int)
@@ -343,7 +343,7 @@ This order respects hard dependencies between components. Each step produces som
 | 7 | API Controllers (Tickets, Workflow) + fake JWT middleware | Wire the HTTP layer to working handlers. |
 | 8 | React: apiClient + ticketsApi + useCreateTicket + useTransition hooks | Frontend service layer mirrors backend endpoints. |
 | 9 | React: T-01 screens (ticket creation form, ticket detail, transition button) | Proves full stack end-to-end on simplest task type. |
-| 10 | Expand: T-02, T-03, T-04, T-05 workflow configs (seed + handler conditional logic) | Incremental — share all infrastructure from steps 1-9. |
+| 10 | Expand: T-02, T-03, T-04, T-04 workflow configs (seed + handler conditional logic) | Incremental — share all infrastructure from steps 1-9. |
 | 11 | Notifications, Audit Trail display, Comments, Document upload | Layer on top of working ticket lifecycle. |
 | 12 | Dashboard, Search, Reports, Admin screens | Pure read/query work — no workflow complexity. |
 | 13 | `SlaBreachMonitor` BackgroundService | Add after ticket lifecycle is stable. |

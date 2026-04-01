@@ -214,7 +214,7 @@ Tixora/
 ```csharp
 public enum ProductCode { RBT, RHN, WTQ, MLM }
 
-public enum TaskType { T01, T02, T03, T05 }
+public enum TaskType { T01, T02, T03, T04 }
 
 public enum ProductAccessMode { Both, ApiOnly }
 // Both = transactional portal + API (Rabet, Rhoon)
@@ -357,7 +357,7 @@ public class Ticket
     public TicketStatus Status { get; set; }
     public int CurrentStageOrder { get; set; }
     public ProvisioningPath? ProvisioningPath { get; set; }    // T-03 only
-    public IssueType? IssueType { get; set; }      // T-05 only
+    public IssueType? IssueType { get; set; }      // T-04 only
     public string FormData { get; set; }           // JSON — dynamic form submission
     public Guid CreatedByUserId { get; set; }
     public Guid? AssignedToUserId { get; set; }    // null until a user claims from role queue
@@ -692,7 +692,7 @@ When a ticket completes, the engine checks if the PartnerProduct lifecycle shoul
 | T-02 Phase 1 | ONBOARDED | UAT_ACTIVE |
 | T-02 Phase 2 | UAT_ACTIVE | (no change — stays UAT_ACTIVE) |
 | T-03 | UAT_ACTIVE | LIVE |
-| T-05 | LIVE | (no change) |
+| T-04 | LIVE | (no change) |
 
 ### 4.3 T-02 Two-Phase Flow
 
@@ -741,7 +741,7 @@ Enforced at ticket creation time (not just warning):
 |-------------------|-------------------|-----------------|
 | T-02 | Partner is ONBOARDED on the product (T-01 completed) | Yes — blocked |
 | T-03 | Partner is UAT_ACTIVE on the product (T-02 Ph1 completed) | Yes — blocked |
-| T-05 | Partner is LIVE on the product | Yes — blocked |
+| T-04 | Partner is LIVE on the product | Yes — blocked |
 
 The API returns a clear error message with a link to the partner's current lifecycle state and any in-progress prerequisite tickets.
 
@@ -969,7 +969,7 @@ Seeded with the default workflow matrix:
 | Both × T-03 PortalOnly | Partner Ops → Director → Provisioning |
 | Both × T-03 PortalAndApi | Partner Ops → Director → [Provisioning ∥ Integration] |
 | ApiOnly × T-03 ApiOnly | Partner Ops → Director → Integration |
-| Any × T-05 | Provisioning (Verify + Resolve) |
+| Any × T-04 | Provisioning (Verify + Resolve) |
 
 ### 9.3 SLA Defaults
 
@@ -979,7 +979,7 @@ Seeded with the default workflow matrix:
 | T-02 | Product Review: 8, Integration Ph1: 8, UAT Signal: 0 (no SLA — external wait), Integration Ph2: 24 |
 | T-03 Portal | 24 |
 | T-03 API / Both | 48 |
-| T-05 | 2 |
+| T-04 | 2 |
 
 **Convention:** `SlaBusinessHours = 0` on a StageDefinition means no SLA tracking for that stage. The workflow engine skips SlaTracker creation. Used for external wait gates (e.g. awaiting partner UAT completion). The UatReminderService handles nudges for overdue waits.
 
@@ -1038,7 +1038,7 @@ All ticket forms use:
 | T-01 | All partners on this product (any lifecycle) | Read-only |
 | T-02 | LifecycleState = Onboarded | Read-only |
 | T-03 | LifecycleState = UatActive | Read-only |
-| T-05 | LifecycleState = Live | Read-only |
+| T-04 | LifecycleState = Live | Read-only |
 
 The ticket stores `PartnerProductId` (FK) — not the partner name or company code as form data.
 
@@ -1135,7 +1135,7 @@ Note: T-01 has no FormData fields — partner selection is stored as `Ticket.Par
 }
 ```
 
-### 11.6 T-05: Access & Credential Support
+### 11.6 T-04: Access & Credential Support
 
 **Fields:**
 | Field | Key | Type | Required | Notes |
@@ -1164,7 +1164,7 @@ When a ticket is completed, the provisioning/integration team records structured
 | T-01 | Agreement reference number, signed date, signatory confirmation |
 | T-02 | UAT environment URL, UAT credentials issued, access confirmation |
 | T-03 | Portal account ID, portal URL, API key (if opted in), API endpoint URL, user account IDs, login emails |
-| T-05 | Resolution summary, action taken (reset/regenerated/unlocked) |
+| T-04 | Resolution summary, action taken (reset/regenerated/unlocked) |
 
 ### 11.8 Phone Number Storage
 

@@ -1,7 +1,7 @@
 namespace Tixora.Domain.Enums;
 
 /// <summary>
-/// Issue categories for T-05 (Access and Credential Support) tickets.
+/// Issue categories for T-04 (Access and Credential Support) tickets.
 /// </summary>
 public enum IssueType
 {

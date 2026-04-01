@@ -130,7 +130,7 @@ public enum TaskType
     T02,
     T03,
     T04,
-    T05
+    T04
 }
 ```
 
@@ -1943,7 +1943,7 @@ public class ProductService
         new() { TaskType = "T02", Name = "UAT Access Creation", Description = "Create UAT environment access for a partner contact." },
         new() { TaskType = "T03", Name = "Partner Account Creation", Description = "Create a partner account with optional API access." },
         new() { TaskType = "T04", Name = "User Account Creation", Description = "Create admin user accounts for an existing partner." },
-        new() { TaskType = "T05", Name = "Access & Credential Support", Description = "Resolve access and credential issues for a partner user." }
+        new() { TaskType = "T04", Name = "Access & Credential Support", Description = "Resolve access and credential issues for a partner user." }
     };
 
     public List<ProductResponse> GetAllProducts()
@@ -3384,22 +3384,22 @@ public class TicketIdGenerationTests
     public void TicketId_SequenceFormatting_PadsCorrectly()
     {
         var productCode = ProductCode.WTQ;
-        var taskType = TaskType.T05;
+        var taskType = TaskType.T04;
         var date = new DateTime(2026, 12, 25);
 
         for (int seq = 1; seq <= 3; seq++)
         {
             var ticketId = $"SPM-{productCode}-{taskType}-{date:yyyyMMdd}-{seq:D4}";
-            Assert.StartsWith("SPM-WTQ-T05-20261225-", ticketId);
+            Assert.StartsWith("SPM-WTQ-T04-20261225-", ticketId);
         }
 
         var id1 = $"SPM-{productCode}-{taskType}-{date:yyyyMMdd}-{1:D4}";
         var id99 = $"SPM-{productCode}-{taskType}-{date:yyyyMMdd}-{99:D4}";
         var id9999 = $"SPM-{productCode}-{taskType}-{date:yyyyMMdd}-{9999:D4}";
 
-        Assert.Equal("SPM-WTQ-T05-20261225-0001", id1);
-        Assert.Equal("SPM-WTQ-T05-20261225-0099", id99);
-        Assert.Equal("SPM-WTQ-T05-20261225-9999", id9999);
+        Assert.Equal("SPM-WTQ-T04-20261225-0001", id1);
+        Assert.Equal("SPM-WTQ-T04-20261225-0099", id99);
+        Assert.Equal("SPM-WTQ-T04-20261225-9999", id9999);
     }
 
     [Theory]

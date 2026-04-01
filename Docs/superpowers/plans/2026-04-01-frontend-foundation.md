@@ -307,7 +307,7 @@ export enum TaskType {
   T02 = 'T02',
   T03 = 'T03',
   T04 = 'T04',
-  T05 = 'T05',
+  T04 = 'T04',
 }
 
 export enum TicketStatus {

@@ -110,10 +110,10 @@ All 4 task types working with their unique flows. Lifecycle enforcement prevents
 | # | Story | Acceptance Criteria | Dependencies |
 |---|-------|-------------------|--------------|
 | 2.1 | **Remaining domain entities + migration** — SlaTracker, SlaPause, Document, Comment, Notification, FulfilmentRecord, DelegateApprover, BusinessHoursConfig, Holiday, SavedFilter. EF configs + migration. WorkflowDefinition filtered unique index on (ProductCode, TaskType, ProvisioningPath) where IsActive. | New tables created, build passes, unique constraint enforced | E1 complete |
-| 2.2 | **Lifecycle enforcement** — TicketService validates prerequisites at creation time. T-02 requires partner is Onboarded (T-01 completed). T-03 requires partner is UatActive (T-02 Ph1 completed). T-05 requires partner is Live. Clear error messages with current state. | POST `/api/tickets` with T-02 when no T-01 exists → 400 with explanation | 2.1 |
+| 2.2 | **Lifecycle enforcement** — TicketService validates prerequisites at creation time. T-02 requires partner is Onboarded (T-01 completed). T-03 requires partner is UatActive (T-02 Ph1 completed). T-04 requires partner is Live. Clear error messages with current state. | POST `/api/tickets` with T-02 when no T-01 exists → 400 with explanation | 2.1 |
 | 2.3 | **T-02 two-phase flow** — ClosePh1 → Phase1Complete → AwaitingUatSignal → SignalUatComplete → Phase2InReview → ClosePh2 → Complete. Independent SLA trackers per phase. Lifecycle: T-02 Ph1 → UatActive. T-02 Ph2 completion leaves lifecycle unchanged (stays UatActive). | Full two-phase lifecycle works, partner → UatActive on Ph1. Ph2 completes ticket without lifecycle change. | 2.2 |
 | 2.4 | **T-03 Production Account Creation — all three paths (sequential)** — ProvisioningPath resolved at submission based on product access mode. Three linear workflow variants. PortalAndApi stage order confirmed with Karthik before seeding. Lifecycle: T-03 complete → LIVE. | PortalOnly, ApiOnly, PortalAndApi all work as linear stage sequences. Partner becomes LIVE on completion. | 2.2 |
-| 2.5 | **T-05 access & credential support** — 3 issue types (PortalLoginIssue, ApiCredentialIssue, PortalPasswordReset), single-stage flow (Provisioning verify + resolve). No lifecycle state change. | Create T-05 for LIVE partner → resolve → Completed. No lifecycle change. | 2.2 |
+| 2.5 | **T-04 access & credential support** — 3 issue types (PortalLoginIssue, ApiCredentialIssue, PortalPasswordReset), single-stage flow (Provisioning verify + resolve). No lifecycle state change. | Create T-04 for LIVE partner → resolve → Completed. No lifecycle change. | 2.2 |
 | 2.6 | **Re-raise from rejection** — POST `/api/tickets/re-raise/{rejectedTicketId}`. Copies form data, links to original, creates fresh ticket with new workflow. | Reject a T-01 → re-raise → new ticket with ref to original, fresh stages | 2.3 |
 | 2.7 | **Fulfilment records** — FulfilmentRecord captured at completion. Structured JSON per task type. | Advance to final stage → record fulfilment data → ticket completes with record attached | 2.3 |
 | 2.8 | **Seed workflow matrix** — All 6 workflow paths seeded (spec §9.2). SLA defaults per task type seeded. T-03 PortalAndApi stage order confirmed with Karthik. | All Product × TaskType × ProvisioningPath combos have correct WorkflowDefinition | 2.4 |
@@ -137,7 +137,7 @@ All 4 task types working with their unique flows. Lifecycle enforcement prevents
 
 ### Definition of Done
 
-Demo: full partner lifecycle — T-01 → T-02 (two-phase) → T-03 Production Account Creation (on Rabet) → partner is LIVE. Plus T-05 for a live partner. Cancel and re-raise both work.
+Demo: full partner lifecycle — T-01 → T-02 (two-phase) → T-03 Production Account Creation (on Rabet) → partner is LIVE. Plus T-04 for a live partner. Cancel and re-raise both work.
 
 ---
 

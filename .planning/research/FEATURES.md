@@ -23,7 +23,7 @@ Features users expect to be present. Missing any of these and the system fails t
 | **Ticket submission with Product × Task selection** | Every request needs a structured entry point with correct context captured upfront | Medium | Product selector comes first; task options render conditionally per product. T-03 has an API opt-in toggle that exposes additional mandatory fields. |
 | **Deterministic workflow routing** | Without enforced routing, approvals still rely on individual judgment and email chasing | High | Custom WorkflowEngine.cs — no external package. Sequential stages per Task Type; T-03 Portal+API path requires parallel provisioning tracks after approval. Must be seeded, not UI-editable in MVP 1. |
 | **Stage ownership and action queue** | Each stage must have a clear owner who sees what actions are required of them | Medium | Users see "my queue" (things assigned to me or my role) and "team queue" (things my team owns). No queue = no accountability. |
-| **SLA tracking with business-hours math** | Without SLA visibility, breach is discovered retrospectively and there is no pressure to act | High | Sun–Thu, 08:00–17:00 GST. SLA clock must pause outside business hours and on holidays. SLA targets vary by task type (2h for T-05, 48h for T-01). |
+| **SLA tracking with business-hours math** | Without SLA visibility, breach is discovered retrospectively and there is no pressure to act | High | Sun–Thu, 08:00–17:00 GST. SLA clock must pause outside business hours and on holidays. SLA targets vary by task type (2h for T-04, 48h for T-01). |
 | **SLA breach warnings and escalation flags** | Passive SLA tracking without alerts provides no operational benefit | Medium | Warning at configurable threshold (e.g., 80% consumed). Breached tickets must be visually flagged in queues. Escalation routing in MVP 2. |
 | **In-app notifications at workflow milestones** | Users need to know when something lands in their queue or transitions | Medium | Triggered at: submission, stage transition, completion, SLA warning. Email deferred to MVP 2 — in-app only for MVP 1. |
 | **Ticket detail view with status timeline** | Without a timeline, partners ask "where is my request?" and operators cannot answer quickly | Medium | Shows current stage, who owns it, all prior transitions with timestamps. Read from audit trail. |
@@ -153,7 +153,7 @@ Reports Dashboard
 
 1. **Fake auth + seeded users** — unblocks everything that needs a user identity
 2. **Workflow engine + seeded workflow rules** — the core routing mechanism; proves architecture end-to-end with T-01 first
-3. **Ticket submission (all 5 task types)** — product × task selection, conditional form fields, document upload, ticket ID generation
+3. **Ticket submission (all 4 task types)** — product × task selection, conditional form fields, document upload, ticket ID generation
 4. **Partner lifecycle state machine** — prerequisite enforcement at submission; per-partner per-product tracking
 5. **SLA tracking with business-hours math** — background service, clock start on submit, pause/resume on business hours, SLA config in admin
 6. **In-app notifications** — triggered at submission, stage transitions, SLA warning, completion

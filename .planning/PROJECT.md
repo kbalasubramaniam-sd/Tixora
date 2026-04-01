@@ -17,7 +17,7 @@ Every partner request is tracked from submission to completion with clear owners
 ### Active
 
 - [ ] Fake auth with seeded users and JWT (real SSO in MVP 2)
-- [ ] 5 task types (T-01 through T-05) with configuration-driven workflow routing
+- [ ] 4 task types (T-01 through T-04) with configuration-driven workflow routing
 - [ ] T-02 two-phase flow with UAT signal
 - [ ] T-03 product-driven access path (PortalOnly, ApiOnly, PortalAndApi)
 - [ ] Lifecycle state machine with prerequisite enforcement (Agreed → UatActive → Onboarded → Live)

@@ -35,7 +35,7 @@ public enum NotificationType
     /// <summary>T-03: API credentials issued — sent to requester.</summary>
     ApiCredentialsIssued = 9,
 
-    /// <summary>T-05: Access or credential issue resolved — sent to requester.</summary>
+    /// <summary>T-04: Access or credential issue resolved — sent to requester.</summary>
     AccessIssueResolved = 10,
 
     /// <summary>Ticket rejected by stage owner — sent to requester.</summary>

@@ -77,7 +77,7 @@ Four admin sub-pages accessible from the sidebar under "Admin" section:
 │  │ API: Partner Ops → Director → Integration        │    │
 │  │ [ Edit ]                                         │    │
 │  ├─────────────────────────────────────────────────┤    │
-│  │ T-05 · Access & Credential Support               │    │
+│  │ T-04 · Access & Credential Support               │    │
 │  │ Stages: Provisioning                             │    │
 │  │ [ Edit ]                                         │    │
 │  └─────────────────────────────────────────────────┘    │

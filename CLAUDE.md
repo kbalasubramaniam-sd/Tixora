@@ -37,7 +37,7 @@ src/
 - T-01: Agreement Validation & Sign-off
 - T-02: UAT Access Creation (two-phase)
 - T-03: Production Account Creation (merged partner account + user setup, with API opt-in)
-- T-05: Access & Credential Support
+- T-04: Access & Credential Support
 
 ## Partner Lifecycle
 

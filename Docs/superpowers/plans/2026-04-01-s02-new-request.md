@@ -131,28 +131,28 @@ const mockTasks: Record<string, TaskOption[]> = {
     { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request UAT environment access for a partner', enabled: true },
     { type: TaskType.T03, name: 'Partner Account Creation', description: 'Create a partner account on the platform', enabled: true },
     { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner', enabled: false, disabledReason: 'Requires completed Partner Account (T-03)' },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: false, disabledReason: 'Requires partner in ONBOARDED state' },
+    { type: TaskType.T04, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: false, disabledReason: 'Requires partner in ONBOARDED state' },
   ],
   [ProductCode.RHN]: [
     { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Validate and sign off a partner agreement', enabled: true },
     { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request UAT environment access for a partner', enabled: true },
     { type: TaskType.T03, name: 'Partner Account Creation', description: 'Create a partner account on the platform', enabled: true },
     { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner', enabled: true },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: true },
+    { type: TaskType.T04, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: true },
   ],
   [ProductCode.WTQ]: [
     { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Validate and sign off a partner agreement', enabled: true },
     { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request UAT environment access for a partner', enabled: true },
     { type: TaskType.T03, name: 'Partner Account Creation', description: 'Create a partner account on the platform', enabled: true },
     { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner', enabled: true },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: true },
+    { type: TaskType.T04, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: true },
   ],
   [ProductCode.MLM]: [
     { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Validate and sign off a partner agreement', enabled: true },
     { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request UAT environment access for a partner', enabled: true },
     { type: TaskType.T03, name: 'Partner Account Creation', description: 'Create a partner account on the platform', enabled: true },
     { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner', enabled: true },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: true },
+    { type: TaskType.T04, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: true },
   ],
 }
 
