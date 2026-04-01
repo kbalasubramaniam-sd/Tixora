@@ -7,11 +7,11 @@ namespace Tixora.Domain.Enums;
 public enum ProvisioningPath
 {
     /// <summary>Portal access only — routes through Provisioning Team.</summary>
-    PortalOnly,
+    PortalOnly = 0,
 
     /// <summary>Portal + API — routes through Provisioning then Integration (sequential).</summary>
-    PortalAndApi,
+    PortalAndApi = 1,
 
     /// <summary>API access only — routes through Integration Team.</summary>
-    ApiOnly
+    ApiOnly = 2
 }

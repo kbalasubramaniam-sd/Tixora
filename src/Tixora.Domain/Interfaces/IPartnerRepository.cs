@@ -6,4 +6,5 @@ public interface IPartnerRepository
 {
     Task<List<Partner>> GetAllAsync();
     Task<Partner?> GetByIdAsync(Guid id);
+    Task<Partner?> GetByIdWithProductsAsync(Guid id);
 }

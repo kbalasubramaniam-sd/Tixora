@@ -6,14 +6,14 @@ namespace Tixora.Domain.Enums;
 public enum ProductCode
 {
     /// <summary>Rabet — transactional portal + API.</summary>
-    RBT,
+    RBT = 0,
 
     /// <summary>Rhoon — transactional portal + API.</summary>
-    RHN,
+    RHN = 1,
 
     /// <summary>Wtheeq — API-only, read-only portal.</summary>
-    WTQ,
+    WTQ = 2,
 
     /// <summary>Mulem — API-only, read-only portal.</summary>
-    MLM
+    MLM = 3
 }

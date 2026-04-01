@@ -6,11 +6,11 @@ namespace Tixora.Domain.Enums;
 public enum IssueType
 {
     /// <summary>Password reset or account unlock for portal access.</summary>
-    PortalLoginIssue,
+    PortalLoginIssue = 0,
 
     /// <summary>API key regeneration or certificate renewal.</summary>
-    ApiCredentialIssue,
+    ApiCredentialIssue = 1,
 
     /// <summary>Password reset for read-only portals on API-only products.</summary>
-    PortalPasswordReset
+    PortalPasswordReset = 2
 }

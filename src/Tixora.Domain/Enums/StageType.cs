@@ -6,14 +6,14 @@ namespace Tixora.Domain.Enums;
 public enum StageType
 {
     /// <summary>Content review — checking submitted data for correctness.</summary>
-    Review,
+    Review = 0,
 
     /// <summary>Sign-off or decision gate — approve or reject.</summary>
-    Approval,
+    Approval = 1,
 
     /// <summary>Operational work — creating accounts, issuing credentials.</summary>
-    Provisioning,
+    Provisioning = 2,
 
     /// <summary>Waiting gate — e.g. awaiting requester signal that UAT is done.</summary>
-    PhaseGate
+    PhaseGate = 3
 }

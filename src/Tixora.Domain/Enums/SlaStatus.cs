@@ -6,14 +6,14 @@ namespace Tixora.Domain.Enums;
 public enum SlaStatus
 {
     /// <summary>Less than 75% of target elapsed.</summary>
-    OnTrack,
+    OnTrack = 0,
 
     /// <summary>75–90% of target elapsed. Stage owner notified.</summary>
-    AtRisk,
+    AtRisk = 1,
 
     /// <summary>90–100% of target elapsed. Stage owner + manager notified.</summary>
-    Critical,
+    Critical = 2,
 
     /// <summary>100%+ elapsed. Stage owner + manager + admin notified.</summary>
-    Breached
+    Breached = 3
 }
