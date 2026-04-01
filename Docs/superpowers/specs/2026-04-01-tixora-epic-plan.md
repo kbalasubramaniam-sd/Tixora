@@ -109,7 +109,7 @@ All 5 task types working with their unique flows. Lifecycle enforcement prevents
 
 | # | Story | Acceptance Criteria | Dependencies |
 |---|-------|-------------------|--------------|
-| 2.1 | **Remaining domain entities + migration** — SlaTracker, Document, Comment, Notification, FulfilmentRecord, DelegateApprover, BusinessHoursConfig, Holiday, SavedFilter. EF configs + migration. | New tables created, build passes | E1 complete |
+| 2.1 | **Remaining domain entities + migration** — SlaTracker, SlaPause, Document, Comment, Notification, FulfilmentRecord, DelegateApprover, BusinessHoursConfig, Holiday, SavedFilter. EF configs + migration. WorkflowDefinition filtered unique index on (ProductCode, TaskType, ProvisioningPath) where IsActive. | New tables created, build passes, unique constraint enforced | E1 complete |
 | 2.2 | **Lifecycle enforcement** — TicketService validates prerequisites at creation time. T-02 requires T-01 completed. T-03 requires T-02 Ph2 completed. T-04 requires T-03 completed. T-05 requires ONBOARDED or LIVE. Clear error messages with current state. | POST `/api/tickets` with T-02 when no T-01 exists → 400 with explanation | 2.1 |
 | 2.3 | **T-02 two-phase flow** — ClosePh1 → Phase1Complete → AwaitingUatSignal → SignalUatComplete → Phase2InReview → ClosePh2 → Complete. Independent SLA trackers per phase. Lifecycle: T-02 Ph1 → UAT_ACTIVE. | Full two-phase lifecycle works, partner → UAT_ACTIVE | 2.2 |
 | 2.4 | **T-03 all three paths (sequential)** — ProvisioningPath resolved at submission based on product access mode. Three linear workflow variants. PortalAndApi stage order confirmed with Karthik before seeding. Lifecycle: T-02 Ph2 + T-03 both complete → ONBOARDED. | PortalOnly, ApiOnly, PortalAndApi all work as linear stage sequences | 2.2 |
@@ -155,10 +155,11 @@ The system goes from "tickets move through stages" to "operationally useful." SL
 | # | Story | Acceptance Criteria | Dependencies |
 |---|-------|-------------------|--------------|
 | 3.1 | **SLA service — business hours calculation** — Reads BusinessHoursConfig + Holidays. Calculates elapsed business hours between two timestamps. Handles Sun-Thu, 08:00-17:00 GST. Subtracts paused periods. | Given start Sunday 16:00, current Monday 10:00 → returns 3 business hours. Holidays excluded. | E2 complete |
-| 3.2 | **SLA tracker integration** — SlaTracker created when a stage starts. Updated on advance/complete. Paused on clarification, resumed on response. Thresholds: OnTrack (<75%), AtRisk (75-90%), Critical (90-100%), Breached (>=100%). | Advance ticket → SlaTracker created. Return for clarification → paused. Respond → resumed. | 3.1 |
+| 3.2 | **SLA tracker integration** — SlaTracker created when a stage starts. Updated on advance/complete. Pause/resume via SlaPause child table (supports multiple pauses per stage). Thresholds: OnTrack (<75%), AtRisk (75-90%), Critical (90-100%), Breached (>=100%). | Advance ticket → SlaTracker created. Return for clarification → SlaPause created. Respond → SlaPause closed with PausedBusinessHours. Multiple pauses accumulate correctly. | 3.1 |
 | 3.3 | **SLA monitoring background service** — `BackgroundService`, runs every 5 minutes. Recalculates BusinessHoursElapsed for all active trackers. Triggers notifications at 75%, 90%, 100%. Idempotent. | After enough business hours, SlaStatus transitions and notification flags set correctly. | 3.2 |
+| 3.3b | **UAT reminder background service** — `BackgroundService`, runs daily. Checks T-02 tickets in AwaitingUatSignal. If configurable window exceeded (default: 30 business days), sends reminder to requester. Second threshold flags for admin review. | T-02 sitting in AwaitingUatSignal for 30+ business days → requester gets reminder notification. | 3.2, 3.4 |
 | 3.4 | **Notification service** — NotificationService.Send creates in-app Notification records. Maps every workflow event to type + recipient(s). IEmailSender with NoOpEmailSender for MVP 1. | Every stage action creates appropriate notifications. | E2 complete |
-| 3.5 | **Notification endpoints** — GET list, PUT mark-read, GET unread-count | All endpoints work. Mark-read sets IsRead + ReadAt. | 3.4 |
+| 3.5 | **Notification endpoints** — GET list, PUT mark-read, PUT mark-all-read, GET unread-count | All endpoints work. Mark-read sets IsRead + ReadAt. Mark-all-read bulk updates. | 3.4 |
 | 3.6 | **Comments** — POST/GET on tickets. Optional attachment reference. Author tracked. | Add comment → appears in list with author and timestamp. | E2 complete |
 | 3.7 | **Document upload** — POST multipart upload, GET metadata. LocalFileStorage. File size/type validation. | Upload PDF → stored locally → metadata in DB → retrievable. Reject >10MB or disallowed types. | E2 complete |
 | 3.8 | **Audit trail** — AuditService logs every action. GET `/api/tickets/{id}/audit` returns full history. Immutable, append-only. | Audit shows: created, advanced, returned, responded, reassigned, cancelled with actor, role, timestamp. | E2 complete |
@@ -168,9 +169,10 @@ The system goes from "tickets move through stages" to "operationally useful." SL
 ### Dependency Graph
 
 ```
-3.1 → 3.2 → 3.3 ──┐
-3.4 → 3.5 ─────────┼─→ 3.9 → 3.10
-3.6 (independent) ──┘
+3.1 → 3.2 → 3.3 ───────┐
+              └─→ 3.3b ─┤
+3.4 → 3.5 ──────────────┼─→ 3.9 → 3.10
+3.6 (independent) ───────┘
 3.7 (independent)
 3.8 (independent)
 ```

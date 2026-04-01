@@ -39,6 +39,7 @@ Tixora/
 │   │   │   ├── StageLog.cs
 │   │   │   ├── AuditEntry.cs
 │   │   │   ├── SlaTracker.cs
+│   │   │   ├── SlaPause.cs
 │   │   │   ├── Document.cs
 │   │   │   ├── Comment.cs
 │   │   │   ├── Notification.cs
@@ -146,6 +147,7 @@ Tixora/
 │   │   │       ├── StageLogConfiguration.cs
 │   │   │       ├── AuditEntryConfiguration.cs
 │   │   │       ├── SlaTrackerConfiguration.cs
+│   │   │       ├── SlaPauseConfiguration.cs
 │   │   │       ├── DocumentConfiguration.cs
 │   │   │       ├── CommentConfiguration.cs
 │   │   │       ├── NotificationConfiguration.cs
@@ -357,7 +359,7 @@ public class Ticket
     public IssueType? IssueType { get; set; }      // T-05 only
     public string FormData { get; set; }           // JSON — dynamic form submission
     public Guid CreatedByUserId { get; set; }
-    public Guid? AssignedToUserId { get; set; }
+    public Guid? AssignedToUserId { get; set; }    // null until a user claims from role queue
     public Guid? RejectedTicketRef { get; set; }   // if re-raised from a rejected ticket
     public string? CancellationReason { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -552,6 +554,8 @@ public class WorkflowDefinition
 
     public ICollection<StageDefinition> Stages { get; set; }
 }
+// Unique constraint: (ProductCode, TaskType, ProvisioningPath) WHERE IsActive = true
+// Enforced via filtered unique index in EF configuration.
 
 public class StageDefinition
 {
@@ -783,14 +787,16 @@ For each active SlaTracker where CompletedAt == null:
 
 ### 5.3 SLA Pause/Resume
 
+Tracked via `SlaPause` child table. Supports multiple pause/resume cycles per stage.
+
 When a ticket is returned for clarification:
-- SlaTracker.PausedAt = now
+- Create new `SlaPause { SlaTrackerId, PausedAt = now }`
 - BusinessHoursElapsed is frozen at current value
 
 When the requester responds:
-- SlaTracker.ResumedAt = now
-- SlaTracker.PausedAt = null
-- Clock resumes from the frozen value
+- Set `SlaPause.ResumedAt = now`
+- Calculate `SlaPause.PausedBusinessHours` (business hours between PausedAt and ResumedAt)
+- Clock resumes — total paused time = sum of all `SlaPause.PausedBusinessHours` for this tracker
 
 ---
 
@@ -869,13 +875,17 @@ Full milestone → recipient mapping as defined in the product spec (US-012). Ea
 |--------|-------|---------|
 | GET | `/api/notifications` | User's notifications |
 | PUT | `/api/notifications/{id}/read` | Mark read |
+| PUT | `/api/notifications/read-all` | Mark all as read |
 | GET | `/api/notifications/unread-count` | Badge count |
 
 ### 7.6 Dashboard & Reports
 | Method | Route | Purpose |
 |--------|-------|---------|
-| GET | `/api/dashboard/my-tickets` | Requester dashboard |
-| GET | `/api/dashboard/team-queue` | Team queue |
+| GET | `/api/dashboard/stats` | Role-adaptive stat cards (counts, SLA %, etc.) |
+| GET | `/api/dashboard/action-required` | Tickets needing current user's action |
+| GET | `/api/dashboard/activity` | Recent activity timeline for current user |
+| GET | `/api/dashboard/my-tickets` | Requester's ticket list |
+| GET | `/api/dashboard/team-queue` | Role-based team queue, sorted by SLA urgency |
 | GET | `/api/reports/overview` | Aggregated metrics |
 | GET | `/api/reports/export` | CSV export |
 
