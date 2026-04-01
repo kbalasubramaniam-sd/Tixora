@@ -35,7 +35,7 @@ export function TaskStep({ product, onSelect, onBack }: TaskStepProps) {
               key={task.type}
               onClick={() => task.enabled && onSelect(task)}
               className={cn(
-                'group relative bg-surface-container-lowest p-6 rounded-xl transition-all duration-300 flex items-center justify-between border-2 border-transparent',
+                'group relative bg-surface-container-lowest p-6 rounded-xl shadow-md shadow-slate-200/50 transition-all duration-300 flex items-center justify-between border-2 border-transparent',
                 task.enabled
                   ? 'cursor-pointer hover:shadow-xl hover:shadow-teal-900/5 hover:border-primary/20'
                   : 'opacity-50 cursor-not-allowed',

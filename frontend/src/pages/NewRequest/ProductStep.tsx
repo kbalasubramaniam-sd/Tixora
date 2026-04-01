@@ -42,7 +42,7 @@ export function ProductStep({ onSelect }: ProductStepProps) {
           <button
             key={product.code}
             onClick={() => onSelect(product)}
-            className="text-left group bg-surface-container-lowest p-8 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50 outline-none focus:ring-2 focus:ring-primary/20"
+            className="text-left group bg-surface-container-lowest p-8 rounded-xl shadow-md shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50 outline-none focus:ring-2 focus:ring-primary/20"
           >
             <div className="flex justify-between items-start mb-6">
               <div className={`w-14 h-14 rounded-xl ${product.iconBg} flex items-center justify-center ${product.iconColor}`}>
