@@ -4,9 +4,9 @@ Internal operations portal for managing partner-facing requests across 4 governm
 
 ## Tech Stack
 
-- **Backend:** C# / .NET 8 (ASP.NET Core Web API), Clean Architecture Monolith
+- **Backend:** C# / .NET 10 (ASP.NET Core Web API), Clean Architecture Monolith
 - **Frontend:** React (built separately via Google Stitch, not in .NET solution)
-- **Database:** SQL Server + Entity Framework Core
+- **Database:** SQL Server + Entity Framework Core 10
 - **Auth:** Fake auth middleware (seeded users + JWT) — real SSO in MVP 2
 - **Email:** Deferred to MVP 2 (in-app notifications only for MVP 1)
 
