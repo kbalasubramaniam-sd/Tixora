@@ -31,7 +31,7 @@ export function TopBar({ notificationCount = 0, onMenuToggle, showMenuButton }: 
 
       {/* Logo */}
       <div className="flex flex-col mr-4">
-        <span className="text-xl font-bold text-primary-container leading-tight">Tixora</span>
+        <span className="text-2xl font-bold tracking-tighter text-primary leading-tight">Tixora</span>
         <span className="text-[0.6875rem] text-on-surface-variant leading-tight hidden sm:block">
           Powering Every Request
         </span>
