@@ -1,51 +1,57 @@
-export enum ProductCode {
-  RBT = 'RBT',
-  RHN = 'RHN',
-  WTQ = 'WTQ',
-  MLM = 'MLM',
-}
+export const ProductCode = {
+  RBT: 'RBT',
+  RHN: 'RHN',
+  WTQ: 'WTQ',
+  MLM: 'MLM',
+} as const
+export type ProductCode = (typeof ProductCode)[keyof typeof ProductCode]
 
-export enum TaskType {
-  T01 = 'T01',
-  T02 = 'T02',
-  T03 = 'T03',
-  T04 = 'T04',
-  T05 = 'T05',
-}
+export const TaskType = {
+  T01: 'T01',
+  T02: 'T02',
+  T03: 'T03',
+  T04: 'T04',
+  T05: 'T05',
+} as const
+export type TaskType = (typeof TaskType)[keyof typeof TaskType]
 
-export enum TicketStatus {
-  Draft = 'Draft',
-  Submitted = 'Submitted',
-  InReview = 'InReview',
-  PendingRequesterAction = 'PendingRequesterAction',
-  Approved = 'Approved',
-  InProvisioning = 'InProvisioning',
-  Completed = 'Completed',
-  Rejected = 'Rejected',
-  Cancelled = 'Cancelled',
-  SlaBreached = 'SlaBreached',
-}
+export const TicketStatus = {
+  Draft: 'Draft',
+  Submitted: 'Submitted',
+  InReview: 'InReview',
+  PendingRequesterAction: 'PendingRequesterAction',
+  Approved: 'Approved',
+  InProvisioning: 'InProvisioning',
+  Completed: 'Completed',
+  Rejected: 'Rejected',
+  Cancelled: 'Cancelled',
+  SlaBreached: 'SlaBreached',
+} as const
+export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus]
 
-export enum LifecycleState {
-  None = 'None',
-  Agreed = 'Agreed',
-  UatActive = 'UatActive',
-  Onboarded = 'Onboarded',
-  Live = 'Live',
-}
+export const LifecycleState = {
+  None: 'None',
+  Agreed: 'Agreed',
+  UatActive: 'UatActive',
+  Onboarded: 'Onboarded',
+  Live: 'Live',
+} as const
+export type LifecycleState = (typeof LifecycleState)[keyof typeof LifecycleState]
 
-export enum SlaStatus {
-  OnTrack = 'OnTrack',
-  AtRisk = 'AtRisk',
-  Critical = 'Critical',
-  Breached = 'Breached',
-}
+export const SlaStatus = {
+  OnTrack: 'OnTrack',
+  AtRisk: 'AtRisk',
+  Critical: 'Critical',
+  Breached: 'Breached',
+} as const
+export type SlaStatus = (typeof SlaStatus)[keyof typeof SlaStatus]
 
-export enum UserRole {
-  Requester = 'Requester',
-  Reviewer = 'Reviewer',
-  Approver = 'Approver',
-  IntegrationTeam = 'IntegrationTeam',
-  ProvisioningAgent = 'ProvisioningAgent',
-  SystemAdministrator = 'SystemAdministrator',
-}
+export const UserRole = {
+  Requester: 'Requester',
+  Reviewer: 'Reviewer',
+  Approver: 'Approver',
+  IntegrationTeam: 'IntegrationTeam',
+  ProvisioningAgent: 'ProvisioningAgent',
+  SystemAdministrator: 'SystemAdministrator',
+} as const
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
