@@ -2,7 +2,6 @@ import { cn } from '@/utils/cn'
 
 interface Step {
   label: string
-  icon: string
 }
 
 interface StepperProps {
@@ -14,49 +13,60 @@ interface StepperProps {
 export function Stepper({ steps, currentStep, className }: StepperProps) {
   return (
     <div className={cn('max-w-4xl mx-auto mb-12', className)}>
-      <div className="flex items-center justify-between w-full relative">
-        {/* Background line */}
-        <div className="absolute top-1/2 left-0 w-full h-[2px] bg-surface-container-high -translate-y-1/2 z-0" />
+      <div className="flex items-center justify-center">
+        <div className="flex items-center">
+          {steps.map((step, i) => {
+            const isCompleted = i < currentStep
+            const isActive = i === currentStep
+            const isFuture = i > currentStep
+            const stepNumber = i + 1
 
-        {steps.map((step, i) => {
-          const isCompleted = i < currentStep
-          const isActive = i === currentStep
-          const isFuture = i > currentStep
-          const stepNumber = String(i + 1).padStart(2, '0')
-
-          return (
-            <div key={step.label} className="relative z-10 flex flex-col items-center group">
-              <div
-                className={cn(
-                  'w-10 h-10 rounded-full flex items-center justify-center',
-                  isCompleted && 'bg-primary text-white',
-                  isActive && 'primary-gradient text-white shadow-lg shadow-teal-500/20',
-                  isFuture && 'bg-surface-container-highest text-on-surface-variant',
-                )}
-              >
-                {isCompleted ? (
-                  <span
-                    className="material-symbols-outlined text-xl"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
+            return (
+              <div key={step.label} className="flex items-center">
+                {/* Step circle + label */}
+                <div className="flex flex-col items-center">
+                  <div
+                    className={cn(
+                      'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold',
+                      isCompleted && 'bg-primary text-on-primary',
+                      isActive && 'bg-primary text-on-primary ring-4 ring-primary-container/20',
+                      isFuture && 'bg-surface-container-highest text-on-surface-variant',
+                    )}
                   >
-                    check
+                    {isCompleted ? (
+                      <span
+                        className="material-symbols-outlined text-sm"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        check
+                      </span>
+                    ) : (
+                      stepNumber
+                    )}
+                  </div>
+                  <span
+                    className={cn(
+                      'text-[10px] font-semibold uppercase tracking-wider mt-2',
+                      (isCompleted || isActive) ? 'text-primary' : 'text-on-surface-variant',
+                    )}
+                  >
+                    {step.label}
                   </span>
-                ) : (
-                  <span className="text-sm font-bold">{stepNumber}</span>
+                </div>
+
+                {/* Connecting line (not after last step) */}
+                {i < steps.length - 1 && (
+                  <div
+                    className={cn(
+                      'w-24 h-[2px] mx-2 -mt-5',
+                      i < currentStep ? 'bg-primary' : 'bg-surface-container-highest',
+                    )}
+                  />
                 )}
               </div>
-              <span
-                className={cn(
-                  'absolute top-12 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap',
-                  (isCompleted || isActive) && 'text-primary',
-                  isFuture && 'text-slate-400',
-                )}
-              >
-                {step.label}
-              </span>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )

@@ -10,10 +10,10 @@ import type { Product, TaskOption } from '@/types/product'
 import type { ProductCode, TaskType } from '@/types/enums'
 
 const STEPS = [
-  { label: 'Product', icon: 'category' },
-  { label: 'Task', icon: 'assignment' },
-  { label: 'Details', icon: 'edit_note' },
-  { label: 'Review', icon: 'verified' },
+  { label: 'Product' },
+  { label: 'Task' },
+  { label: 'Details' },
+  { label: 'Review' },
 ]
 
 export default function NewRequest() {
