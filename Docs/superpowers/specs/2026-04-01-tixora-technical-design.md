@@ -1102,8 +1102,7 @@ Note: T-01 has no FormData fields — partner selection is stored as `Ticket.Par
 | Portal Admin Mobile | `portalAdminMobile` | tel | Yes | Numeric only |
 | Portal Admin Designation | `portalAdminDesignation` | text | Yes | |
 | IP Addresses for Whitelisting | `ipAddresses` | textarea | No | One per line |
-| Invoicing Emails | `invoicingEmails` | dynamic list (email) | Yes (min 1) | Add/remove |
-| Invoicing Phone Numbers | `invoicingPhoneNumbers` | dynamic list (tel) | Yes (min 1) | Numeric only, add/remove |
+| Invoicing Contacts | `invoicingContacts` | dynamic list (object) | Yes (min 1) | Each: { name, email, phone } |
 | First Level Contacts | `firstLevelContacts` | dynamic list (object) | Yes (min 1) | Each: { name, mobile, email } |
 | First Level Escalation | `firstLevelEscalation` | dynamic list (object) | Yes (min 1) | Each: { name, mobile, email } |
 | Second Level Escalation | `secondLevelEscalation` | dynamic list (object) | Yes (min 1) | Each: { name, mobile, email } |
@@ -1119,8 +1118,10 @@ Note: T-01 has no FormData fields — partner selection is stored as `Ticket.Par
   "portalAdminMobile": "+971501234567",
   "portalAdminDesignation": "Operations Lead",
   "ipAddresses": "10.0.0.1\n10.0.0.2",
-  "invoicingEmails": ["billing@partner.com", "finance@partner.com"],
-  "invoicingPhoneNumbers": ["+97141234567", "+97149876543"],
+  "invoicingContacts": [
+    { "name": "Ahmed Billing", "email": "billing@partner.com", "phone": "+97141234567" },
+    { "name": "Sara Finance", "email": "finance@partner.com", "phone": "+97149876543" }
+  ],
   "firstLevelContacts": [
     { "name": "Ali Hassan", "mobile": "+971501111111", "email": "ali@partner.com" },
     { "name": "Fatima Omar", "mobile": "+971502222222", "email": "fatima@partner.com" }

@@ -238,35 +238,29 @@ When a partner is selected, Company Code fills automatically. If a partner has n
 - **Network:**
   - IP Addresses for Whitelisting (textarea, one per line)
 
-- **Invoicing Information:**
+- **Invoicing Contacts:**
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ Invoicing Information                                    │
+│ Invoicing Contacts                                       │
 │                                                          │
-│ Emails *                                                 │
-│ ┌──────────────────────────────────────────────┐         │
-│ │ billing@partner.com                       ×  │         │
-│ └──────────────────────────────────────────────┘         │
-│ ┌──────────────────────────────────────────────┐         │
-│ │ finance@partner.com                       ×  │         │
-│ └──────────────────────────────────────────────┘         │
-│ [ + Add Email ]                                          │
-│                                                          │
-│ Phone Numbers *                                          │
-│ ┌──────────────────────────────────────────────┐         │
-│ │ +971 4 123 4567                           ×  │         │
-│ └──────────────────────────────────────────────┘         │
-│ [ + Add Phone ]                                          │
+│ ┌────────────────┬────────────────┬────────────────┐     │
+│ │ Name           │ Email          │ Phone          │ ×   │
+│ │ [Ahmed Billing]│ [billing@pa.. ]│ [+971 4 123.. ]│     │
+│ └────────────────┴────────────────┴────────────────┘     │
+│ ┌────────────────┬────────────────┬────────────────┐     │
+│ │ Name           │ Email          │ Phone          │ ×   │
+│ │ [Sara Finance ]│ [finance@pa.. ]│ [+971 4 987.. ]│     │
+│ └────────────────┴────────────────┴────────────────┘     │
+│ [ + Add Contact ]                                        │
 │                                                          │
 └─────────────────────────────────────────────────────────┘
 ```
 
-  - **Emails:** Each row is an email input + remove (×) button. At least one required — cannot remove the last row. "Add Email" button below the list adds a new empty row.
-  - **Phone Numbers:** Same pattern. Tel input (numeric only) + remove (×). "Add Phone" button adds a new row.
-  - Add buttons: secondary style, teal text, `+` icon left of text.
-  - Remove (×): 20px icon button, `#3d4949` at 50%, hover → `#d32f2f`. Hidden when only one row remains.
-  - New rows animate in with slide-down (200ms ease).
+  - Same pattern as support contacts: 3-field inline rows (Name text, Email email, Phone tel numeric only) + remove (×).
+  - At least one invoicing contact required — cannot remove the last row.
+  - "Add Contact" adds a new empty 3-field row.
+  - Field labels shown above the first row only.
 
 - **Customer Support Contact Information:**
 
