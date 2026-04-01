@@ -86,6 +86,10 @@ When building or modifying any frontend screen, follow this process exactly:
 ### 3. Post-Build Visual Audit Checklist
 After building, run through this checklist against the Stitch HTML. Every item must match.
 
+**Font families:**
+- [ ] Stitch uses `font-headline`, `font-body`, `font-label` — verify all three are defined in `@theme` in index.css
+- [ ] Any new font-family class in Stitch HTML must have a matching `--font-*` token
+
 **Icons:**
 - [ ] Correct Material Symbol icon name (e.g. `hub` not `home`)
 - [ ] Filled vs outlined — check `font-variation-settings: 'FILL' 1` in Stitch `style=` attributes
