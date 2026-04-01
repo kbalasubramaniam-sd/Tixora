@@ -214,7 +214,7 @@ Tixora/
 ```csharp
 public enum ProductCode { RBT, RHN, WTQ, MLM }
 
-public enum TaskType { T01, T02, T03, T04, T05 }
+public enum TaskType { T01, T02, T03, T05 }
 
 public enum ProductAccessMode { Both, ApiOnly }
 // Both = transactional portal + API (Rabet, Rhoon)
@@ -239,7 +239,7 @@ public enum TicketStatus
     Cancelled
 }
 
-public enum LifecycleState { None, Agreed, UatActive, Onboarded, Live }
+public enum LifecycleState { None, Onboarded, UatActive, Live }
 
 public enum StageType { Review, Approval, Provisioning, PhaseGate }
 
@@ -687,13 +687,11 @@ When a ticket completes, the engine checks if the PartnerProduct lifecycle shoul
 
 | Completed Task | Current State Required | New State |
 |---------------|----------------------|-----------|
-| T-01 | (any or new) | AGREED |
-| T-02 Phase 1 | AGREED | UAT_ACTIVE |
-| T-02 Phase 2 + T-03 both complete | UAT_ACTIVE | ONBOARDED |
-| T-04 | ONBOARDED | LIVE |
-| T-05 | ONBOARDED or LIVE | (no change) |
-
-ONBOARDED requires both T-02 Phase 2 closed AND T-03 completed. The engine checks both conditions before advancing.
+| T-01 | (any or new) | ONBOARDED |
+| T-02 Phase 1 | ONBOARDED | UAT_ACTIVE |
+| T-02 Phase 2 | UAT_ACTIVE | (no change — stays UAT_ACTIVE) |
+| T-03 | UAT_ACTIVE | LIVE |
+| T-05 | LIVE | (no change) |
 
 ### 4.3 T-02 Two-Phase Flow
 
@@ -715,7 +713,9 @@ Stage 4: Integration Team — Phase 2 (UAT Sign-off)
 
 Phase 1 and Phase 2 have independent SLA trackers.
 
-### 4.4 T-03 Product-Driven Access Path
+### 4.4 T-03 Product-Driven Access Path (Production Account Creation)
+
+T-03 handles both partner account and user setup in a single request. ProvisioningPath is resolved at submission based on the product's access mode:
 
 ```
 ProvisioningPath resolved at submission:
@@ -738,10 +738,9 @@ Enforced at ticket creation time (not just warning):
 
 | Task Being Created | Prerequisite Check | Block if not met |
 |-------------------|-------------------|-----------------|
-| T-02 | T-01 completed for same partner + product | Yes — blocked |
-| T-03 | T-02 Phase 2 completed for same partner + product | Yes — blocked |
-| T-04 | T-03 completed for same partner + product | Yes — blocked |
-| T-05 | Partner is ONBOARDED or LIVE on the product | Yes — blocked |
+| T-02 | Partner is ONBOARDED on the product (T-01 completed) | Yes — blocked |
+| T-03 | Partner is UAT_ACTIVE on the product (T-02 Ph1 completed) | Yes — blocked |
+| T-05 | Partner is LIVE on the product | Yes — blocked |
 
 The API returns a clear error message with a link to the partner's current lifecycle state and any in-progress prerequisite tickets.
 
@@ -969,7 +968,6 @@ Seeded with the default workflow matrix:
 | Both × T-03 PortalOnly | Partner Ops → Director → Provisioning |
 | Both × T-03 PortalAndApi | Partner Ops → Director → [Provisioning ∥ Integration] |
 | ApiOnly × T-03 ApiOnly | Partner Ops → Director → Integration |
-| Any × T-04 | Partner Ops → Provisioning |
 | Any × T-05 | Provisioning (Verify + Resolve) |
 
 ### 9.3 SLA Defaults
@@ -980,7 +978,6 @@ Seeded with the default workflow matrix:
 | T-02 | Product Review: 8, Integration Ph1: 8, UAT Signal: 0 (no SLA — external wait), Integration Ph2: 24 |
 | T-03 Portal | 24 |
 | T-03 API / Both | 48 |
-| T-04 | 8 |
 | T-05 | 2 |
 
 **Convention:** `SlaBusinessHours = 0` on a StageDefinition means no SLA tracking for that stage. The workflow engine skips SlaTracker creation. Used for external wait gates (e.g. awaiting partner UAT completion). The UatReminderService handles nudges for overdue waits.
@@ -995,9 +992,9 @@ Seeded with the default workflow matrix:
 ### 9.5 Sample Partners (for demo)
 
 Seed 3-4 sample partners at various lifecycle states to demonstrate the system:
-- Partner A: LIVE on Rabet (all tasks completed)
+- Partner A: LIVE on Rabet (all tasks completed — T-01, T-02, T-03)
 - Partner B: UAT_ACTIVE on Rhoon (T-01 + T-02 Ph1 done)
-- Partner C: AGREED on Wtheeq (only T-01 done)
+- Partner C: None on Wtheeq (no T-01 yet)
 
 ---
 
