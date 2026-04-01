@@ -1018,9 +1018,155 @@ Constraints enforced at the API layer:
 
 ---
 
-## 11. Background Services
+## 11. Form Schemas & Document Requirements
 
-### 11.1 SlaMonitoringService
+### 11.1 Form Schema Endpoint
+
+`GET /api/products/{code}/form-schema/{taskType}` returns the field definitions for the dynamic form. The response drives the frontend — fields, types, validation, required documents, and conditional logic.
+
+### 11.2 T-01: Agreement Validation & Sign-off
+
+**Fields:**
+| Field | Key | Type | Required | Notes |
+|-------|-----|------|----------|-------|
+| Partner Name | `partnerName` | lookup | Yes | Autocomplete against existing partners |
+
+**Required Documents:**
+| Document | Key | Required |
+|----------|-----|----------|
+| Trade License | `tradeLicense` | Yes |
+| VAT Certificate | `vatCertificate` | Yes |
+| Power of Attorney | `powerOfAttorney` | Yes |
+| Duly Filled Agreement | `dulyFilledAgreement` | Yes |
+
+**FormData JSON example:**
+```json
+{
+  "partnerName": "ABC Insurance Co."
+}
+```
+
+### 11.3 T-02: UAT Access Creation
+
+**Fields:**
+| Field | Key | Type | Required | Notes |
+|-------|-----|------|----------|-------|
+| Partner Name | `partnerName` | lookup | Yes | Must be Onboarded on this product |
+| UAT User Full Name | `uatUserFullName` | text | Yes | |
+| Email | `uatUserEmail` | email | Yes | |
+| Mobile | `uatUserMobile` | tel | Yes | Numeric only (digits, +, spaces, dashes) |
+| Designation | `uatUserDesignation` | text | Yes | |
+| Company Code | `companyCode` | text | Yes | |
+
+**Required Documents:** None
+
+**FormData JSON example:**
+```json
+{
+  "partnerName": "ABC Insurance Co.",
+  "uatUserFullName": "Ahmed Ali",
+  "uatUserEmail": "ahmed@partner.com",
+  "uatUserMobile": "+971501234567",
+  "uatUserDesignation": "IT Manager",
+  "companyCode": "ABC-INS-001"
+}
+```
+
+### 11.4 T-03: Production Account Creation
+
+Partner Name and Company Code are **inferred from lifecycle context** — displayed as disabled fields, not user input. The backend resolves them from the PartnerProduct record.
+
+**Fields:**
+| Field | Key | Type | Required | Notes |
+|-------|-----|------|----------|-------|
+| Company Code | `companyCode` | text (disabled) | Auto | Inferred from T-02 FormData |
+| API Opt-In | `apiOptIn` | toggle | No | Both products: user chooses. ApiOnly: always true (hidden). |
+| Portal Admin Full Name | `portalAdminFullName` | text | Yes | |
+| Portal Admin Email | `portalAdminEmail` | email | Yes | |
+| Portal Admin Mobile | `portalAdminMobile` | tel | Yes | Numeric only |
+| Portal Admin Designation | `portalAdminDesignation` | text | Yes | |
+| IP Addresses for Whitelisting | `ipAddresses` | textarea | No | One per line |
+| Invoicing Emails | `invoicingEmails` | dynamic list (email) | Yes (min 1) | Add/remove |
+| Invoicing Phone Numbers | `invoicingPhoneNumbers` | dynamic list (tel) | Yes (min 1) | Numeric only, add/remove |
+| First Level Contacts | `firstLevelContacts` | dynamic list (object) | Yes (min 1) | Each: { name, mobile, email } |
+| First Level Escalation | `firstLevelEscalation` | dynamic list (object) | Yes (min 1) | Each: { name, mobile, email } |
+| Second Level Escalation | `secondLevelEscalation` | dynamic list (object) | Yes (min 1) | Each: { name, mobile, email } |
+
+**Required Documents:** None
+
+**FormData JSON example:**
+```json
+{
+  "companyCode": "ABC-INS-001",
+  "apiOptIn": true,
+  "portalAdminFullName": "Sara Khan",
+  "portalAdminEmail": "sara@partner.com",
+  "portalAdminMobile": "+971501234567",
+  "portalAdminDesignation": "Operations Lead",
+  "ipAddresses": "10.0.0.1\n10.0.0.2",
+  "invoicingEmails": ["billing@partner.com", "finance@partner.com"],
+  "invoicingPhoneNumbers": ["+97141234567", "+97149876543"],
+  "firstLevelContacts": [
+    { "name": "Ali Hassan", "mobile": "+971501111111", "email": "ali@partner.com" },
+    { "name": "Fatima Omar", "mobile": "+971502222222", "email": "fatima@partner.com" }
+  ],
+  "firstLevelEscalation": [
+    { "name": "Omar Saeed", "mobile": "+971503333333", "email": "omar@partner.com" }
+  ],
+  "secondLevelEscalation": [
+    { "name": "Huda Al-Rashid", "mobile": "+971504444444", "email": "huda@partner.com" }
+  ]
+}
+```
+
+### 11.5 T-05: Access & Credential Support
+
+**Fields:**
+| Field | Key | Type | Required | Notes |
+|-------|-----|------|----------|-------|
+| Issue Type | `issueType` | dropdown | Yes | Values depend on product access mode (see IssueType enum) |
+| Description | `description` | textarea | Yes | Free text, max 2000 chars |
+
+**Required Documents:** None
+
+**FormData JSON example:**
+```json
+{
+  "issueType": "PortalLoginIssue",
+  "description": "User unable to login after password reset. Account may be locked."
+}
+```
+
+### 11.6 Fulfilment Record Structure
+
+When a ticket is completed, the provisioning/integration team records structured completion data in `FulfilmentRecord.RecordData` (JSON).
+
+| Task | Fulfilment Fields |
+|------|-------------------|
+| T-01 | Agreement reference number, signed date, signatory confirmation |
+| T-02 | UAT environment URL, UAT credentials issued, access confirmation |
+| T-03 | Portal account ID, portal URL, API key (if opted in), API endpoint URL, user account IDs, login emails |
+| T-05 | Resolution summary, action taken (reset/regenerated/unlocked) |
+
+### 11.7 CompanyCode Inference for T-03
+
+When creating a T-03 ticket, the backend:
+1. Looks up the PartnerProduct for the selected partner + product
+2. Finds the most recent completed T-02 ticket for that PartnerProduct
+3. Extracts `companyCode` from T-02's FormData JSON
+4. Returns it as a read-only pre-populated field in the form schema response
+
+If no completed T-02 exists, T-03 creation is blocked by lifecycle enforcement (requires UatActive).
+
+### 11.8 Phone Number Storage
+
+All phone/mobile fields are stored as strings in FormData JSON. The backend does not validate phone formats beyond ensuring the value is non-empty. Frontend enforces numeric-only input (digits, +, spaces, dashes). Phone numbers are stored as-entered (not stripped).
+
+---
+
+## 12. Background Services
+
+### 12.1 SlaMonitoringService
 
 - Runs every 5 minutes via `IHostedService`
 - Queries all active SLA trackers
@@ -1028,7 +1174,7 @@ Constraints enforced at the API layer:
 - Sends threshold notifications
 - Updates SLA status
 
-### 11.2 UatReminderService
+### 12.2 UatReminderService
 
 - Runs daily
 - Checks T-02 tickets in AwaitingUatSignal status
@@ -1037,7 +1183,7 @@ Constraints enforced at the API layer:
 
 ---
 
-## 12. MVP Scope Boundary
+## 13. MVP Scope Boundary
 
 ### MVP 1 (Hackathon)
 Everything described in this spec, including:
