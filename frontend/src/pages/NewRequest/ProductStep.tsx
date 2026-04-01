@@ -46,7 +46,7 @@ export function ProductStep({ onSelect }: ProductStepProps) {
           >
             <div className="flex justify-between items-start mb-6">
               <div className={`w-14 h-14 rounded-xl ${product.iconBg} flex items-center justify-center ${product.iconColor}`}>
-                <span className="material-symbols-outlined text-3xl">{product.icon}</span>
+                <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>{product.icon}</span>
               </div>
               <div className="flex flex-wrap gap-2 justify-end">
                 {product.accessType === 'Portal + API' ? (

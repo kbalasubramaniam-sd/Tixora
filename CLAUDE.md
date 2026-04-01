@@ -83,10 +83,43 @@ When building or modifying any frontend screen, follow this process exactly:
 - Every element must match: font size, font weight, tracking, colors, padding, margin, gap, radius, shadow
 - When Stitch uses a custom Tailwind color (e.g. `text-teal-800`), map it to the closest design token or use the exact class
 
-### 3. Post-Build Visual Audit
-- After building, a review subagent compares the Stitch HTML element-by-element against the React output
-- Check: colors, font sizes/weights, spacing (padding/margin/gap), border-radius, shadows, hover effects
-- Any mismatch = fix before committing
+### 3. Post-Build Visual Audit Checklist
+After building, run through this checklist against the Stitch HTML. Every item must match.
+
+**Icons:**
+- [ ] Correct Material Symbol icon name (e.g. `hub` not `home`)
+- [ ] Filled vs outlined — check `font-variation-settings: 'FILL' 1` in Stitch `style=` attributes
+- [ ] Icon size class (e.g. `text-3xl`, `text-xl`, `text-lg`)
+- [ ] Icon color class
+
+**Typography:**
+- [ ] Font size (e.g. `text-4xl`, `text-[11px]`, `text-sm`)
+- [ ] Font weight (`font-bold`, `font-extrabold`, `font-semibold`, `font-medium`)
+- [ ] Letter spacing (`tracking-tight`, `tracking-widest`, `tracking-[0.05em]`)
+- [ ] Text transform (`uppercase`, none)
+- [ ] Text color (exact token: `text-on-surface` vs `text-on-surface-variant` vs `text-primary`)
+- [ ] Opacity modifiers (`opacity-70`, `text-on-surface-variant/50`)
+
+**Layout & Spacing:**
+- [ ] Container max-width (`max-w-4xl` vs `max-w-6xl`)
+- [ ] Grid columns and gap
+- [ ] Padding values (`p-6` vs `p-8`)
+- [ ] Margin/gap between sections (`mb-6` vs `mb-10` vs `mb-12`)
+- [ ] Element dimensions (`w-14 h-14` vs `w-12 h-12`)
+
+**Visual Effects:**
+- [ ] Default shadows (cards visible at rest, not just on hover)
+- [ ] Hover effects (translate, shadow change, opacity transitions)
+- [ ] Border radius (`rounded-xl`, `rounded-full`, `rounded-lg`)
+- [ ] Border styles (`border-2 border-transparent hover:border-primary/20`)
+- [ ] Background colors and opacity modifiers
+
+**Interactive States:**
+- [ ] Hover classes present and matching
+- [ ] Focus ring styles
+- [ ] Disabled/inactive states
+- [ ] Cursor styles
+- [ ] Transition duration and easing
 
 ### Stitch Reference Files
 - Location: `frontend/.stitch-ref/` (gitignored, ephemeral)
