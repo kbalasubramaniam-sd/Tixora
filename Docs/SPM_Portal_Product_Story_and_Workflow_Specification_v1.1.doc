@@ -1,0 +1,161 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>SPM Portal — Product Story & Workflow Specification</title></head><body>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; margin: 2cm; line-height: 1.5; }
+    h1 { font-size: 20pt; color: #1a1a2e; border-bottom: 3px solid #4f46e5; padding-bottom: 8px; margin-bottom: 6px; }
+    h2 { font-size: 14pt; color: #1a1a2e; margin-top: 28px; margin-bottom: 6px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    h3 { font-size: 12pt; color: #4f46e5; margin-top: 20px; margin-bottom: 4px; }
+    h4 { font-size: 11pt; color: #1a1a2e; margin-top: 14px; margin-bottom: 4px; }
+    p { margin-bottom: 8px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10pt; }
+    th { background: #4f46e5; color: #fff; padding: 7px 10px; text-align: left; font-weight: 600; }
+    td { padding: 6px 10px; border: 1px solid #ddd; vertical-align: top; }
+    tr:nth-child(even) td { background: #f8f8ff; }
+    pre { background: #f4f4f8; border: 1px solid #ddd; border-radius: 4px; padding: 12px; font-size: 9pt; font-family: Consolas, monospace; white-space: pre-wrap; margin: 10px 0; }
+    code { background: #f4f4f8; padding: 1px 4px; font-family: Consolas, monospace; font-size: 9.5pt; }
+    ul { margin: 6px 0 10px 20px; }
+    li { margin-bottom: 3px; }
+    blockquote { border-left: 4px solid #4f46e5; margin: 10px 0; padding: 8px 16px; background: #f8f8ff; color: #444; }
+    .cover { text-align: center; padding: 60px 0 40px; border-bottom: 2px solid #4f46e5; margin-bottom: 30px; }
+    .cover h1 { border: none; font-size: 24pt; }
+    .cover p { color: #666; font-size: 12pt; margin-top: 6px; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
+    .note { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 8px 14px; margin: 10px 0; font-size: 10pt; }
+  </style>
+
+    <div class="cover">
+      <h1>SPM Portal</h1>
+      <p>Product Story &amp; Workflow Specification</p>
+      <p style="margin-top:16px;font-size:10pt;color:#999;">Version 1.1 &nbsp;|&nbsp; April 2026 &nbsp;|&nbsp; Strategic Partner Management</p>
+    </div>
+
+    <h2>The Problem We're Solving</h2>
+    <p>Every day, teams managing partner-facing operations across Rabet, Rhoon, Wtheeq, and Mulem lose time to the same invisible tax: chasing approvals by email, re-explaining context that was already provided, discovering missing documents only after a ticket has sat unactioned for two days, and having no single source of truth when a partner asks <em>"where does my request stand?"</em></p>
+    <p>There is no consistent routing. There is no enforced completeness. There is no audit trail that survives a team member's departure. There is no SLA visibility until a breach has already happened. SPM exists to eliminate that tax entirely.</p>
+
+    <h2>The Vision</h2>
+    <blockquote>SPM is the single operational gateway through which every partner-facing request — across all four platforms — is raised, routed, reviewed, approved, and fulfilled. Zero ambiguity about who owns it, what is needed, or what happens next.</blockquote>
+    <p>Every request in SPM is anchored to a <strong>Product</strong> and a <strong>Task</strong>. That combination unlocks a pre-defined workflow matrix — a deterministic path that knows who to notify, what to collect, where to route, and when to escalate.</p>
+
+    <h2>Who Uses SPM</h2>
+    <table><tr><th>Persona</th><th>Role in SPM</th></tr>
+    <tr><td>Requester</td><td>Raises a request on behalf of a partner or internal team</td></tr>
+    <tr><td>Reviewer</td><td>First-line validator — checks completeness and eligibility</td></tr>
+    <tr><td>Approver</td><td>Authorises progression past a defined gate</td></tr>
+    <tr><td>Integration Team</td><td>Owns UAT lifecycle and API provisioning steps</td></tr>
+    <tr><td>Provisioning Agent</td><td>Executes fulfilment tasks (account creation, access grants, resets)</td></tr>
+    <tr><td>System Administrator</td><td>Manages workflow configurations, SLA rules, and user access</td></tr>
+    </table>
+
+    <h2>The Product Catalogue</h2>
+
+    <h3>Rabet — ICP Health Insurance Data Platform</h3>
+    <p>Rabet is a digital platform that enables the real-time transfer of health insurance data from over 43 insurance companies directly into the ICP (Federal Authority for Identity, Citizenship, Customs &amp; Port Security) system.</p>
+    <table><tr><th>Attribute</th><th>Detail</th></tr>
+    <tr><td>Regulatory context</td><td>ICP-mandated data exchange; agreement sign-off carries compliance implications</td></tr>
+    <tr><td>Partner type</td><td>Insurance companies (43+ active)</td></tr>
+    <tr><td>Integration sensitivity</td><td>High — real-time data transfer to a federal authority system</td></tr>
+    <tr><td>Product code</td><td>RBT</td></tr>
+    </table>
+
+    <h3>Rhoon — ADP &amp; ITC Mortgage Platform</h3>
+    <p>Rhoon is a digital platform that enables mortgage-related transactions for over 180 financing entities — including banks — connecting them to both Abu Dhabi Police (ADP) and the Integrated Transport Centre (ITC).</p>
+    <table><tr><th>Attribute</th><th>Detail</th></tr>
+    <tr><td>Regulatory context</td><td>Dual-authority platform (ADP + ITC); partner agreements must reflect both authority scopes</td></tr>
+    <tr><td>Partner type</td><td>Banks and financing entities (180+ active)</td></tr>
+    <tr><td>Integration sensitivity</td><td>High — live transactional data to government authorities</td></tr>
+    <tr><td>Product code</td><td>RHN</td></tr>
+    </table>
+
+    <h3>Wtheeq — Vehicle Insurance Data Platform</h3>
+    <p>Wtheeq is an electronic platform that facilitates the seamless transfer of vehicle insurance data from over 38 insurance companies to ADP and ITC systems, maintaining a unified vehicle insurance database across Abu Dhabi and the Northern Emirates.</p>
+    <table><tr><th>Attribute</th><th>Detail</th></tr>
+    <tr><td>Regulatory context</td><td>Shared authority scope with Rhoon (ADP + ITC) but distinct data domain (vehicle insurance)</td></tr>
+    <tr><td>Partner type</td><td>Insurance companies (38+ active)</td></tr>
+    <tr><td>Integration sensitivity</td><td>High — feeds unified government vehicle database</td></tr>
+    <tr><td>Product code</td><td>WTQ</td></tr>
+    </table>
+
+    <h3>Mulem — Unified Motor Insurance Data Platform</h3>
+    <p>Mulem is a unified data platform that enables insurers to digitally price, quote, and issue motor insurance policies by automatically retrieving verified driver, vehicle, and accident history data from official government systems.</p>
+    <table><tr><th>Attribute</th><th>Detail</th></tr>
+    <tr><td>Regulatory context</td><td>Government-sourced data; partner access conditional on agreement validation and credential security</td></tr>
+    <tr><td>Partner type</td><td>Insurance companies (motor underwriting)</td></tr>
+    <tr><td>Integration sensitivity</td><td>High — direct API access to government-held personal and vehicle data</td></tr>
+    <tr><td>Product code</td><td>MLM</td></tr>
+    </table>
+
+    <h2>The Task Library</h2>
+
+    <h3>T-01 · Agreement Validation and Sign-off</h3>
+    <p><strong>Purpose:</strong> Validate agreement details and complete the internal sign-off process before any onboarding, access provisioning, or system setup activity begins. No downstream task may be initiated without a completed agreement on record.</p>
+    <p><strong>Routing path:</strong> Requester → Legal Review → Product Review → EA Sign-off → Completed</p>
+    <p>Key notes: captures full agreement details; mandatory document package (agreement copy, TL, VAT Certificate, POA); three-party sign-off (Legal → Product → EA); stakeholder notification on completion.</p>
+
+    <h3>T-02 · UAT Access Creation</h3>
+    <p><strong>Purpose:</strong> Raise and fulfil a request for UAT environment access for a named partner contact on the selected product.</p>
+    <p><strong>Routing path:</strong> Requester → Product Team Review → Integration Team (Phase 1: Access) → Integration Team (Phase 2: UAT Sign-off) → Completed</p>
+    <p>Two distinct closure phases: Phase 1 (access provisioned, stakeholders notified) and Phase 2 (UAT sign-off confirmed by Integration Team). Ticket remains open between phases.</p>
+
+    <h3>T-03 · Partner Account Creation (with API Opt-in)</h3>
+    <p><strong>Purpose:</strong> Create a partner account on the selected product. Workflow splits based on API opt-in selection.</p>
+    <p><strong>Portal routing:</strong> Requester → Partner Ops Review → Partner Director Approval → Provisioning Team → Completed</p>
+    <p><strong>API routing:</strong> Requester → Partner Ops Review → Partner Director Approval → Integration Team (IP Whitelisting + Credential Issuance) → Completed</p>
+
+    <h3>T-04 · User Account Creation</h3>
+    <p><strong>Purpose:</strong> Create one or more admin user accounts for a partner, linked to an existing active partner account.</p>
+    <p><strong>Routing path:</strong> Requester → Partner Ops Review → Provisioning Team → Completed</p>
+
+    <h3>T-05 · Partner Password Reset</h3>
+    <p><strong>Purpose:</strong> Fulfil a credential reset request for a named partner user — portal login or API credentials.</p>
+    <p><strong>Routing path:</strong> Requester → Provisioning Team (Verify + Reset + Confirm) → Completed</p>
+
+    <h2>The Workflow Matrix</h2>
+    <table><tr><th>Task</th><th>Review Stage(s)</th><th>Approval Stage</th><th>Provisioning / Closure</th><th>SLA (hrs)</th></tr>
+    <tr><td>T-01 Agreement Validation &amp; Sign-off</td><td>Legal Team → Product Team</td><td>Legal + Product Team</td><td>EA Sign-off → Stakeholder Notification</td><td>48</td></tr>
+    <tr><td>T-02 UAT Access Creation</td><td>Product Team</td><td>—</td><td>Integration Team: Ph1 Access + Ph2 UAT Sign-off</td><td>8 (Ph1) / TBD (Ph2)</td></tr>
+    <tr><td>T-03 Partner Account Creation — Portal</td><td>Partner Ops</td><td>Partner Director</td><td>Provisioning Team</td><td>24</td></tr>
+    <tr><td>T-03 Partner Account Creation — API</td><td>Partner Ops</td><td>Partner Director</td><td>Integration Team (Whitelist + Credentials)</td><td>48</td></tr>
+    <tr><td>T-04 User Account Creation</td><td>Partner Ops</td><td>—</td><td>Provisioning Team</td><td>8</td></tr>
+    <tr><td>T-05 Partner Password Reset</td><td>—</td><td>—</td><td>Provisioning Team (Verify + Reset + Confirm)</td><td>2</td></tr>
+    </table>
+
+    <h2>Ticket ID Convention</h2>
+    <p>Format: <code>SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]</code></p>
+    <table><tr><th>Example</th><th>Meaning</th></tr>
+    <tr><td>SPM-RBT-T01-20260401-0001</td><td>Rabet · Agreement Validation · 1 Apr 2026 · First ticket of the day</td></tr>
+    <tr><td>SPM-MLM-T03-20260401-0042</td><td>Mulem · Partner Account Creation · 1 Apr 2026 · 42nd ticket</td></tr>
+    <tr><td>SPM-WTQ-T05-20260401-0011</td><td>Wtheeq · Password Reset · 1 Apr 2026 · 11th ticket</td></tr>
+    </table>
+
+    <h2>User Stories — Summary</h2>
+    <table><tr><th>ID</th><th>Epic</th><th>Story</th></tr>
+    <tr><td>US-001</td><td>Submission</td><td>Product &amp; Task selection drives workflow activation</td></tr>
+    <tr><td>US-002</td><td>Submission</td><td>Task-specific guided form with conditional fields</td></tr>
+    <tr><td>US-003</td><td>Submission</td><td>Mandatory field and document enforcement before submission</td></tr>
+    <tr><td>US-004</td><td>Submission</td><td>API opt-in toggle for T-03 triggers correct provisioning path</td></tr>
+    <tr><td>US-005</td><td>Submission</td><td>T-02 two-phase closure (access + UAT sign-off)</td></tr>
+    <tr><td>US-006</td><td>Submission</td><td>Submission confirmation with unique ticket ID</td></tr>
+    <tr><td>US-007</td><td>Routing</td><td>Automatic routing to correct first-stage queue</td></tr>
+    <tr><td>US-008</td><td>Routing</td><td>Stage progression: Approve, Reject, or Return for Clarification</td></tr>
+    <tr><td>US-009</td><td>Routing</td><td>Agreement pre-requisite check on T-02/T-03/T-04 submission</td></tr>
+    <tr><td>US-010</td><td>SLA</td><td>SLA countdown per stage, dual-clock for T-02</td></tr>
+    <tr><td>US-011</td><td>SLA</td><td>Escalating breach alerts at 75%, 90%, 100%</td></tr>
+    <tr><td>US-012</td><td>Notifications</td><td>Milestone notification framework (14 events)</td></tr>
+    <tr><td>US-013</td><td>Audit</td><td>Immutable, append-only audit log retained 7 years</td></tr>
+    <tr><td>US-014</td><td>Dashboards</td><td>Requester "My Requests" dashboard</td></tr>
+    <tr><td>US-015</td><td>Dashboards</td><td>Team queue view sorted by SLA urgency</td></tr>
+    <tr><td>US-016</td><td>Dashboards</td><td>Operations reporting dashboard with export</td></tr>
+    </table>
+
+    <h2>Non-Functional Requirements</h2>
+    <table><tr><th>Requirement</th><th>Specification</th></tr>
+    <tr><td>Availability</td><td>99.9% uptime during business hours; 99.5% outside</td></tr>
+    <tr><td>Performance</td><td>Page load &lt; 2 seconds; form save &lt; 500ms</td></tr>
+    <tr><td>Security</td><td>RBAC; SSO integration; TLS 1.3 encryption at rest and in transit</td></tr>
+    <tr><td>Accessibility</td><td>WCAG 2.1 AA compliant</td></tr>
+    <tr><td>Browser Support</td><td>Chrome, Edge, Firefox, Safari (latest two major versions)</td></tr>
+    <tr><td>Audit Retention</td><td>7 years minimum</td></tr>
+    <tr><td>Localisation</td><td>English (primary); Arabic (future consideration)</td></tr>
+    </table>
+
+    <p style="margin-top:30px;font-size:9pt;color:#999;">Document version 1.1 | SPM Portal | April 2026 | Owner: [Product Owner Name]</p></body></html>
