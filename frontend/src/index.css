@@ -1,37 +1,76 @@
 @import "tailwindcss";
 
 @theme {
-  /* Surface hierarchy */
+  /* Surface hierarchy (values from Stitch Material 3 palette) */
   --color-surface: #f5fafa;
-  --color-surface-container-lowest: #f8fdfc;
-  --color-surface-container-low: #f0f5f4;
+  --color-surface-bright: #f5fafa;
+  --color-surface-dim: #d6dbdb;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff5f5;
+  --color-surface-container: #eaefef;
+  --color-surface-container-high: #e4e9e9;
   --color-surface-container-highest: #dee3e3;
+  --color-surface-variant: #dee3e3;
+  --color-surface-tint: #00696a;
+  --color-background: #f5fafa;
+  --color-on-background: #171d1d;
 
   /* Primary */
   --color-primary: #00696a;
   --color-primary-container: #23a2a3;
   --color-primary-fixed: #86f4f5;
+  --color-primary-fixed-dim: #67d7d8;
   --color-on-primary: #ffffff;
-
-  /* Text */
-  --color-on-surface: #171d1c;
-  --color-on-surface-variant: #3d4949;
+  --color-on-primary-container: #003132;
+  --color-on-primary-fixed: #002020;
+  --color-on-primary-fixed-variant: #004f50;
+  --color-inverse-primary: #67d7d8;
 
   /* Secondary */
-  --color-secondary-container: #c1eaea;
-  --color-on-secondary-container: #456b6b;
+  --color-secondary: #546161;
+  --color-secondary-container: #d8e5e5;
+  --color-secondary-fixed: #d8e5e5;
+  --color-secondary-fixed-dim: #bcc9c9;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #5a6767;
+  --color-on-secondary-fixed: #121e1e;
+  --color-on-secondary-fixed-variant: #3d4949;
+
+  /* Tertiary */
+  --color-tertiary: #944a21;
+  --color-tertiary-container: #d37c4f;
+  --color-tertiary-fixed: #ffdbcb;
+  --color-tertiary-fixed-dim: #ffb692;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #4d1c00;
+  --color-on-tertiary-fixed: #341100;
+  --color-on-tertiary-fixed-variant: #76330b;
+
+  /* Text */
+  --color-on-surface: #171d1d;
+  --color-on-surface-variant: #3d4949;
 
   /* Outline */
+  --color-outline: #6d7979;
   --color-outline-variant: #bcc9c8;
 
-  /* Semantic */
-  --color-error: #d32f2f;
-  --color-error-container: #ffebee;
+  /* Error */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
   --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  /* Warning (not in Stitch M3 — kept from original) */
   --color-warning: #e65100;
   --color-warning-container: #fff3e0;
+
+  /* Success (not in Stitch M3 — kept from original) */
   --color-success: #2e7d32;
   --color-success-container: #e8f5e9;
+
+  /* Inverse */
+  --color-inverse-surface: #2c3132;
+  --color-inverse-on-surface: #edf2f2;
 
   /* Font */
   --font-sans: 'Manrope', sans-serif;
