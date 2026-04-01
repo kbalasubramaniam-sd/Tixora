@@ -19,7 +19,7 @@ Tixora is an internal operations portal for managing partner-facing requests acr
 | Backend | ASP.NET Core 10 Web API (C#) |
 | Frontend | React (built separately via Google Stitch) |
 | Database | SQL Server (local for hackathon, cloud-ready) |
-| ORM | Entity Framework Core 8 |
+| ORM | Entity Framework Core 10 |
 | Email | In-app notifications only (MVP 1); email provider TBD (MVP 2) |
 | Auth | Fake auth layer (seeded users + JWT), real SSO later |
 

@@ -22,9 +22,9 @@ This plan breaks Tixora's backend implementation into 4 sequential epics. Each e
 
 | Component | Technology |
 |-----------|-----------|
-| Backend | ASP.NET Core 8 Web API (C#) |
+| Backend | ASP.NET Core 10 Web API (C#) |
 | Database | SQL Server (local) |
-| ORM | Entity Framework Core |
+| ORM | Entity Framework Core 10 |
 | Auth | Fake JWT (seeded users), real SSO in MVP 2 |
 | Background | `BackgroundService` (built-in) |
 | Tests | xUnit |
