@@ -10,9 +10,9 @@ export function ProductStep({ onSelect }: ProductStepProps) {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-12">
-          <div className="h-8 w-64 bg-surface-container-low rounded animate-pulse mb-2" />
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-10">
+          <div className="h-10 w-64 bg-surface-container-low rounded animate-pulse mb-2" />
           <div className="h-5 w-96 bg-surface-container-low rounded animate-pulse" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -25,74 +25,51 @@ export function ProductStep({ onSelect }: ProductStepProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <>
       {/* Header */}
-      <div className="mb-12">
-        <h1 className="text-[2rem] font-bold text-on-background tracking-tight mb-2 leading-tight">
+      <header className="max-w-6xl mx-auto mb-10">
+        <h1 className="text-4xl font-bold tracking-tight text-on-surface mb-2 font-headline">
           Select a Product
         </h1>
-        <p className="text-on-surface-variant text-lg font-body leading-relaxed">
+        <p className="text-lg text-on-surface-variant font-body">
           Choose the platform this request relates to
         </p>
-      </div>
+      </header>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
         {products?.map((product) => (
-          <div
+          <button
             key={product.code}
             onClick={() => onSelect(product)}
-            className="group relative bg-surface-container-lowest rounded-xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(23,29,28,0.08)] cursor-pointer overflow-hidden"
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter') onSelect(product) }}
+            className="text-left group bg-surface-container-lowest p-8 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50 outline-none focus:ring-2 focus:ring-primary/20"
           >
-            {/* Decorative background icon */}
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="material-symbols-outlined text-6xl">{product.bgIcon}</span>
-            </div>
-
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-6">
-                <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center group-hover:bg-primary-container/10 transition-colors">
-                  <span className="material-symbols-outlined text-primary">{product.icon}</span>
-                </div>
-                <span
-                  className={
-                    product.accessType === 'Portal + API'
-                      ? 'bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider'
-                      : 'bg-surface-container-highest text-on-surface-variant px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider'
-                  }
-                >
-                  {product.accessType}
-                </span>
+            <div className="flex justify-between items-start mb-6">
+              <div className={`w-14 h-14 rounded-xl ${product.iconBg} flex items-center justify-center ${product.iconColor}`}>
+                <span className="material-symbols-outlined text-3xl">{product.icon}</span>
               </div>
-              <h3 className="text-2xl font-bold text-on-surface mb-2">{product.name}</h3>
-              <p className="text-on-surface-variant font-medium leading-relaxed">{product.description}</p>
-              <div className="mt-8 flex items-center text-primary font-bold text-sm">
-                <span>Select Platform</span>
-                <span className="material-symbols-outlined ml-2 text-sm transition-transform group-hover:translate-x-1">arrow_forward</span>
+              <div className="flex flex-wrap gap-2 justify-end">
+                {product.accessType === 'Portal + API' ? (
+                  <>
+                    <span className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Portal</span>
+                    <span className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">API</span>
+                  </>
+                ) : (
+                  <span className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">API Only</span>
+                )}
               </div>
             </div>
-          </div>
+            <h3 className="text-2xl font-bold text-on-surface mb-1">{product.name}</h3>
+            <p className="text-[11px] font-bold uppercase tracking-[0.05em] text-on-surface-variant opacity-70">
+              {product.description}
+            </p>
+            <div className="mt-8 flex items-center text-primary font-semibold text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+              Select Product
+              <span className="material-symbols-outlined ml-1 text-base">arrow_forward</span>
+            </div>
+          </button>
         ))}
       </div>
-
-      {/* Help section */}
-      <div className="max-w-4xl mx-auto mt-12">
-        <div className="bg-surface-container-low rounded-xl p-6 flex items-center gap-6">
-          <div className="p-3 bg-white rounded-lg shadow-sm">
-            <span className="material-symbols-outlined text-tertiary">info</span>
-          </div>
-          <div>
-            <h4 className="text-on-surface font-bold text-sm uppercase tracking-wider mb-1">Need assistance?</h4>
-            <p className="text-on-surface-variant text-sm">
-              If you don't see the product you need, contact your department administrator or reach out to{' '}
-              <span className="text-primary underline cursor-pointer">Support</span>.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   )
 }

@@ -7,6 +7,8 @@ export interface Product {
   accessType: 'Portal + API' | 'API'
   icon: string
   bgIcon: string
+  iconBg: string
+  iconColor: string
 }
 
 export interface TaskOption {
@@ -15,6 +17,7 @@ export interface TaskOption {
   description: string
   enabled: boolean
   disabledReason?: string
+  icon: string
 }
 
 export interface FormFieldDefinition {

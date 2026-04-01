@@ -5,40 +5,40 @@ import type { Product, TaskOption, FormSchema, TicketCreateRequest, TicketCreate
 // --- Mock data ---
 
 const mockProducts: Product[] = [
-  { code: ProductCode.RBT, name: 'Rabet', description: 'RBT · Federal Authority ICP', accessType: 'Portal + API', icon: 'hub', bgIcon: 'lan' },
-  { code: ProductCode.RHN, name: 'Rhoon', description: 'RHN · ADP + ITC', accessType: 'Portal + API', icon: 'account_tree', bgIcon: 'cloud_sync' },
-  { code: ProductCode.WTQ, name: 'Wtheeq', description: 'WTQ · ADP + ITC', accessType: 'API', icon: 'data_object', bgIcon: 'code' },
-  { code: ProductCode.MLM, name: 'Mulem', description: 'MLM · Motor', accessType: 'API', icon: 'settings_input_component', bgIcon: 'directions_car' },
+  { code: ProductCode.RBT, name: 'Rabet', description: 'RBT • Central Gateway Authority', accessType: 'Portal + API', icon: 'hub', bgIcon: 'lan', iconBg: 'bg-primary-container/10', iconColor: 'text-primary' },
+  { code: ProductCode.RHN, name: 'Rhoon', description: 'RHN • Identity Compliance', accessType: 'Portal + API', icon: 'account_balance', bgIcon: 'cloud_sync', iconBg: 'bg-tertiary-container/10', iconColor: 'text-tertiary' },
+  { code: ProductCode.WTQ, name: 'Wtheeq', description: 'WTQ • Digital Signature Hub', accessType: 'API', icon: 'encrypted', bgIcon: 'code', iconBg: 'bg-slate-200', iconColor: 'text-on-surface' },
+  { code: ProductCode.MLM, name: 'Mulem', description: 'MLM • Intelligence Analytics', accessType: 'API', icon: 'psychology', bgIcon: 'directions_car', iconBg: 'bg-primary/10', iconColor: 'text-primary' },
 ]
 
 const mockTasks: Record<string, TaskOption[]> = {
   [ProductCode.RBT]: [
-    { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Validate and sign off a partner agreement', enabled: true },
-    { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request UAT environment access for a partner', enabled: true },
-    { type: TaskType.T03, name: 'Partner Account Creation', description: 'Create a partner account on the platform', enabled: true },
-    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner', enabled: false, disabledReason: 'Requires completed Partner Account (T-03)' },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: false, disabledReason: 'Requires partner in ONBOARDED state' },
+    { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Formal review and digital signature processing for partnership agreements and service level commitments.', enabled: true, icon: 'description' },
+    { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request sandbox credentials for User Acceptance Testing environments to validate integrations.', enabled: true, icon: 'person_add' },
+    { type: TaskType.T03, name: 'Partner Account Creation', description: 'Initiate live environment provisioning and primary administrator account setup for the portal.', enabled: true, icon: 'key' },
+    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner organisation already provisioned on the platform.', enabled: false, disabledReason: 'Requires completed Partner Account (T-03)', icon: 'group_add' },
+    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: false, disabledReason: 'Requires partner in ONBOARDED state', icon: 'support_agent' },
   ],
   [ProductCode.RHN]: [
-    { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Validate and sign off a partner agreement', enabled: true },
-    { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request UAT environment access for a partner', enabled: true },
-    { type: TaskType.T03, name: 'Partner Account Creation', description: 'Create a partner account on the platform', enabled: true },
-    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner', enabled: true },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: true },
+    { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Formal review and digital signature processing for partnership agreements and service level commitments.', enabled: true, icon: 'description' },
+    { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request sandbox credentials for User Acceptance Testing environments to validate integrations.', enabled: true, icon: 'person_add' },
+    { type: TaskType.T03, name: 'Partner Account Creation', description: 'Initiate live environment provisioning and primary administrator account setup for the portal.', enabled: true, icon: 'key' },
+    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner organisation already provisioned on the platform.', enabled: true, icon: 'group_add' },
+    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: true, icon: 'support_agent' },
   ],
   [ProductCode.WTQ]: [
-    { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Validate and sign off a partner agreement', enabled: true },
-    { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request UAT environment access for a partner', enabled: true },
-    { type: TaskType.T03, name: 'Partner Account Creation', description: 'Create a partner account on the platform', enabled: true },
-    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner', enabled: true },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: true },
+    { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Formal review and digital signature processing for partnership agreements and service level commitments.', enabled: true, icon: 'description' },
+    { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request sandbox credentials for User Acceptance Testing environments to validate integrations.', enabled: true, icon: 'person_add' },
+    { type: TaskType.T03, name: 'Partner Account Creation', description: 'Initiate live environment provisioning and primary administrator account setup for the portal.', enabled: true, icon: 'key' },
+    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner organisation already provisioned on the platform.', enabled: true, icon: 'group_add' },
+    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: true, icon: 'support_agent' },
   ],
   [ProductCode.MLM]: [
-    { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Validate and sign off a partner agreement', enabled: true },
-    { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request UAT environment access for a partner', enabled: true },
-    { type: TaskType.T03, name: 'Partner Account Creation', description: 'Create a partner account on the platform', enabled: true },
-    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner', enabled: true },
-    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Resolve login or credential issues', enabled: true },
+    { type: TaskType.T01, name: 'Agreement Validation & Sign-off', description: 'Formal review and digital signature processing for partnership agreements and service level commitments.', enabled: true, icon: 'description' },
+    { type: TaskType.T02, name: 'UAT Access Creation', description: 'Request sandbox credentials for User Acceptance Testing environments to validate integrations.', enabled: true, icon: 'person_add' },
+    { type: TaskType.T03, name: 'Partner Account Creation', description: 'Initiate live environment provisioning and primary administrator account setup for the portal.', enabled: true, icon: 'key' },
+    { type: TaskType.T04, name: 'User Account Creation', description: 'Create user accounts for an existing partner organisation already provisioned on the platform.', enabled: true, icon: 'group_add' },
+    { type: TaskType.T05, name: 'Access & Credential Support', description: 'Technical assistance for existing accounts, password resets, or API key troubleshooting.', enabled: true, icon: 'support_agent' },
   ],
 }
 
