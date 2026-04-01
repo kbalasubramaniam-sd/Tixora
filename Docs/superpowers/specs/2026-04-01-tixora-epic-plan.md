@@ -43,8 +43,8 @@ Domain has zero dependencies. Application depends on Domain. Infrastructure depe
 |------|------|---------|----------------|-----------------|
 | **E1** | Bootstrap & First Ticket | 13 | T-01 end-to-end, architecture proven | Login → create T-01 → advance 3 stages → partner lifecycle = AGREED |
 | **E2** | Full Ticket Lifecycle | 10 | All 5 task types, full lifecycle | Complete partner lifecycle: T-01 → T-02 → T-03 → T-04 → LIVE |
-| **E3** | Operational Intelligence | 10 | SLA, notifications, comments, docs, audit | SLA warnings fire, notifications appear, full audit trail visible |
-| **E4** | Surface & Admin | 14 | Dashboards, search, reports, admin config | Full demo as every role, search, reports, admin manages system |
+| **E3** | Operational Intelligence | 11 | SLA, notifications, comments, docs, audit | SLA warnings fire, notifications appear, full audit trail visible |
+| **E4** | Surface & Admin | 17 | Dashboards, search, reports, admin config | Full demo as every role, search, reports, admin manages system |
 
 ---
 
@@ -221,17 +221,20 @@ The system becomes feature-complete for MVP 1. Dashboards give each role a landi
 ### Dependency Graph
 
 ```
-4.1 (independent)
-4.2 (independent)
-4.3 → 4.4 → 4.5
-4.6 → 4.7
-4.8 (independent)
-4.9 (independent)
-4.10 (independent)
-4.11 (independent)
-4.12 (independent)
-4.13 (after 4.1-4.12, retrofit)
-4.14 (after all)
+4.1 (independent)     — dashboard stats
+4.2 (independent)     — action required
+4.3 (independent)     — activity
+4.4 (independent)     — my tickets
+4.5 (independent)     — team queue
+4.6 → 4.7 → 4.8      — search pipeline
+4.9 → 4.10            — reports
+4.11 (independent)    — user management
+4.12 (independent)    — SLA config
+4.13 (independent)    — business hours & holidays
+4.14 (independent)    — delegates
+4.15 (independent)    — workflow config (read-only)
+4.16 (after 4.1-4.15) — pagination retrofit
+4.17 (after 4.16)     — tests
 ```
 
 Most E4 stories are independent — this epic is highly parallelizable.
@@ -255,10 +258,14 @@ Demo: log in as each role → see dashboard → search for a partner → view re
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | Workflow execution | All sequential, stage order from seed data | Eliminates parallel stage complexity. PortalAndApi order configurable without code changes. |
-| Background jobs | `BackgroundService` (built-in) | Zero packages. Only need one 5-minute polling loop for SLA. |
+| Ticket assignment | Role queue — `AssignedToUserId` null until a user claims from team queue | Multiple users per role. No auto-assignment algorithm needed. Reassign handles mistakes. |
+| Partner initial state | `LifecycleState.None` — partners start with no lifecycle state | T-01 completion moves to Agreed. None represents "no T-01 completed yet." |
+| SLA pause tracking | `SlaPause` child table on SlaTracker | Supports multiple clarification cycles per stage. Full audit of pause/resume durations. |
+| Workflow uniqueness | Filtered unique index on (ProductCode, TaskType, ProvisioningPath) where IsActive | Prevents duplicate active workflows that would break routing. |
+| Background jobs | `BackgroundService` (built-in) | Zero packages. SLA monitor (5min) + UAT reminder (daily). |
 | Auth | Fake JWT, seeded users | Identical contract to real SSO — swap later without touching downstream code. |
 | File storage | Local disk via `IFileStorage` | Swap to blob storage in MVP 2 by implementing the interface. |
-| Email | `IEmailSender` → `NoOpEmailSender` | Interface defined, no-op for MVP 1. Real provider in MVP 2. |
+| Email | `IEmailSender` → `NoOpEmailSender` | Interface defined, no-op for MVP 1. No SES-specific code. Real provider in MVP 2. |
 | Notifications | In-app only (DB records) | No external delivery in MVP 1. |
 | Workflow editing | Seed-only, read-only admin view | No PUT endpoint for workflow config in MVP 1. |
 
