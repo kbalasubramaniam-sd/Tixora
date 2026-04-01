@@ -2,7 +2,13 @@ import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Chip } from '@/components/ui/Chip'
 
-export function TopBar() {
+interface TopBarProps {
+  notificationCount?: number
+  onMenuToggle?: () => void
+  showMenuButton?: boolean
+}
+
+export function TopBar({ notificationCount = 0, onMenuToggle, showMenuButton }: TopBarProps) {
   const { user, logout } = useAuth()
   const [showUserMenu, setShowUserMenu] = useState(false)
 
@@ -12,10 +18,21 @@ export function TopBar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 glass z-40 flex items-center px-6 gap-4">
+      {/* Hamburger menu for mobile */}
+      {showMenuButton && (
+        <button
+          onClick={onMenuToggle}
+          className="p-2 rounded-lg hover:bg-surface-container-low transition-colors lg:hidden"
+          aria-label="Toggle navigation menu"
+        >
+          <span className="material-symbols-outlined text-on-surface-variant">menu</span>
+        </button>
+      )}
+
       {/* Logo */}
       <div className="flex flex-col mr-4">
         <span className="text-xl font-bold text-primary-container leading-tight">Tixora</span>
-        <span className="text-[0.6875rem] text-on-surface-variant leading-tight">
+        <span className="text-[0.6875rem] text-on-surface-variant leading-tight hidden sm:block">
           Powering Every Request
         </span>
       </div>
@@ -29,6 +46,7 @@ export function TopBar() {
           <input
             type="text"
             placeholder="Search tickets, partners, users..."
+            aria-label="Global search"
             className="w-full h-10 pl-10 pr-4 rounded-full bg-surface-container-low text-sm text-on-surface placeholder:text-on-surface-variant/50 outline-none focus-glow transition-shadow"
           />
         </div>
@@ -37,11 +55,16 @@ export function TopBar() {
       {/* Right side */}
       <div className="flex items-center gap-3">
         {/* Notification bell */}
-        <button className="relative p-2 rounded-lg hover:bg-surface-container-low transition-colors">
+        <button
+          className="relative p-2 rounded-lg hover:bg-surface-container-low transition-colors"
+          aria-label={notificationCount > 0 ? `Notifications, ${notificationCount} unread` : 'Notifications'}
+        >
           <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary-container text-on-primary text-[10px] font-bold flex items-center justify-center">
-            3
-          </span>
+          {notificationCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary-container text-on-primary text-[10px] font-bold flex items-center justify-center">
+              {notificationCount > 9 ? '9+' : notificationCount}
+            </span>
+          )}
         </button>
 
         {/* User avatar */}
@@ -49,6 +72,7 @@ export function TopBar() {
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="w-9 h-9 rounded-full bg-primary-container text-on-primary text-sm font-semibold flex items-center justify-center hover:opacity-90 transition-opacity"
+            aria-label="User menu"
           >
             {initials}
           </button>

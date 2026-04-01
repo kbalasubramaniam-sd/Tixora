@@ -54,27 +54,26 @@ export default function Login() {
             autoComplete="email"
           />
 
-          <div className="relative">
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              className="pr-12"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors"
-              tabIndex={-1}
-            >
-              <span className="material-symbols-outlined text-xl">
-                {showPassword ? 'visibility_off' : 'visibility'}
-              </span>
-            </button>
-          </div>
+          <Input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+            endAdornment={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-on-surface-variant hover:text-on-surface transition-colors"
+                tabIndex={-1}
+              >
+                <span className="material-symbols-outlined text-xl">
+                  {showPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            }
+          />
 
           <div className="mt-2">
             <Button

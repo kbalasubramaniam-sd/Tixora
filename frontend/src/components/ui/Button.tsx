@@ -12,8 +12,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary: 'gradient-primary text-on-primary font-semibold hover:opacity-90 active:scale-[0.99]',
-  secondary: 'ghost-border text-primary-container font-medium hover:bg-surface-container-low',
-  tertiary: 'text-primary-container font-medium hover:bg-surface-container-low',
+  secondary: 'ghost-border text-primary font-medium hover:bg-surface-container-low',
+  tertiary: 'text-primary font-medium hover:bg-surface-container-low',
   danger: 'ghost-border text-error font-medium hover:bg-error-container',
 }
 

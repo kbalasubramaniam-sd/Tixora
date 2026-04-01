@@ -18,13 +18,12 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-// Auto-logout on 401
+// Clear token on 401 — AuthContext and ProtectedRoute handle the redirect
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('tixora_token')
-      window.location.href = '/login'
     }
     return Promise.reject(error)
   },

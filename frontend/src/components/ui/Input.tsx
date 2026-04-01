@@ -1,14 +1,15 @@
-import { forwardRef, type InputHTMLAttributes } from 'react'
+import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
   helperText?: string
   error?: string
+  endAdornment?: ReactNode
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, helperText, error, className, id, ...props }, ref) => {
+  ({ label, helperText, error, endAdornment, className, id, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-')
 
     return (
@@ -19,18 +20,26 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {props.required && <span className="text-primary-container ml-0.5">*</span>}
           </label>
         )}
-        <input
-          ref={ref}
-          id={inputId}
-          className={cn(
-            'h-12 px-4 rounded-lg bg-surface-container-lowest text-sm text-on-surface',
-            'placeholder:text-on-surface-variant/50 outline-none transition-shadow',
-            'focus-glow',
-            error && 'shadow-[inset_0_-2px_0_0_rgba(211,47,47,0.6)]',
-            className,
+        <div className="relative">
+          <input
+            ref={ref}
+            id={inputId}
+            className={cn(
+              'h-12 w-full px-4 rounded-lg bg-surface-container-lowest text-sm text-on-surface',
+              'placeholder:text-on-surface-variant/50 outline-none transition-shadow',
+              'focus-glow',
+              error && 'shadow-[inset_0_-2px_0_0_rgba(211,47,47,0.6)]',
+              endAdornment && 'pr-12',
+              className,
+            )}
+            {...props}
+          />
+          {endAdornment && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {endAdornment}
+            </div>
           )}
-          {...props}
-        />
+        </div>
         {error && (
           <p className="text-xs text-error">{error}</p>
         )}

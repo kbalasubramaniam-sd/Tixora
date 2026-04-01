@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useRef, useEffect, type ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 
 type ToastType = 'success' | 'error' | 'info'
@@ -15,17 +15,26 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null)
 
-let toastId = 0
-
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
+  const idRef = useRef(0)
+  const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map())
+
+  // Cleanup all timers on unmount
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach((timer) => clearTimeout(timer))
+    }
+  }, [])
 
   const addToast = useCallback((message: string, type: ToastType = 'info') => {
-    const id = ++toastId
+    const id = ++idRef.current
     setToasts((prev) => [...prev, { id, message, type }])
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id))
+      timersRef.current.delete(id)
     }, 5000)
+    timersRef.current.set(id, timer)
   }, [])
 
   return (
@@ -37,7 +46,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={t.id}
             className={cn(
               'glass rounded-lg px-4 py-3 shadow-ambient text-sm font-medium',
-              'transition-all duration-300',
+              'animate-[slideIn_300ms_ease-out]',
               t.type === 'success' && 'bg-success-container/80 text-success',
               t.type === 'error' && 'bg-error-container/80 text-error',
               t.type === 'info' && 'bg-secondary-container/80 text-on-secondary-container',

@@ -3,25 +3,37 @@ import { Component, type ErrorInfo, type ReactNode } from 'react'
 interface Props {
   children: ReactNode
   fallback?: ReactNode
+  onReset?: () => void
 }
 
 interface State {
   hasError: boolean
   error: Error | null
+  errorKey: number
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
-    this.state = { hasError: false, error: null }
+    this.state = { hasError: false, error: null, errorKey: 0 }
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error }
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught:', error, errorInfo)
+  }
+
+  handleReset = () => {
+    this.props.onReset?.()
+    // Increment key to force children to remount fresh
+    this.setState((prev) => ({
+      hasError: false,
+      error: null,
+      errorKey: prev.errorKey + 1,
+    }))
   }
 
   render() {
@@ -41,7 +53,7 @@ export class ErrorBoundary extends Component<Props, State> {
               {this.state.error?.message ?? 'An unexpected error occurred.'}
             </p>
             <button
-              onClick={() => this.setState({ hasError: false, error: null })}
+              onClick={this.handleReset}
               className="gradient-primary text-on-primary font-semibold text-sm px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
             >
               Try Again
@@ -51,6 +63,7 @@ export class ErrorBoundary extends Component<Props, State> {
       )
     }
 
-    return this.props.children
+    // Key forces fresh mount of children on reset
+    return <div key={this.state.errorKey}>{this.props.children}</div>
   }
 }
