@@ -83,47 +83,66 @@ When building or modifying any frontend screen, follow this process exactly:
 - Every element must match: font size, font weight, tracking, colors, padding, margin, gap, radius, shadow
 - When Stitch uses a custom Tailwind color (e.g. `text-teal-800`), map it to the closest design token or use the exact class
 
-### 3. Post-Build Visual Audit Checklist
-After building, run through this checklist against the Stitch HTML. Every item must match.
+### 3. Post-Build Visual Audit (MANDATORY)
 
-**Font families:**
-- [ ] Stitch uses `font-headline`, `font-body`, `font-label` — verify all three are defined in `@theme` in index.css
-- [ ] Any new font-family class in Stitch HTML must have a matching `--font-*` token
+After building any screen, the reviewer subagent must systematically diff every HTML element in the Stitch file against the React output. This is not optional — it is a line-by-line comparison.
 
-**Icons:**
-- [ ] Correct Material Symbol icon name (e.g. `hub` not `home`)
-- [ ] Filled vs outlined — check `font-variation-settings: 'FILL' 1` in Stitch `style=` attributes
-- [ ] Icon size class (e.g. `text-3xl`, `text-xl`, `text-lg`)
-- [ ] Icon color class
+**How to audit:** Open the Stitch HTML file. For every element with a `class=` attribute, find the corresponding React element and verify every single class matches. If a class doesn't exist in our Tailwind config, it must be added to `@theme` in `index.css` or as a custom CSS class.
 
-**Typography:**
-- [ ] Font size (e.g. `text-4xl`, `text-[11px]`, `text-sm`)
-- [ ] Font weight (`font-bold`, `font-extrabold`, `font-semibold`, `font-medium`)
-- [ ] Letter spacing (`tracking-tight`, `tracking-widest`, `tracking-[0.05em]`)
-- [ ] Text transform (`uppercase`, none)
-- [ ] Text color (exact token: `text-on-surface` vs `text-on-surface-variant` vs `text-primary`)
-- [ ] Opacity modifiers (`opacity-70`, `text-on-surface-variant/50`)
+#### A. Tailwind Token Alignment
+- [ ] Every color class in Stitch HTML exists in our `@theme` (e.g. `text-teal-800` may need mapping to `text-primary`)
+- [ ] Every font-family class exists (`font-headline`, `font-body`, `font-label`, `font-sans`)
+- [ ] Every custom gradient class exists (`.primary-gradient`, `.glass`, `.gradient-primary`)
+- [ ] Every custom utility class exists (`.focus-glow`, `.ghost-border`)
+- [ ] Arbitrary values in Stitch (e.g. `text-[10px]`, `tracking-[0.05em]`, `shadow-[0_20px_40px...]`) are copied exactly
 
-**Layout & Spacing:**
-- [ ] Container max-width (`max-w-4xl` vs `max-w-6xl`)
-- [ ] Grid columns and gap
-- [ ] Padding values (`p-6` vs `p-8`)
-- [ ] Margin/gap between sections (`mb-6` vs `mb-10` vs `mb-12`)
-- [ ] Element dimensions (`w-14 h-14` vs `w-12 h-12`)
+#### B. Element-by-Element Comparison
+For each element, verify ALL of:
+- [ ] **Tag type** — `<button>` vs `<div>`, `<section>` vs `<div>`, `<a>` vs `<div>`
+- [ ] **Font family** — `font-headline`, `font-body`, `font-label` on the correct elements
+- [ ] **Font size** — exact class: `text-4xl`, `text-xl`, `text-lg`, `text-sm`, `text-xs`, `text-[10px]`, `text-[11px]`
+- [ ] **Font weight** — `font-black`, `font-extrabold`, `font-bold`, `font-semibold`, `font-medium`
+- [ ] **Letter spacing** — `tracking-tight`, `tracking-tighter`, `tracking-widest`, `tracking-wider`, `tracking-[0.05em]`, `tracking-[0.2em]`
+- [ ] **Text transform** — `uppercase` present or absent
+- [ ] **Text color** — exact token including opacity: `text-on-surface`, `text-primary`, `text-slate-400`, `text-on-surface-variant/50`
+- [ ] **Background color** — exact token: `bg-surface-container-low`, `bg-primary/10`, `bg-white`
+- [ ] **Padding** — `p-4`, `p-6`, `p-8`, `px-3 py-1.5`, etc.
+- [ ] **Margin/gap** — `mb-2`, `mb-6`, `mb-8`, `gap-2`, `gap-4`, `gap-6`, `gap-8`, `space-y-4`
+- [ ] **Dimensions** — `w-8 h-8`, `w-10 h-10`, `w-12 h-12`, `w-14 h-14`, `h-[80px]`
+- [ ] **Border radius** — `rounded`, `rounded-lg`, `rounded-xl`, `rounded-2xl`, `rounded-full`
+- [ ] **Borders** — `border-2 border-transparent`, `border-dashed`, `border-outline-variant/30`, `ring-4 ring-primary-container/20`
+- [ ] **Shadows** — default shadow at rest AND hover shadow. `shadow-sm`, `shadow-md`, `shadow-lg`, `shadow-xl`, custom `shadow-[...]`
+- [ ] **Grid/flex layout** — `grid-cols-1 md:grid-cols-2`, `flex items-center gap-4`, `justify-between`
+- [ ] **Container width** — `max-w-4xl`, `max-w-5xl`, `max-w-6xl`
 
-**Visual Effects:**
-- [ ] Default shadows (cards visible at rest, not just on hover)
-- [ ] Hover effects (translate, shadow change, opacity transitions)
-- [ ] Border radius (`rounded-xl`, `rounded-full`, `rounded-lg`)
-- [ ] Border styles (`border-2 border-transparent hover:border-primary/20`)
-- [ ] Background colors and opacity modifiers
+#### C. Icons
+- [ ] Correct Material Symbol name (grep for `material-symbols-outlined` in Stitch HTML)
+- [ ] Filled icons: check for `style="font-variation-settings: 'FILL' 1"` — must be replicated as inline style
+- [ ] Icon size class matches exactly
+- [ ] Icon color class matches exactly
 
-**Interactive States:**
-- [ ] Hover classes present and matching
-- [ ] Focus ring styles
-- [ ] Disabled/inactive states
-- [ ] Cursor styles
-- [ ] Transition duration and easing
+#### D. Interactive States
+- [ ] **Hover** — every `hover:` class in Stitch HTML is present: `hover:-translate-y-1`, `hover:shadow-xl`, `hover:bg-surface-container-high`, `hover:text-primary`, `hover:opacity-100`, `hover:border-primary/20`
+- [ ] **Focus** — `focus:ring-2 focus:ring-primary/20`, `focus:bg-white`, `focus-glow`
+- [ ] **Active** — `active:scale-95`, `active:scale-[0.99]`
+- [ ] **Disabled** — `opacity-50 cursor-not-allowed`
+- [ ] **Group hover** — `group` on parent + `group-hover:` on children (e.g. `opacity-0 group-hover:opacity-100`)
+- [ ] **Transitions** — `transition-all`, `transition-colors`, `transition-transform`, `transition-opacity`, `duration-200`, `duration-300`
+
+#### E. Component-Specific Checks
+- [ ] **Stepper** — circle size, bg color (solid vs gradient), text color, ring effect, connecting line color (completed vs future), label position and styling
+- [ ] **Cards** — visible at rest (shadow-md/shadow-sm, not just on hover), correct surface tier bg
+- [ ] **Buttons** — gradient direction, shadow color (`shadow-primary/20`), border-radius, font weight
+- [ ] **Inputs** — bg color, border style (none vs outline), focus ring, height, placeholder color
+- [ ] **Chips/badges** — bg color, text color, font size, tracking, uppercase, border-radius
+- [ ] **Document uploads** — pending vs uploaded state styling identical to FileUpload component
+
+#### F. Things That Stitch Generates But We Might Miss
+- [ ] Inline `style=` attributes (especially `font-variation-settings`)
+- [ ] Pseudo-elements via `before:` classes (e.g. timeline lines)
+- [ ] Responsive breakpoints (`md:`, `lg:`, `xl:`, `hidden md:block`)
+- [ ] Dark mode classes (ignore — we only support light mode)
+- [ ] Decorative elements (background blurs, gradients) — include if visible in screenshot
 
 ### Stitch Reference Files
 - Location: `frontend/.stitch-ref/` (gitignored, ephemeral)
