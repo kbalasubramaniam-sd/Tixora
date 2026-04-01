@@ -1,6 +1,18 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import { apiClient } from '@/api/client'
 import type { User, AuthResponse, LoginRequest } from '@/types/user'
+import { UserRole } from '@/types/enums'
+
+const DEV_USER: User = {
+  id: 'dev-1',
+  email: 'admin@tixora.dev',
+  firstName: 'Karthik',
+  lastName: 'Dev',
+  role: UserRole.SystemAdministrator,
+  isActive: true,
+}
+
+const IS_DEV = import.meta.env.DEV
 
 interface AuthState {
   user: User | null
@@ -31,19 +43,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .get<User>('/auth/me')
       .then((res) => setUser(res.data))
       .catch(() => {
-        // Token is invalid — clear it
-        localStorage.removeItem('tixora_token')
-        setToken(null)
+        if (IS_DEV) {
+          // Dev mode: use mock user instead of clearing token
+          setUser(DEV_USER)
+        } else {
+          localStorage.removeItem('tixora_token')
+          setToken(null)
+        }
       })
       .finally(() => setIsLoading(false))
   }, [token])
 
   const login = useCallback(async (credentials: LoginRequest) => {
-    const res = await apiClient.post<AuthResponse>('/auth/login', credentials)
-    const { token: newToken, user: newUser } = res.data
-    localStorage.setItem('tixora_token', newToken)
-    setToken(newToken)
-    setUser(newUser)
+    try {
+      const res = await apiClient.post<AuthResponse>('/auth/login', credentials)
+      const { token: newToken, user: newUser } = res.data
+      localStorage.setItem('tixora_token', newToken)
+      setToken(newToken)
+      setUser(newUser)
+    } catch {
+      if (IS_DEV) {
+        // Dev mode: bypass auth, set fake token and dev user
+        localStorage.setItem('tixora_token', 'dev-token')
+        setToken('dev-token')
+        setUser(DEV_USER)
+      } else {
+        throw new Error('Invalid credentials')
+      }
+    }
   }, [])
 
   const logout = useCallback(() => {
