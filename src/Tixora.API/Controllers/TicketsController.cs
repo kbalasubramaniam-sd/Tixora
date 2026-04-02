@@ -14,10 +14,12 @@ namespace Tixora.API.Controllers;
 public class TicketsController : ControllerBase
 {
     private readonly IWorkflowEngine _workflowEngine;
+    private readonly ITicketQueryService _queryService;
 
-    public TicketsController(IWorkflowEngine workflowEngine)
+    public TicketsController(IWorkflowEngine workflowEngine, ITicketQueryService queryService)
     {
         _workflowEngine = workflowEngine;
+        _queryService = queryService;
     }
 
     // ─────────────────────────────────────────────────────
@@ -42,6 +44,44 @@ public class TicketsController : ControllerBase
         if (roleClaim is null || !int.TryParse(roleClaim, out var roleInt))
             return null;
         return (UserRole)roleInt;
+    }
+
+    /// <summary>
+    /// Get tickets created by the current user.
+    /// </summary>
+    [HttpGet("my")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<TicketSummaryResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetMyTickets()
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+            return Unauthorized(new { message = "Invalid token: missing sub claim." });
+
+        var tickets = await _queryService.GetMyTicketsAsync(userId.Value);
+        return Ok(tickets);
+    }
+
+    /// <summary>
+    /// Get full ticket detail by ID.
+    /// </summary>
+    [HttpGet("{id:guid}")]
+    [Authorize]
+    [ProducesResponseType(typeof(TicketDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetDetail(Guid id)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+            return Unauthorized(new { message = "Invalid token: missing sub claim." });
+
+        var detail = await _queryService.GetTicketDetailAsync(id);
+        if (detail is null)
+            return NotFound(new { message = "Ticket not found." });
+
+        return Ok(detail);
     }
 
     /// <summary>
