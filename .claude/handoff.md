@@ -108,7 +108,7 @@ All backend endpoints are live and tested. **64 tests passing** (26 unit + 38 in
 | E3.2 | Documents | DONE | YES | POST/GET /api/tickets/{id}/documents, GET /api/documents/{id} |
 | E3.3 | Audit Trail | — | YES (already in E2) | GET /api/tickets/{id} → auditTrail[] |
 | E3.4 | SLA Engine | DONE | YES | SLA fields in ticket responses |
-| E3.5 | Notifications | — | NO | GET/PUT /api/notifications |
+| E3.5 | Notifications | DONE | YES | GET/PUT /api/notifications |
 
 ### E3.1 Comments (BE DONE — FE: NOT WIRED)
 
@@ -175,5 +175,59 @@ All backend endpoints are live and tested. **64 tests passing** (26 unit + 38 in
 - Remove hardcoded "100% SLA Integrity" — use real slaStatus from response
 - SlaStatus `"OnTrack"` with `slaHoursRemaining = 0` means stage has no SLA tracking (e.g., UAT wait gate)
 
+### E3.5 Notifications (BE DONE — FE: NOT WIRED)
+
+**Endpoints:**
+- `GET /api/notifications?unreadOnly=false` — List notifications for current user (max 50, newest first)
+- `GET /api/notifications/unread-count` — Returns `{ "count": 5 }`
+- `PUT /api/notifications/{id}/read` — Mark single notification as read → 204
+- `PUT /api/notifications/read-all` — Mark all as read → 204
+
+**Response shape (NotificationResponse):**
+```json
+{
+  "id": "guid-string",
+  "type": "RequestSubmitted",
+  "title": "New request assigned to you",
+  "message": "Ticket SPM-RBT-T01-20260403-001 has been submitted and assigned to you for Legal Review.",
+  "ticketId": "guid-string",
+  "ticketDisplayId": "SPM-RBT-T01-20260403-001",
+  "isRead": false,
+  "readAt": null,
+  "createdAt": "2026-04-03T10:00:00Z"
+}
+```
+
+**Notification types emitted by workflow actions:**
+| Action | Type | Recipients |
+|--------|------|-----------|
+| Create ticket | RequestSubmitted | Assigned stage owner |
+| Advance stage | StageAdvanced | Next stage owner |
+| Complete ticket | RequestCompleted | Requester |
+| Reject | RequestRejected | Requester |
+| Return for clarification | ClarificationRequested | Requester |
+| Respond to clarification | ClarificationResponded | Stage owner |
+| Cancel | RequestCancelled | Assigned stage owner |
+| Reassign | TicketReassigned | New assignee |
+
+**Wiring notes:**
+- Auth required (Bearer token)
+- Wire into S-07 Notifications page (replace mock data)
+- Wire unread-count into TopBar notification bell badge
+- `ticketId` (guid) can be used to link/navigate to ticket detail
+- `ticketDisplayId` is the human-readable ticket ID (e.g., SPM-RBT-T01-...)
+- `type` string maps to frontend NotificationType enum for card styling
+
+---
+
+## E3 COMPLETE — 87 tests passing (36 infrastructure + 51 API)
+
+All E3 chunks merged to `frontend/foundation`. Summary:
+- **Comments:** POST/GET per ticket
+- **Documents:** Upload/download with file validation
+- **Audit Trail:** Already complete from E2
+- **SLA Engine:** Real business hours tracking, pause/resume, background monitoring
+- **Notifications:** In-app with all 8 workflow action types wired
+
 ## Next Steps
-- **E3.5: Notifications** — in progress
+- **E4: Surface & Admin** — starting now
