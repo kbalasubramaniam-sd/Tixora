@@ -80,3 +80,12 @@ export const NotificationType = {
   RequestCompleted: 'RequestCompleted',
 } as const
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+export const IssueType = {
+  PortalLoginIssue: 'PortalLoginIssue',
+  ApiCredentialIssue: 'ApiCredentialIssue',
+  PortalPasswordReset: 'PortalPasswordReset',
+  AccountUnlock: 'AccountUnlock',
+  GeneralAccessIssue: 'GeneralAccessIssue',
+} as const
+export type IssueType = (typeof IssueType)[keyof typeof IssueType]

@@ -345,8 +345,11 @@ const schemaT04: FormSchema = {
       type: 'radio-card',
       required: true,
       options: [
-        { label: 'Portal Login / Reset', value: 'portal_login', icon: 'login' },
-        { label: 'API Credentials', value: 'api_credentials', icon: 'key' },
+        { label: 'Portal Login Issue', value: 'PortalLoginIssue', icon: 'login' },
+        { label: 'API Credentials', value: 'ApiCredentialIssue', icon: 'key' },
+        { label: 'Password Reset', value: 'PortalPasswordReset', icon: 'lock_reset' },
+        { label: 'Account Unlock', value: 'AccountUnlock', icon: 'lock_open' },
+        { label: 'General Access Issue', value: 'GeneralAccessIssue', icon: 'help' },
       ],
       section: 'Support Details',
     },
