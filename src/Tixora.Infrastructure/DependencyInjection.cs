@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IWorkflowEngine, WorkflowEngine>();
         services.AddScoped<ITicketQueryService, TicketQueryService>();
+        services.AddScoped<ICommentService, CommentService>();
 
         return services;
     }
