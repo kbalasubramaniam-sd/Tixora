@@ -107,7 +107,7 @@ export default function TicketDetail() {
               ))}
             </div>
 
-            {activeTab === 'comments' && <CommentsTab comments={ticket.comments} />}
+            {activeTab === 'comments' && <CommentsTab ticketId={ticket.id} />}
             {activeTab === 'documents' && <DocumentsTab documents={ticket.documents} />}
             {activeTab === 'audit' && <AuditTrailTab entries={ticket.auditTrail} />}
           </div>
