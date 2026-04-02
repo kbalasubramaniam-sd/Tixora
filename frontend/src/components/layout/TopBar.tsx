@@ -13,7 +13,7 @@ export function TopBar({ notificationCount = 0, onMenuToggle, showMenuButton }: 
   const [showUserMenu, setShowUserMenu] = useState(false)
 
   const initials = user
-    ? `${user.firstName[0]}${user.lastName[0]}`
+    ? user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
     : '??'
 
   return (
@@ -82,7 +82,7 @@ export function TopBar({ notificationCount = 0, onMenuToggle, showMenuButton }: 
               <div className="fixed inset-0" onClick={() => setShowUserMenu(false)} />
               <div className="absolute right-0 top-12 w-56 glass rounded-xl p-4 shadow-ambient z-50">
                 <p className="text-sm font-semibold text-on-surface">
-                  {user?.firstName} {user?.lastName}
+                  {user?.fullName}
                 </p>
                 <p className="text-xs text-on-surface-variant">{user?.email}</p>
                 <Chip className="mt-2">{user?.role}</Chip>

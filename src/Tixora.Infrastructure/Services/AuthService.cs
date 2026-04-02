@@ -39,7 +39,8 @@ public class AuthService : IAuthService
             user.Id,
             user.FullName,
             user.Email,
-            user.Role.ToString());
+            user.Role.ToString(),
+            user.IsActive);
 
         return new LoginResponse(token, profile);
     }

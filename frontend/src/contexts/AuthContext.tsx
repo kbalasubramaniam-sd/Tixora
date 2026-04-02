@@ -5,9 +5,8 @@ import { UserRole } from '@/types/enums'
 
 const DEV_USER: User = {
   id: 'dev-1',
+  fullName: 'Karthik Dev',
   email: 'admin@tixora.dev',
-  firstName: 'Karthik',
-  lastName: 'Dev',
   role: UserRole.SystemAdministrator,
   isActive: true,
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tixora.Application.DTOs.Auth;
 using Tixora.Application.Interfaces;
+using Tixora.Domain.Enums;
 
 namespace Tixora.API.Controllers;
 
@@ -52,11 +53,17 @@ public class AuthController : ControllerBase
         if (userId is null || email is null || role is null || name is null)
             return Unauthorized();
 
+        // Role is stored as int in JWT — convert back to enum name for frontend
+        var roleName = Enum.IsDefined(typeof(UserRole), int.Parse(role))
+            ? ((UserRole)int.Parse(role)).ToString()
+            : role;
+
         var profile = new UserProfileResponse(
             Guid.Parse(userId),
             name,
             email,
-            role);
+            roleName,
+            true);
 
         return Ok(profile);
     }

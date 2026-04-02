@@ -41,7 +41,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-3xl font-extrabold text-on-surface tracking-tight">
-              {getGreeting()}, {user?.firstName}
+              {getGreeting()}, {user?.fullName?.split(' ')[0]}
             </h1>
             <span className="bg-primary-container/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
               {roleLabel[user?.role ?? ''] ?? user?.role}

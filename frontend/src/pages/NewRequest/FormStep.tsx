@@ -412,7 +412,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
               <div>
                 <p className="text-[10px] text-slate-500 font-bold uppercase">Requested By</p>
                 <p className="text-sm font-semibold text-slate-700">
-                  {user.firstName} {user.lastName}
+                  {user.fullName}
                 </p>
               </div>
               <div>
