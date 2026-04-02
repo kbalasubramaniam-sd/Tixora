@@ -50,6 +50,7 @@ public class WorkflowEngineTests : IDisposable
             Id = PartnerProductId,
             PartnerId = PartnerId,
             ProductCode = ProductCode.RBT,
+            CompanyCode = "TST-RBT",
             LifecycleState = LifecycleState.None,
             StateChangedAt = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow

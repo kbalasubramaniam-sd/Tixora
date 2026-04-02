@@ -1,51 +1,82 @@
-# Session Handoff — 2026-04-02
+# Session Handoff — 2026-04-02 (Updated)
 
-## Completed This Session
+## E1 Backend — COMPLETE
 
-### Backend (E1 — Bootstrap & First Ticket)
-- **E1 Task 2: Domain model updates** — Applied business feedback: UserRole 9 roles (PartnershipTeam=1...SystemAdministrator=9), LifecycleState 5 states (added UatCompleted), PortalType enum, IssueType 5 types, all products Portal+API
-- **E1 Task 3: EF Core + Seed** — TixoraDbContext (9 DbSets), 9 Fluent API configs, seed data (4 products, 12 users, 3 partners, 6 partner-products, 18 workflows, 64 stages), InitialCreate migration, 7 seed verification tests
-- **E1 Task 4: Fake Auth + Endpoints** — JWT Bearer auth, POST /auth/login, GET /auth/me, GET /products, GET /partners. Switched to Scalar (replaced Swashbuckle). Connection string set to SDSHJ-KARTHIKEY\SQLEXPRESS
-- **E1 Task 5: Workflow Engine + Ticket Creation** — WorkflowEngine service with lifecycle validation, auto-assign, ticket ID generation (SPM-RBT-T01-YYYYMMDD-SEQ). POST /api/tickets endpoint
-- **E1 Task 6: Ticket Actions** — All 6 actions: approve (with lifecycle advancement + T-02 mid-workflow handling), reject, return for clarification, respond, cancel, reassign. 6 new POST endpoints
+All backend endpoints are live and tested. **56 tests passing** (26 unit + 30 integration).
 
-### Frontend (done by other session)
-- S-07 Notifications, S-11 Workflows admin, S-12 SLA Settings, S-13 Business Hours admin
-- Wired auth, products, partners, ticket-create to real backend APIs
+### Available API Endpoints
 
-### Tests: 44 passing (26 infrastructure + 18 API integration)
+#### Auth
+- `POST /api/auth/login` — `{ email, password }` → `{ token, user }`
+- `GET /api/auth/me` — [Authorize] → current user profile
 
-### Other
-- Business feedback HTML (workflow-visual-v2.html) with interactive review
-- Postman collection at Docs/Tixora.postman_collection.json
-- DB created and migrated on SQL Express
+#### Reference Data
+- `GET /api/products` — all products (no auth)
+- `GET /api/partners` — [Authorize] all partners with products
 
-## Pending / Not Committed
-- `Docs/superpowers/plans/2026-04-02-ticket-actions.md` — plan file (untracked)
-- `Docs/superpowers/plans/2026-04-02-workflow-engine-ticket-creation.md` — plan file (untracked)
-- `Docs/superpowers/specs/2026-04-02-ticket-actions-design.md` — spec (untracked)
-- `Docs/superpowers/specs/2026-04-02-workflow-engine-ticket-creation-design.md` — spec (untracked)
-- `frontend/src/pages/NewRequest/index.tsx` — modified (by other session)
-- `src/Tixora.API/Tixora.API.csproj` — modified (OpenApi package added)
+#### Tickets (Write)
+- `POST /api/tickets` — create ticket (PartnershipTeam/SystemAdmin only)
+- `POST /api/tickets/{id}/approve` — approve current stage
+- `POST /api/tickets/{id}/reject` — reject (terminal)
+- `POST /api/tickets/{id}/return` — return for clarification
+- `POST /api/tickets/{id}/respond` — respond to clarification
+- `POST /api/tickets/{id}/cancel` — cancel (Submitted only)
+- `POST /api/tickets/{id}/reassign` — reassign to user with same role
 
-## Next Steps (E1 remaining — Chunk C)
+#### Tickets (Read) — NEW
+- `GET /api/tickets/my` — [Authorize] tickets created by current user → `TicketSummaryResponse[]`
+- `GET /api/tickets/{id}` — [Authorize] full ticket detail → `TicketDetailResponse` (includes workflowStages, auditTrail, clarification)
 
-1. **Query Endpoints:**
-   - `GET /api/tickets/my` — requester's tickets
-   - `GET /api/tickets/queue` — team queue by role
-   - `GET /api/tickets/{id}` — ticket detail with stage logs + audit trail
-   - `GET /api/dashboard/stats` — real stats (replace mock data)
+#### Dashboard — NEW
+- `GET /api/dashboard/stats` — [Authorize] 4 role-specific stat cards → `DashboardStatsResponse`
+- `GET /api/dashboard/action-required` — [Authorize] tickets needing user's action → `TicketSummaryResponse[]`
+- `GET /api/dashboard/activity` — [Authorize] recent activity timeline → `ActivityEntryResponse[]`
+- `GET /api/dashboard/team-queue?product=&task=&partner=&requester=` — [Authorize] team queue with filters → `TicketSummaryResponse[]`
 
-2. **Then E2: Full Ticket Lifecycle**
-   - All 4 task types end-to-end
-   - T-02 two-phase flow
-   - T-03 provisioning paths
-   - Re-raise after rejection
+### Response Shapes (for frontend wiring)
 
-## Key Decisions Made This Session
-- Requester renamed to PartnershipTeam, Approver renamed to ExecutiveAuthority
-- All enums start at 1 (not 0)
-- Auto-assign: first active user with matching role (round-robin deferred to MVP 2)
-- WorkflowEngine throws InvalidOperationException, controllers map to 400
-- T-02 mid-workflow: lifecycle advances to UatActive after stage 2 completion
-- Scalar API reference at /scalar/v1 (replaced Swashbuckle)
+**TicketSummaryResponse:**
+```json
+{
+  "id": "guid-string",
+  "ticketId": "SPM-RBT-T01-20260402-001",
+  "productCode": "RBT",
+  "taskType": "T01",
+  "partnerName": "Al Ain Insurance",
+  "requesterName": "Sarah Ahmad",
+  "status": "Submitted",
+  "currentStage": "Legal Review",
+  "slaStatus": "OnTrack",
+  "slaHoursRemaining": 0,
+  "createdAt": "2026-04-02T...",
+  "updatedAt": "2026-04-02T..."
+}
+```
+
+**DashboardStatsResponse:**
+```json
+{
+  "stat1": { "label": "My Open Requests", "value": 7, "icon": "inbox", "iconBg": "bg-primary-container/10", "iconColor": "text-primary", "badge": "Active", "badgeStyle": "...", "valueColor": null },
+  "stat2": { ... },
+  "stat3": { ... },
+  "stat4": { ... }
+}
+```
+
+**TicketDetailResponse:** extends TicketSummary with:
+- `companyCode`, `formData` (parsed JSON object), `documents` (empty []), `workflowStages[]`, `comments` (empty []), `auditTrail[]`, `clarification?`, `assignedTo?`, `createdBy`, `accessPath?`, `lifecycleState`
+
+**WorkflowStageResponse:** `{ name, icon, status: "completed"|"current"|"future", assignedTo?, completedAt? }`
+
+**ActivityEntryResponse:** `{ id, title, description, timestamp (relative string), icon, iconBg, iconColor }`
+
+### Notes for Frontend
+- `slaStatus` always returns `"OnTrack"` and `slaHoursRemaining` always `0` (SLA is E3)
+- `documents` and `comments` return empty arrays (E3)
+- Status enum values from backend: `Submitted`, `InReview`, `PendingRequesterAction`, `InProvisioning`, `Phase1Complete`, `AwaitingUatSignal`, `Phase2InReview`, `Completed`, `Rejected`, `Cancelled`
+- Frontend has `Draft`, `Approved`, `SlaBreached` which backend doesn't return — handle gracefully
+- Dashboard stats include Tailwind classes — render directly, no mapping needed
+- Team queue filters: pass `product=RBT`, `task=T01`, `partner=Al Ain`, `requester=Sarah` as query params
+
+## Next Steps
+- **E2: Full Ticket Lifecycle** — all 4 task types e2e, T-02 two-phase, T-03 paths, re-raise
