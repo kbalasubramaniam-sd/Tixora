@@ -3,15 +3,16 @@ import { apiClient } from '@/api/client'
 import type { User, AuthResponse, LoginRequest } from '@/types/user'
 import { UserRole } from '@/types/enums'
 
-const DEV_USER: User = {
+// Mock mode: only enabled via VITE_MOCK_AUTH=true (npm run dev:mock)
+const MOCK_AUTH = import.meta.env.VITE_MOCK_AUTH === 'true'
+
+const MOCK_USER: User = {
   id: 'dev-1',
   fullName: 'Karthik Dev',
   email: 'admin@tixora.dev',
   role: UserRole.SystemAdministrator,
   isActive: true,
 }
-
-const IS_DEV = import.meta.env.DEV
 
 interface AuthState {
   user: User | null
@@ -38,22 +39,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
+    if (MOCK_AUTH) {
+      setUser(MOCK_USER)
+      setIsLoading(false)
+      return
+    }
+
     apiClient
       .get<User>('/auth/me')
       .then((res) => setUser(res.data))
       .catch(() => {
-        if (IS_DEV) {
-          // Dev mode: use mock user instead of clearing token
-          setUser(DEV_USER)
-        } else {
-          localStorage.removeItem('tixora_token')
-          setToken(null)
-        }
+        localStorage.removeItem('tixora_token')
+        setToken(null)
       })
       .finally(() => setIsLoading(false))
   }, [token])
 
   const login = useCallback(async (credentials: LoginRequest) => {
+    if (MOCK_AUTH) {
+      localStorage.setItem('tixora_token', 'mock-token')
+      setToken('mock-token')
+      setUser(MOCK_USER)
+      return
+    }
+
     try {
       const res = await apiClient.post<AuthResponse>('/auth/login', credentials)
       const { token: newToken, user: newUser } = res.data
@@ -61,14 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(newToken)
       setUser(newUser)
     } catch {
-      if (IS_DEV) {
-        // Dev mode: bypass auth, set fake token and dev user
-        localStorage.setItem('tixora_token', 'dev-token')
-        setToken('dev-token')
-        setUser(DEV_USER)
-      } else {
-        throw new Error('Invalid credentials')
-      }
+      throw new Error('Invalid credentials')
     }
   }, [])
 
