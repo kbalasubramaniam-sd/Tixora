@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Tixora.Application.Interfaces;
 using Tixora.Infrastructure.Data;
+using Tixora.Infrastructure.Services;
 
 namespace Tixora.Infrastructure;
 
@@ -16,6 +17,7 @@ public static class DependencyInjection
                 b => b.MigrationsAssembly(typeof(TixoraDbContext).Assembly.FullName)));
 
         services.AddScoped<ITixoraDbContext>(provider => provider.GetRequiredService<TixoraDbContext>());
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
