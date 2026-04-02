@@ -1,7 +1,26 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNotifications } from '@/api/hooks/useNotifications'
 import { NotificationStats } from './NotificationStats'
 import { NotificationCard } from './NotificationCard'
+import type { NotificationItem } from '@/api/endpoints/notifications'
+
+function groupByTime(notifications: NotificationItem[]): { label: string; items: NotificationItem[] }[] {
+  const today: NotificationItem[] = []
+  const yesterday: NotificationItem[] = []
+
+  for (const n of notifications) {
+    if (n.timestamp === 'Yesterday') {
+      yesterday.push(n)
+    } else {
+      today.push(n)
+    }
+  }
+
+  const groups: { label: string; items: NotificationItem[] }[] = []
+  if (today.length > 0) groups.push({ label: 'Today', items: today })
+  if (yesterday.length > 0) groups.push({ label: 'Yesterday', items: yesterday })
+  return groups
+}
 
 export default function Notifications() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
@@ -10,6 +29,8 @@ export default function Notifications() {
   const filtered = filter === 'unread'
     ? notifications.filter((n) => !n.read)
     : notifications
+
+  const groups = useMemo(() => groupByTime(filtered), [filtered])
 
   if (isLoading) {
     return (
@@ -60,10 +81,10 @@ export default function Notifications() {
         </div>
       </div>
 
-      {/* Stats */}
-      <NotificationStats />
+      {/* Stats (derived from data) */}
+      <NotificationStats notifications={notifications} />
 
-      {/* Notification List */}
+      {/* Notification List with time groups */}
       {filtered.length === 0 ? (
         <div className="bg-surface-container-lowest rounded-xl p-12 text-center shadow-sm">
           <span className="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-3 block">notifications_off</span>
@@ -71,9 +92,19 @@ export default function Notifications() {
           <p className="text-sm text-on-surface-variant">You're all caught up.</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {filtered.map((notification) => (
-            <NotificationCard key={notification.id} notification={notification} />
+        <div className="space-y-6">
+          {groups.map((group) => (
+            <div key={group.label}>
+              <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-xs font-black text-secondary uppercase tracking-widest">{group.label}</h3>
+                <div className="flex-1 h-px bg-outline-variant/30" />
+              </div>
+              <div className="space-y-3">
+                {group.items.map((notification) => (
+                  <NotificationCard key={notification.id} notification={notification} />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -82,7 +113,7 @@ export default function Notifications() {
       {filtered.length > 0 && (
         <div className="mt-10 flex justify-center">
           <button className="text-sm font-bold text-secondary px-8 py-3 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors">
-            Load previous notifications
+            Load more (24 older)
           </button>
         </div>
       )}
