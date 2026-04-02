@@ -6,6 +6,7 @@ import { FormStep } from './FormStep'
 import { ReviewStep } from './ReviewStep'
 import { ConfirmationStep } from './ConfirmationStep'
 import { useSubmitTicket } from '@/api/hooks/useProducts'
+import { TaskType } from '@/types/enums'
 import type { Product, TaskOption } from '@/types/product'
 
 const STEPS = [
@@ -57,8 +58,8 @@ export default function NewRequest() {
         productCode: product.code,
         taskType: task.type,
         partnerId: partnerId as string,
-        provisioningPath: task.type === 'T03' ? provisioningPath : null,
-        issueType: task.type === 'T04' ? (issueType as string) : null,
+        provisioningPath: task.type === TaskType.T03 ? provisioningPath : null,
+        issueType: task.type === TaskType.T04 ? (issueType as string) : null,
         formData: JSON.stringify(rest),
       })
       setResult({ ticketId: res.ticketId, currentStageName: res.currentStageName })
