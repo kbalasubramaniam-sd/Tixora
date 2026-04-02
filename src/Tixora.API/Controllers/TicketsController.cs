@@ -77,7 +77,11 @@ public class TicketsController : ControllerBase
         if (userId is null)
             return Unauthorized(new { message = "Invalid token: missing sub claim." });
 
-        var detail = await _queryService.GetTicketDetailAsync(id);
+        var role = GetCurrentUserRole();
+        if (role is null)
+            return Unauthorized(new { message = "Invalid token: missing role claim." });
+
+        var detail = await _queryService.GetTicketDetailAsync(id, userId.Value, role.Value);
         if (detail is null)
             return NotFound(new { message = "Ticket not found." });
 

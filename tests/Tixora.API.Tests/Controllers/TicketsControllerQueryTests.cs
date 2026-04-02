@@ -90,6 +90,68 @@ public class TicketsControllerQueryTests : IClassFixture<CustomWebApplicationFac
     }
 
     [Fact]
+    public async Task GetTicketDetail_AsRequester_AllowedActionsIncludesCancel()
+    {
+        // Sarah creates ticket → she should see "cancel" (status is Submitted)
+        var client = _factory.CreateClient();
+        var ticket = await CreateT01TicketAsync(client);
+
+        var response = await client.GetAsync($"/api/tickets/{ticket.Id}");
+        var detail = await response.Content.ReadFromJsonAsync<TicketDetailResponse>();
+
+        Assert.NotNull(detail);
+        Assert.Contains("cancel", detail.AllowedActions);
+        // Requester is not the assigned stage owner
+        Assert.DoesNotContain("approve", detail.AllowedActions);
+        Assert.DoesNotContain("reject", detail.AllowedActions);
+    }
+
+    [Fact]
+    public async Task GetTicketDetail_AsAssignedOwner_AllowedActionsIncludesApproveRejectReturn()
+    {
+        // Create ticket as sarah → assigned to omar (LegalTeam, stage 1)
+        var client = _factory.CreateClient();
+        var ticket = await CreateT01TicketAsync(client);
+
+        // Switch to omar
+        var omarToken = await TestHelpers.GetAuthTokenAsync(client, "omar.khalid@tixora.ae", "Password1!");
+        TestHelpers.SetAuthToken(client, omarToken);
+
+        var response = await client.GetAsync($"/api/tickets/{ticket.Id}");
+        var detail = await response.Content.ReadFromJsonAsync<TicketDetailResponse>();
+
+        Assert.NotNull(detail);
+        Assert.Contains("approve", detail.AllowedActions);
+        Assert.Contains("reject", detail.AllowedActions);
+        Assert.Contains("return", detail.AllowedActions);
+        // Omar is not the requester
+        Assert.DoesNotContain("cancel", detail.AllowedActions);
+    }
+
+    [Fact]
+    public async Task GetTicketDetail_OnRejectedTicket_AllowedActionsEmpty()
+    {
+        var client = _factory.CreateClient();
+        var ticket = await CreateT01TicketAsync(client);
+
+        // Reject as omar
+        var omarToken = await TestHelpers.GetAuthTokenAsync(client, "omar.khalid@tixora.ae", "Password1!");
+        TestHelpers.SetAuthToken(client, omarToken);
+        await client.PostAsJsonAsync($"/api/tickets/{ticket.Id}/reject",
+            new ActionRequest(Comments: "Rejected"));
+
+        // Check detail as sarah
+        var sarahToken = await TestHelpers.GetAuthTokenAsync(client, "sarah.ahmad@tixora.ae", "Password1!");
+        TestHelpers.SetAuthToken(client, sarahToken);
+
+        var response = await client.GetAsync($"/api/tickets/{ticket.Id}");
+        var detail = await response.Content.ReadFromJsonAsync<TicketDetailResponse>();
+
+        Assert.NotNull(detail);
+        Assert.Empty(detail.AllowedActions);
+    }
+
+    [Fact]
     public async Task GetTicketDetail_NonExistent_Returns404()
     {
         var client = _factory.CreateClient();
