@@ -1,13 +1,13 @@
 namespace Tixora.Domain.Enums;
 
 /// <summary>
-/// How partners access a product. Determines T-03 provisioning path options.
+/// How partners access a product. All products are Both (Portal + API) in MVP 1.
+/// Kept for future flexibility — not currently used for routing decisions.
 /// </summary>
 public enum ProductAccessMode
 {
-    /// <summary>Portal + API — partner chooses portal-only or portal+API at T-03.</summary>
-    Both = 0,
+    /// <summary>Portal + API access.</summary>
+    Both = 0
 
-    /// <summary>API primary, read-only portal — T-03 always routes to API provisioning.</summary>
-    ApiOnly = 1
+    // ApiOnly removed — all 4 products confirmed as Both (2026-04-02 business feedback)
 }
