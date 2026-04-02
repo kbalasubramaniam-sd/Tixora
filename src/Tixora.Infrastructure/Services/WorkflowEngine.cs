@@ -16,6 +16,173 @@ public class WorkflowEngine : IWorkflowEngine
         _db = db;
     }
 
+    // ─────────────────────────────────────────────────────
+    //  Shared: Active status set (any non-terminal status)
+    // ─────────────────────────────────────────────────────
+
+    private static readonly HashSet<TicketStatus> ActiveStatuses = new()
+    {
+        TicketStatus.Submitted,
+        TicketStatus.InReview,
+        TicketStatus.InProvisioning,
+        TicketStatus.Phase1Complete,
+        TicketStatus.AwaitingUatSignal,
+        TicketStatus.Phase2InReview,
+        TicketStatus.PendingRequesterAction
+    };
+
+    // ─────────────────────────────────────────────────────
+    //  Shared: Load ticket with all navigation properties
+    // ─────────────────────────────────────────────────────
+
+    private async Task<Ticket> LoadTicketAsync(Guid ticketId)
+    {
+        var ticket = await _db.Tickets
+            .Include(t => t.WorkflowDefinition)
+                .ThenInclude(w => w.Stages)
+            .Include(t => t.PartnerProduct)
+                .ThenInclude(pp => pp.Partner)
+            .Include(t => t.AssignedTo)
+            .FirstOrDefaultAsync(t => t.Id == ticketId);
+
+        if (ticket is null)
+            throw new InvalidOperationException($"Ticket '{ticketId}' not found.");
+
+        return ticket;
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  Shared: Get current stage definition from ticket
+    // ─────────────────────────────────────────────────────
+
+    private static StageDefinition GetCurrentStage(Ticket ticket)
+    {
+        var stage = ticket.WorkflowDefinition.Stages
+            .FirstOrDefault(s => s.StageOrder == ticket.CurrentStageOrder);
+
+        if (stage is null)
+            throw new InvalidOperationException(
+                $"No stage definition found for StageOrder {ticket.CurrentStageOrder} " +
+                $"in workflow '{ticket.WorkflowDefinitionId}'.");
+
+        return stage;
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  Shared: Map StageType to TicketStatus
+    // ─────────────────────────────────────────────────────
+
+    private static TicketStatus GetStatusForStageType(StageType stageType)
+    {
+        return stageType switch
+        {
+            StageType.Review => TicketStatus.InReview,
+            StageType.Approval => TicketStatus.InReview,
+            StageType.Provisioning => TicketStatus.InProvisioning,
+            StageType.PhaseGate => TicketStatus.AwaitingUatSignal,
+            _ => throw new InvalidOperationException($"Unknown stage type: {stageType}")
+        };
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  Shared: Build TicketResponse from loaded Ticket
+    // ─────────────────────────────────────────────────────
+
+    private static TicketResponse BuildResponse(Ticket ticket, string? currentStageName, string? assignedToName)
+    {
+        return new TicketResponse(
+            Id: ticket.Id,
+            TicketId: ticket.TicketId,
+            ProductCode: ticket.ProductCode.ToString(),
+            TaskType: ticket.TaskType.ToString(),
+            Status: ticket.Status.ToString(),
+            CurrentStageOrder: ticket.CurrentStageOrder,
+            CurrentStageName: currentStageName,
+            AssignedToName: assignedToName,
+            PartnerName: ticket.PartnerProduct.Partner.Name,
+            ProvisioningPath: ticket.ProvisioningPath?.ToString(),
+            IssueType: ticket.IssueType?.ToString(),
+            CreatedAt: ticket.CreatedAt
+        );
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  Shared: Build TicketResponse using loaded navigations
+    // ─────────────────────────────────────────────────────
+
+    private TicketResponse BuildResponseFromTicket(Ticket ticket)
+    {
+        string? stageName = null;
+        if (ticket.Status != TicketStatus.Completed &&
+            ticket.Status != TicketStatus.Rejected &&
+            ticket.Status != TicketStatus.Cancelled)
+        {
+            var stage = ticket.WorkflowDefinition.Stages
+                .FirstOrDefault(s => s.StageOrder == ticket.CurrentStageOrder);
+            stageName = stage?.StageName;
+        }
+
+        return BuildResponse(ticket, stageName, ticket.AssignedTo?.FullName);
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  Shared: Lifecycle advancement on ticket completion
+    // ─────────────────────────────────────────────────────
+
+    private static LifecycleState? GetCompletionLifecycleState(TaskType taskType)
+    {
+        return taskType switch
+        {
+            TaskType.T01 => LifecycleState.Onboarded,
+            TaskType.T02 => LifecycleState.UatCompleted,
+            TaskType.T03 => LifecycleState.Live,
+            TaskType.T04 => null, // support ticket, no lifecycle change
+            _ => throw new InvalidOperationException($"Unknown task type: {taskType}")
+        };
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  Shared: Required lifecycle state for ticket creation
+    // ─────────────────────────────────────────────────────
+
+    private static LifecycleState GetRequiredLifecycleState(TaskType taskType)
+    {
+        return taskType switch
+        {
+            TaskType.T01 => LifecycleState.None,
+            TaskType.T02 => LifecycleState.Onboarded,
+            TaskType.T03 => LifecycleState.UatCompleted,
+            TaskType.T04 => LifecycleState.Live,
+            _ => throw new InvalidOperationException($"Unknown task type: {taskType}")
+        };
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  Shared: Validate ticket is in an active (non-terminal) status
+    // ─────────────────────────────────────────────────────
+
+    private static void ValidateActive(Ticket ticket)
+    {
+        if (!ActiveStatuses.Contains(ticket.Status))
+            throw new InvalidOperationException(
+                $"Ticket '{ticket.TicketId}' has status '{ticket.Status}' and cannot be acted upon.");
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  Shared: Validate actor is the assigned stage owner
+    // ─────────────────────────────────────────────────────
+
+    private static void ValidateAssignedUser(Ticket ticket, Guid actorUserId)
+    {
+        if (ticket.AssignedToUserId != actorUserId)
+            throw new InvalidOperationException(
+                $"User '{actorUserId}' is not the assigned owner of ticket '{ticket.TicketId}'.");
+    }
+
+    // ═════════════════════════════════════════════════════
+    //  CreateTicketAsync (existing, unchanged logic)
+    // ═════════════════════════════════════════════════════
+
     public async Task<TicketResponse> CreateTicketAsync(CreateTicketRequest request, Guid createdByUserId)
     {
         // 1. Parse and validate enum inputs
@@ -168,15 +335,358 @@ public class WorkflowEngine : IWorkflowEngine
         );
     }
 
-    private static LifecycleState GetRequiredLifecycleState(TaskType taskType)
+    // ═════════════════════════════════════════════════════
+    //  ApproveStageAsync
+    // ═════════════════════════════════════════════════════
+
+    public async Task<TicketResponse> ApproveStageAsync(Guid ticketId, Guid actorUserId, string? comments)
     {
-        return taskType switch
+        var ticket = await LoadTicketAsync(ticketId);
+        ValidateActive(ticket);
+        ValidateAssignedUser(ticket, actorUserId);
+
+        var now = DateTime.UtcNow;
+        var currentStage = GetCurrentStage(ticket);
+        var stages = ticket.WorkflowDefinition.Stages.OrderBy(s => s.StageOrder).ToList();
+        var isLastStage = currentStage.StageOrder == stages.Last().StageOrder;
+
+        // StageLog: Approve
+        _db.StageLogs.Add(new StageLog
         {
-            TaskType.T01 => LifecycleState.None,
-            TaskType.T02 => LifecycleState.Onboarded,
-            TaskType.T03 => LifecycleState.UatCompleted,
-            TaskType.T04 => LifecycleState.Live,
-            _ => throw new InvalidOperationException($"Unknown task type: {taskType}")
-        };
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            StageOrder = currentStage.StageOrder,
+            StageName = currentStage.StageName,
+            Action = StageAction.Approve,
+            ActorUserId = actorUserId,
+            Comments = comments,
+            Timestamp = now
+        });
+
+        // AuditEntry: StageApproved
+        _db.AuditEntries.Add(new AuditEntry
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            ActorUserId = actorUserId,
+            ActionType = "StageApproved",
+            Details = $"Stage {currentStage.StageOrder} '{currentStage.StageName}' approved.",
+            TimestampUtc = now
+        });
+
+        // T-02 mid-workflow lifecycle: Stage 2 (Access Provisioning) completion → UatActive
+        if (ticket.TaskType == TaskType.T02 &&
+            currentStage.StageOrder == 2 &&
+            currentStage.StageType == StageType.Provisioning &&
+            !isLastStage)
+        {
+            ticket.PartnerProduct.LifecycleState = LifecycleState.UatActive;
+            ticket.PartnerProduct.StateChangedAt = now;
+
+            _db.AuditEntries.Add(new AuditEntry
+            {
+                Id = Guid.CreateVersion7(),
+                TicketId = ticket.Id,
+                ActorUserId = actorUserId,
+                ActionType = "LifecycleAdvanced",
+                Details = $"Partner-product lifecycle advanced to UatActive (T-02 Phase 1 complete).",
+                TimestampUtc = now
+            });
+        }
+
+        if (isLastStage)
+        {
+            // ── Complete the ticket ──
+            ticket.Status = TicketStatus.Completed;
+            ticket.AssignedToUserId = null;
+            ticket.AssignedTo = null;
+            ticket.UpdatedAt = now;
+
+            // Advance lifecycle
+            var newLifecycle = GetCompletionLifecycleState(ticket.TaskType);
+            if (newLifecycle.HasValue)
+            {
+                ticket.PartnerProduct.LifecycleState = newLifecycle.Value;
+                ticket.PartnerProduct.StateChangedAt = now;
+            }
+
+            _db.AuditEntries.Add(new AuditEntry
+            {
+                Id = Guid.CreateVersion7(),
+                TicketId = ticket.Id,
+                ActorUserId = actorUserId,
+                ActionType = "TicketCompleted",
+                Details = $"Ticket '{ticket.TicketId}' completed." +
+                    (newLifecycle.HasValue ? $" Lifecycle advanced to {newLifecycle.Value}." : ""),
+                TimestampUtc = now
+            });
+        }
+        else
+        {
+            // ── Advance to next stage ──
+            var nextStage = stages.First(s => s.StageOrder > currentStage.StageOrder);
+            ticket.CurrentStageOrder = nextStage.StageOrder;
+
+            // T-02 special: after Phase 1 completes (stage 2), status is Phase1Complete
+            // But actually the next stage determines status, so:
+            // - If next stage is PhaseGate (T-02 stage 4) → AwaitingUatSignal
+            // - Normal flow: map from stage type
+            ticket.Status = GetStatusForStageType(nextStage.StageType);
+
+            // Auto-assign next stage owner
+            var nextAssignee = await _db.Users
+                .FirstOrDefaultAsync(u => u.Role == nextStage.AssignedRole && u.IsActive);
+
+            ticket.AssignedToUserId = nextAssignee?.Id;
+            ticket.AssignedTo = nextAssignee;
+            ticket.UpdatedAt = now;
+        }
+
+        await _db.SaveChangesAsync();
+        return BuildResponseFromTicket(ticket);
+    }
+
+    // ═════════════════════════════════════════════════════
+    //  RejectAsync
+    // ═════════════════════════════════════════════════════
+
+    public async Task<TicketResponse> RejectAsync(Guid ticketId, Guid actorUserId, string? comments)
+    {
+        var ticket = await LoadTicketAsync(ticketId);
+        ValidateActive(ticket);
+        ValidateAssignedUser(ticket, actorUserId);
+
+        var now = DateTime.UtcNow;
+        var currentStage = GetCurrentStage(ticket);
+
+        ticket.Status = TicketStatus.Rejected;
+        ticket.UpdatedAt = now;
+
+        _db.StageLogs.Add(new StageLog
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            StageOrder = currentStage.StageOrder,
+            StageName = currentStage.StageName,
+            Action = StageAction.Reject,
+            ActorUserId = actorUserId,
+            Comments = comments,
+            Timestamp = now
+        });
+
+        _db.AuditEntries.Add(new AuditEntry
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            ActorUserId = actorUserId,
+            ActionType = "TicketRejected",
+            Details = $"Ticket '{ticket.TicketId}' rejected at stage {currentStage.StageOrder} '{currentStage.StageName}'.",
+            TimestampUtc = now
+        });
+
+        await _db.SaveChangesAsync();
+        return BuildResponseFromTicket(ticket);
+    }
+
+    // ═════════════════════════════════════════════════════
+    //  ReturnForClarificationAsync
+    // ═════════════════════════════════════════════════════
+
+    public async Task<TicketResponse> ReturnForClarificationAsync(Guid ticketId, Guid actorUserId, string comments)
+    {
+        var ticket = await LoadTicketAsync(ticketId);
+        ValidateActive(ticket);
+        ValidateAssignedUser(ticket, actorUserId);
+
+        // Don't allow return-for-clarification if already pending requester action
+        if (ticket.Status == TicketStatus.PendingRequesterAction)
+            throw new InvalidOperationException(
+                $"Ticket '{ticket.TicketId}' is already pending requester action.");
+
+        var now = DateTime.UtcNow;
+        var currentStage = GetCurrentStage(ticket);
+
+        ticket.Status = TicketStatus.PendingRequesterAction;
+        ticket.UpdatedAt = now;
+
+        _db.StageLogs.Add(new StageLog
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            StageOrder = currentStage.StageOrder,
+            StageName = currentStage.StageName,
+            Action = StageAction.ReturnForClarification,
+            ActorUserId = actorUserId,
+            Comments = comments,
+            Timestamp = now
+        });
+
+        _db.AuditEntries.Add(new AuditEntry
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            ActorUserId = actorUserId,
+            ActionType = "ReturnedForClarification",
+            Details = $"Ticket '{ticket.TicketId}' returned for clarification at stage {currentStage.StageOrder} '{currentStage.StageName}'.",
+            TimestampUtc = now
+        });
+
+        await _db.SaveChangesAsync();
+        return BuildResponseFromTicket(ticket);
+    }
+
+    // ═════════════════════════════════════════════════════
+    //  RespondToClarificationAsync
+    // ═════════════════════════════════════════════════════
+
+    public async Task<TicketResponse> RespondToClarificationAsync(Guid ticketId, Guid actorUserId, string comments)
+    {
+        var ticket = await LoadTicketAsync(ticketId);
+
+        if (ticket.Status != TicketStatus.PendingRequesterAction)
+            throw new InvalidOperationException(
+                $"Ticket '{ticket.TicketId}' is not pending requester action (status: {ticket.Status}).");
+
+        if (ticket.CreatedByUserId != actorUserId)
+            throw new InvalidOperationException(
+                $"User '{actorUserId}' is not the original requester of ticket '{ticket.TicketId}'.");
+
+        var now = DateTime.UtcNow;
+        var currentStage = GetCurrentStage(ticket);
+
+        // Restore status based on current stage type
+        ticket.Status = GetStatusForStageType(currentStage.StageType);
+        ticket.UpdatedAt = now;
+
+        _db.StageLogs.Add(new StageLog
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            StageOrder = currentStage.StageOrder,
+            StageName = currentStage.StageName,
+            Action = StageAction.RespondToClarification,
+            ActorUserId = actorUserId,
+            Comments = comments,
+            Timestamp = now
+        });
+
+        _db.AuditEntries.Add(new AuditEntry
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            ActorUserId = actorUserId,
+            ActionType = "ClarificationResponded",
+            Details = $"Requester responded to clarification on ticket '{ticket.TicketId}' at stage {currentStage.StageOrder} '{currentStage.StageName}'.",
+            TimestampUtc = now
+        });
+
+        await _db.SaveChangesAsync();
+        return BuildResponseFromTicket(ticket);
+    }
+
+    // ═════════════════════════════════════════════════════
+    //  CancelAsync
+    // ═════════════════════════════════════════════════════
+
+    public async Task<TicketResponse> CancelAsync(Guid ticketId, Guid actorUserId, string reason)
+    {
+        var ticket = await LoadTicketAsync(ticketId);
+
+        if (ticket.Status != TicketStatus.Submitted)
+            throw new InvalidOperationException(
+                $"Ticket '{ticket.TicketId}' can only be cancelled when status is Submitted (current: {ticket.Status}).");
+
+        if (ticket.CreatedByUserId != actorUserId)
+            throw new InvalidOperationException(
+                $"User '{actorUserId}' is not the original requester of ticket '{ticket.TicketId}'.");
+
+        var now = DateTime.UtcNow;
+        var currentStage = GetCurrentStage(ticket);
+
+        ticket.Status = TicketStatus.Cancelled;
+        ticket.CancellationReason = reason;
+        ticket.UpdatedAt = now;
+
+        _db.StageLogs.Add(new StageLog
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            StageOrder = currentStage.StageOrder,
+            StageName = currentStage.StageName,
+            Action = StageAction.Cancel,
+            ActorUserId = actorUserId,
+            Comments = reason,
+            Timestamp = now
+        });
+
+        _db.AuditEntries.Add(new AuditEntry
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            ActorUserId = actorUserId,
+            ActionType = "TicketCancelled",
+            Details = $"Ticket '{ticket.TicketId}' cancelled. Reason: {reason}",
+            TimestampUtc = now
+        });
+
+        await _db.SaveChangesAsync();
+        return BuildResponseFromTicket(ticket);
+    }
+
+    // ═════════════════════════════════════════════════════
+    //  ReassignAsync
+    // ═════════════════════════════════════════════════════
+
+    public async Task<TicketResponse> ReassignAsync(Guid ticketId, Guid actorUserId, Guid newAssigneeUserId)
+    {
+        var ticket = await LoadTicketAsync(ticketId);
+        ValidateActive(ticket);
+
+        var currentStage = GetCurrentStage(ticket);
+
+        // Validate new assignee exists and has the correct role
+        var newAssignee = await _db.Users
+            .FirstOrDefaultAsync(u => u.Id == newAssigneeUserId && u.IsActive);
+
+        if (newAssignee is null)
+            throw new InvalidOperationException(
+                $"User '{newAssigneeUserId}' not found or is inactive.");
+
+        if (newAssignee.Role != currentStage.AssignedRole)
+            throw new InvalidOperationException(
+                $"User '{newAssignee.FullName}' has role '{newAssignee.Role}' but stage " +
+                $"'{currentStage.StageName}' requires role '{currentStage.AssignedRole}'.");
+
+        var now = DateTime.UtcNow;
+
+        ticket.AssignedToUserId = newAssigneeUserId;
+        ticket.AssignedTo = newAssignee;
+        ticket.UpdatedAt = now;
+
+        _db.StageLogs.Add(new StageLog
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            StageOrder = currentStage.StageOrder,
+            StageName = currentStage.StageName,
+            Action = StageAction.Reassign,
+            ActorUserId = actorUserId,
+            ReassignedToUserId = newAssigneeUserId,
+            Comments = $"Reassigned from {ticket.AssignedTo?.FullName ?? "unassigned"} to {newAssignee.FullName}.",
+            Timestamp = now
+        });
+
+        _db.AuditEntries.Add(new AuditEntry
+        {
+            Id = Guid.CreateVersion7(),
+            TicketId = ticket.Id,
+            ActorUserId = actorUserId,
+            ActionType = "TicketReassigned",
+            Details = $"Ticket '{ticket.TicketId}' reassigned to {newAssignee.FullName} at stage {currentStage.StageOrder} '{currentStage.StageName}'.",
+            TimestampUtc = now
+        });
+
+        await _db.SaveChangesAsync();
+        return BuildResponseFromTicket(ticket);
     }
 }
