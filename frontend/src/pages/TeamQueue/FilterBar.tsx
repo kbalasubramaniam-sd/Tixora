@@ -18,6 +18,8 @@ interface FilterBarProps {
   lifecycle?: string
   onLifecycleChange?: (v: string) => void
   onClear: () => void
+  children?: React.ReactNode
+  hasExtraFilters?: boolean
 }
 
 const products: FilterOption[] = [
@@ -159,13 +161,14 @@ function FilterChip({
   )
 }
 
-export function FilterBar({ product, onProductChange, task, onTaskChange, slaStatus, onSlaChange, status, onStatusChange, lifecycle, onLifecycleChange, onClear }: FilterBarProps) {
+export function FilterBar({ product, onProductChange, task, onTaskChange, slaStatus, onSlaChange, status, onStatusChange, lifecycle, onLifecycleChange, onClear, children, hasExtraFilters }: FilterBarProps) {
   const hasFilters =
     (product !== undefined && product !== 'All') ||
     (task !== undefined && task !== 'All') ||
     (slaStatus !== undefined && slaStatus !== 'All') ||
     (status !== undefined && status !== 'All') ||
-    (lifecycle !== undefined && lifecycle !== 'All')
+    (lifecycle !== undefined && lifecycle !== 'All') ||
+    !!hasExtraFilters
 
   return (
     <div className="bg-surface-bright rounded-lg p-3 mb-8 flex flex-wrap items-center justify-between gap-3 shadow-sm border border-surface-container-high">
@@ -185,6 +188,7 @@ export function FilterBar({ product, onProductChange, task, onTaskChange, slaSta
         {lifecycle !== undefined && onLifecycleChange && (
           <FilterChip label="Lifecycle" value={lifecycle} options={lifecycleStates} onChange={onLifecycleChange} />
         )}
+        {children}
       </div>
       {hasFilters && (
         <button

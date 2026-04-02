@@ -14,6 +14,7 @@ interface SearchableDropdownProps {
   placeholder?: string
   icon?: string
   className?: string
+  compact?: boolean
 }
 
 export function SearchableDropdown({
@@ -23,6 +24,7 @@ export function SearchableDropdown({
   placeholder = 'Search...',
   icon = 'search',
   className,
+  compact = false,
 }: SearchableDropdownProps) {
   const [inputText, setInputText] = useState('')
   const [open, setOpen] = useState(false)
@@ -153,13 +155,18 @@ export function SearchableDropdown({
         onFocus={handleFocus}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="w-full bg-surface-container-low border-none rounded-full py-3.5 pl-12 pr-10 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest shadow-sm transition-all duration-300 placeholder-slate-400 outline-none"
+        className={cn(
+          'bg-surface-container-low border-none rounded-full text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest shadow-sm transition-all duration-300 placeholder-slate-400 outline-none',
+          compact
+            ? 'py-1.5 pl-8 pr-7 text-xs w-48'
+            : 'w-full py-3.5 pl-12 pr-10',
+        )}
         autoComplete="off"
       />
 
       {/* Left icon */}
-      <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-        <span className="material-symbols-outlined text-[20px] text-teal-600">{icon}</span>
+      <div className={cn('absolute inset-y-0 flex items-center pointer-events-none', compact ? 'left-2.5' : 'left-4')}>
+        <span className={cn('material-symbols-outlined text-teal-600', compact ? 'text-[16px]' : 'text-[20px]')}>{icon}</span>
       </div>
 
       {/* Right: clear button or nothing */}
@@ -167,11 +174,11 @@ export function SearchableDropdown({
         <button
           type="button"
           onClick={handleClear}
-          className="absolute inset-y-0 right-4 flex items-center text-slate-400 hover:text-error transition-colors"
+          className={cn('absolute inset-y-0 flex items-center text-slate-400 hover:text-error transition-colors', compact ? 'right-2' : 'right-4')}
           tabIndex={-1}
           aria-label="Clear selection"
         >
-          <span className="material-symbols-outlined text-[18px]">close</span>
+          <span className={cn('material-symbols-outlined', compact ? 'text-[14px]' : 'text-[18px]')}>close</span>
         </button>
       )}
 

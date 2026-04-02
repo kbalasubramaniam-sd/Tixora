@@ -33,6 +33,7 @@ export default function Partners() {
   )
 
   const clearFilters = () => {
+    setSelectedPartnerId('')
     setLifecycle('All')
     setProduct('All')
   }
@@ -53,25 +54,24 @@ export default function Partners() {
         <p className="text-on-surface-variant mt-2 text-lg">Manage and explore Tixora's global partner network.</p>
       </header>
 
-      {/* Partner Search */}
-      <section className="mb-6">
-        <SearchableDropdown
-          options={searchOptions}
-          value={selectedPartnerId}
-          onChange={setSelectedPartnerId}
-          placeholder="Search by partner name or account reference"
-          icon="search"
-        />
-      </section>
-
-      {/* Filter Bar */}
+      {/* Filter Bar with inline partner search */}
       <FilterBar
         product={product}
         onProductChange={setProduct}
         lifecycle={lifecycle}
         onLifecycleChange={setLifecycle}
         onClear={clearFilters}
-      />
+        hasExtraFilters={!!selectedPartnerId}
+      >
+        <SearchableDropdown
+          options={searchOptions}
+          value={selectedPartnerId}
+          onChange={setSelectedPartnerId}
+          placeholder="Search partner..."
+          icon="search"
+          compact
+        />
+      </FilterBar>
 
       {/* Result Count */}
       <div className="mb-4 text-sm text-on-surface-variant">
