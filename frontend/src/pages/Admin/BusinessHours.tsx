@@ -62,7 +62,7 @@ export default function BusinessHours() {
   };
 
   return (
-    <main className="ml-64 flex-grow px-12 pt-16 pb-24 max-w-7xl mx-auto">
+    <main className="flex-grow max-w-7xl mx-auto">
       {/* Background decorations */}
       <div className="fixed top-0 right-0 -z-10 w-[600px] h-[600px] bg-primary-fixed opacity-10 blur-[120px] rounded-full pointer-events-none"></div>
       <div className="fixed bottom-0 left-0 -z-10 w-[400px] h-[400px] bg-tertiary-fixed opacity-10 blur-[100px] rounded-full pointer-events-none"></div>

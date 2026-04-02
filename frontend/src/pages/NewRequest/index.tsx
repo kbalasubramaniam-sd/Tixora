@@ -20,7 +20,8 @@ export default function NewRequest() {
   const [step, setStep] = useState(0)
   const [product, setProduct] = useState<Product | null>(null)
   const [task, setTask] = useState<TaskOption | null>(null)
-  const [formData, setFormData] = useState<Record<string, string | boolean>>({})
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [formData, setFormData] = useState<Record<string, any>>({})
   const [result, setResult] = useState<{ ticketId: string; currentStageName: string | null } | null>(null)
 
   const submitMutation = useSubmitTicket()
@@ -38,7 +39,8 @@ export default function NewRequest() {
     setStep(2)
   }
 
-  function handleFormSubmit(data: Record<string, string | boolean>) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function handleFormSubmit(data: Record<string, any>) {
     setFormData(data)
     setStep(3)
   }

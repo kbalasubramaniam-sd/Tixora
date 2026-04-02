@@ -39,6 +39,8 @@ export interface FormSectionMeta {
   columns?: 1 | 2
   colorAccent?: string // e.g. 'bg-primary' or 'bg-tertiary' for the left bar
   subtitle?: string
+  repeatable?: boolean   // section can have multiple entries (e.g. UAT users, contacts)
+  minEntries?: number    // minimum entries required (default 1 when repeatable)
 }
 
 export interface RequiredDocument {

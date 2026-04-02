@@ -152,7 +152,7 @@ const schemaT02: FormSchema = {
   requiredDocuments: [],
   sectionMeta: [
     { name: 'Partner Information', icon: 'corporate_fare', iconBg: 'bg-primary-container/20', columns: 2, colorAccent: 'text-primary' },
-    { name: 'UAT User Details', icon: 'person_add', iconBg: 'bg-tertiary-container/20', columns: 2, colorAccent: 'text-tertiary' },
+    { name: 'UAT User Details', icon: 'person_add', iconBg: 'bg-tertiary-container/20', columns: 2, colorAccent: 'text-tertiary', repeatable: true, minEntries: 1 },
   ],
 }
 
@@ -227,9 +227,9 @@ const schemaT03: FormSchema = {
       helperText: 'Please specify all static IPs that will communicate with the Tixora Production environment.',
       section: 'Network',
     },
-    // Invoicing Contacts
+    // Invoicing Contacts (repeatable)
     {
-      name: 'invoicingName',
+      name: 'contactName',
       label: 'Contact Name',
       type: 'text',
       required: true,
@@ -237,7 +237,7 @@ const schemaT03: FormSchema = {
       section: 'Invoicing Contacts',
     },
     {
-      name: 'invoicingEmail',
+      name: 'contactEmail',
       label: 'Email',
       type: 'email',
       required: true,
@@ -245,60 +245,48 @@ const schemaT03: FormSchema = {
       section: 'Invoicing Contacts',
     },
     {
-      name: 'invoicingPhone',
+      name: 'contactPhone',
       label: 'Phone',
       type: 'text',
       required: true,
       placeholder: '+1 (555) 123-4567',
       section: 'Invoicing Contacts',
     },
-    // Customer Support Contact
+    // Customer Support Contact (repeatable with role)
     {
-      name: 'supportPrimaryName',
-      label: 'Primary Contact Name',
+      name: 'contactName',
+      label: 'Contact Name',
       type: 'text',
       required: true,
       placeholder: 'Name',
       section: 'Customer Support Contact',
     },
     {
-      name: 'supportPrimaryMobile',
-      label: 'Primary Contact Mobile',
+      name: 'contactMobile',
+      label: 'Mobile',
       type: 'text',
       required: true,
-      placeholder: 'Mobile',
+      placeholder: '+1 (555) 000-0000',
       section: 'Customer Support Contact',
     },
     {
-      name: 'supportPrimaryEmail',
-      label: 'Primary Contact Email',
+      name: 'contactEmail',
+      label: 'Email',
       type: 'email',
       required: true,
-      placeholder: 'Email',
+      placeholder: 'email@company.com',
       section: 'Customer Support Contact',
     },
     {
-      name: 'supportEscalationName',
-      label: 'Escalation Contact Name',
-      type: 'text',
-      required: false,
-      placeholder: 'Name',
-      section: 'Customer Support Contact',
-    },
-    {
-      name: 'supportEscalationMobile',
-      label: 'Escalation Contact Mobile',
-      type: 'text',
-      required: false,
-      placeholder: 'Mobile',
-      section: 'Customer Support Contact',
-    },
-    {
-      name: 'supportEscalationEmail',
-      label: 'Escalation Contact Email',
-      type: 'email',
-      required: false,
-      placeholder: 'Email',
+      name: 'contactRole',
+      label: 'Role',
+      type: 'select',
+      required: true,
+      placeholder: 'Select role...',
+      options: [
+        { label: 'Primary', value: 'Primary' },
+        { label: 'Escalation', value: 'Escalation' },
+      ],
       section: 'Customer Support Contact',
     },
   ],
@@ -308,8 +296,8 @@ const schemaT03: FormSchema = {
     { name: 'API Opt-In Selection', icon: 'api', iconBg: 'bg-primary-container/10', columns: 1, colorAccent: 'text-primary' },
     { name: 'Portal Admin User', icon: 'admin_panel_settings', iconBg: 'bg-transparent', columns: 2, colorAccent: 'text-primary' },
     { name: 'Network', icon: 'lan', iconBg: 'bg-transparent', columns: 1, colorAccent: 'text-primary' },
-    { name: 'Invoicing Contacts', icon: 'receipt_long', iconBg: 'bg-transparent', columns: 2, colorAccent: 'text-primary' },
-    { name: 'Customer Support Contact', icon: 'support_agent', iconBg: 'bg-transparent', columns: 2, colorAccent: 'text-primary', subtitle: 'First & escalation contacts' },
+    { name: 'Invoicing Contacts', icon: 'receipt_long', iconBg: 'bg-transparent', columns: 2, colorAccent: 'text-primary', repeatable: true, minEntries: 1 },
+    { name: 'Customer Support Contact', icon: 'support_agent', iconBg: 'bg-transparent', columns: 2, colorAccent: 'text-primary', subtitle: 'At least one Primary contact required', repeatable: true, minEntries: 1 },
   ],
 }
 

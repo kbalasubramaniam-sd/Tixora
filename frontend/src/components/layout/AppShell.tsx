@@ -26,14 +26,16 @@ export function AppShell() {
       />
       <main className={cn('pt-16 min-h-svh transition-all duration-200', mainMargin)}>
         <div className="p-8">
-          <ErrorBoundary>
-            <div
-              key={location.pathname}
-              className="animate-[fadeIn_200ms_ease-out]"
-            >
-              <Outlet />
-            </div>
-          </ErrorBoundary>
+          <div className="max-w-screen-xl mx-auto">
+            <ErrorBoundary>
+              <div
+                key={location.pathname}
+                className="animate-[fadeIn_200ms_ease-out]"
+              >
+                <Outlet />
+              </div>
+            </ErrorBoundary>
+          </div>
         </div>
       </main>
     </div>

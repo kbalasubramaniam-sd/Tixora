@@ -17,7 +17,7 @@ export default function SlaSettings() {
   ];
 
   return (
-    <main className="ml-64 min-h-screen p-8 lg:p-12 pt-16 lg:pt-20">
+    <main className="max-w-7xl mx-auto">
       {/* Header */}
       <header className="flex justify-between items-center mb-12">
         <div className="space-y-1">

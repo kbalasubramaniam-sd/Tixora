@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, type FieldValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -10,17 +10,24 @@ import { cn } from '@/utils/cn'
 import { FileUpload } from '@/components/ui/FileUpload'
 import type { Product, TaskOption, FormFieldDefinition, FormSectionMeta } from '@/types/product'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>
+
 interface FormStepProps {
   product: Product
   task: TaskOption
-  initialData?: Record<string, string | boolean>
-  onSubmit: (data: Record<string, string | boolean>) => void
+  initialData?: AnyRecord
+  onSubmit: (data: AnyRecord) => void
   onBack: () => void
 }
 
-function buildZodSchema(fields: FormFieldDefinition[]) {
+/** Build zod schema for flat (non-repeatable) fields only */
+function buildZodSchema(fields: FormFieldDefinition[], repeatableSections: Set<string>) {
   const shape: Record<string, z.ZodTypeAny> = {}
   for (const field of fields) {
+    // Skip fields belonging to repeatable sections — validated separately
+    if (repeatableSections.has(field.section)) continue
+
     if (field.type === 'toggle') {
       shape[field.name] = z.boolean().optional()
     } else if (field.type === 'readonly') {
@@ -134,7 +141,7 @@ function ToggleField({
   )
 }
 
-// Render a single form field
+/** Generic form field renderer — used in both flat sections and repeatable entries */
 function FormField({
   field,
   register,
@@ -228,6 +235,243 @@ function FormField({
   )
 }
 
+// ---------------------------------------------------------------------------
+// RepeatableSection — renders N entry cards for a repeatable section
+// ---------------------------------------------------------------------------
+
+type RepeatableEntry = Record<string, string>
+
+function createEmptyEntry(fields: FormFieldDefinition[]): RepeatableEntry {
+  const entry: RepeatableEntry = {}
+  for (const f of fields) entry[f.name] = ''
+  return entry
+}
+
+function RepeatableSection({
+  sectionName,
+  meta,
+  fields,
+  entries,
+  onChange,
+  validationErrors,
+}: {
+  sectionName: string
+  meta: FormSectionMeta | undefined
+  fields: FormFieldDefinition[]
+  entries: RepeatableEntry[]
+  onChange: (entries: RepeatableEntry[]) => void
+  validationErrors: Record<string, string>  // key = "sectionKey.idx.fieldName"
+}) {
+  const icon = meta?.icon
+  const iconBg = meta?.iconBg ?? 'bg-surface-container-lowest'
+  const iconColor = meta?.colorAccent ?? 'text-primary'
+  const columns = meta?.columns ?? 2
+  const subtitle = meta?.subtitle
+  const minEntries = meta?.minEntries ?? 1
+
+  const handleFieldChange = (idx: number, fieldName: string, value: string) => {
+    const updated = entries.map((e, i) => (i === idx ? { ...e, [fieldName]: value } : e))
+    onChange(updated)
+  }
+
+  const addEntry = () => {
+    onChange([...entries, createEmptyEntry(fields)])
+  }
+
+  const removeEntry = (idx: number) => {
+    if (entries.length <= minEntries) return
+    onChange(entries.filter((_, i) => i !== idx))
+  }
+
+  // Derive a stable key for error lookup from sectionName
+  const sectionKey = sectionName.replace(/\s+/g, '_')
+
+  const inputClass = cn(
+    'w-full bg-white border-none rounded-lg h-12 px-4',
+    'text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 shadow-sm transition-all font-medium',
+  )
+
+  return (
+    <section className="bg-surface-container-low rounded-xl p-10 transition-all">
+      {/* Section header */}
+      <div className="flex items-center gap-4 mb-8">
+        {icon ? (
+          <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shrink-0', iconBg, iconColor)}>
+            <span className="material-symbols-outlined">{icon}</span>
+          </div>
+        ) : null}
+        <div className="flex-1">
+          <h2 className="text-xl font-bold text-on-surface">{sectionName}</h2>
+          {subtitle && (
+            <p className="text-sm text-on-surface-variant mt-0.5">{subtitle}</p>
+          )}
+        </div>
+        <span className="text-xs font-bold text-on-surface-variant bg-surface-container-highest px-3 py-1 rounded-full">
+          {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+        </span>
+      </div>
+
+      {/* Entry cards */}
+      <div className="space-y-4">
+        {entries.map((entry, idx) => (
+          <div
+            key={idx}
+            className="bg-surface-container-lowest rounded-xl p-6 border-l-4 border-primary/20 transition-all duration-200"
+            style={{ opacity: 1, transform: 'translateY(0)' }}
+          >
+            <div className="flex items-center justify-between mb-5">
+              {/* Entry badge */}
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#00696a] to-[#23a2a3] flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">{idx + 1}</span>
+                </div>
+                <span className="text-sm font-semibold text-on-surface-variant">
+                  {sectionName} {idx + 1}
+                </span>
+              </div>
+              {/* Remove button */}
+              {entries.length > minEntries && (
+                <button
+                  type="button"
+                  onClick={() => removeEntry(idx)}
+                  className="p-1.5 rounded-lg text-error/50 hover:text-error hover:bg-error/5 transition-colors"
+                  title="Remove entry"
+                >
+                  <span className="material-symbols-outlined text-lg">delete</span>
+                </button>
+              )}
+            </div>
+
+            {/* Fields grid */}
+            <div
+              className={cn(
+                'grid gap-x-8 gap-y-6',
+                columns === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2',
+              )}
+            >
+              {fields.map((field) => {
+                const errorKey = `${sectionKey}.${idx}.${field.name}`
+                const error = validationErrors[errorKey]
+                const value = entry[field.name] ?? ''
+
+                return (
+                  <div key={field.name} className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+                      {field.label}
+                      {field.required && <span className="text-error ml-0.5"> *</span>}
+                    </label>
+
+                    {field.type === 'select' && field.options ? (
+                      <div className="relative">
+                        <select
+                          value={value}
+                          onChange={(e) => handleFieldChange(idx, field.name, e.target.value)}
+                          className={cn(inputClass, 'appearance-none cursor-pointer')}
+                        >
+                          <option value="">{field.placeholder ?? 'Select...'}</option>
+                          {field.options.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-sm">
+                          expand_more
+                        </span>
+                      </div>
+                    ) : field.type === 'textarea' ? (
+                      <textarea
+                        value={value}
+                        onChange={(e) => handleFieldChange(idx, field.name, e.target.value)}
+                        placeholder={field.placeholder}
+                        rows={4}
+                        className={cn(
+                          'w-full bg-white border-none rounded-lg px-4 py-3',
+                          'text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20',
+                          'shadow-sm transition-all resize-none',
+                        )}
+                      />
+                    ) : (
+                      <input
+                        type={field.type === 'email' ? 'email' : 'text'}
+                        value={value}
+                        onChange={(e) => handleFieldChange(idx, field.name, e.target.value)}
+                        placeholder={field.placeholder}
+                        className={inputClass}
+                      />
+                    )}
+
+                    {error && <p className="text-xs text-error ml-1">{error}</p>}
+                    {field.helperText && !error && (
+                      <p className="text-[0.6875rem] text-on-surface-variant/70 ml-1">{field.helperText}</p>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Add entry button */}
+      <button
+        type="button"
+        onClick={addEntry}
+        className="mt-4 w-full py-4 rounded-xl border-2 border-dashed border-outline-variant/30 text-primary font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/5 hover:border-primary/20 transition-all active:scale-[0.99]"
+      >
+        <span className="material-symbols-outlined text-lg">add</span>
+        Add {sectionName}
+      </button>
+    </section>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Validation helpers for repeatable sections
+// ---------------------------------------------------------------------------
+
+/** Validate all repeatable section entries, returns error map */
+function validateRepeatableSections(
+  sections: { sectionName: string; fields: FormFieldDefinition[]; meta: FormSectionMeta | undefined }[],
+  repeatableData: Record<string, RepeatableEntry[]>,
+): Record<string, string> {
+  const errors: Record<string, string> = {}
+
+  for (const { sectionName, fields, meta } of sections) {
+    const sectionKey = sectionName.replace(/\s+/g, '_')
+    const entries = repeatableData[sectionKey] ?? []
+    const minEntries = meta?.minEntries ?? 1
+
+    if (entries.length < minEntries) {
+      errors[`${sectionKey}._section`] = `At least ${minEntries} ${minEntries === 1 ? 'entry is' : 'entries are'} required`
+    }
+
+    entries.forEach((entry, idx) => {
+      for (const field of fields) {
+        if (field.required && (!entry[field.name] || entry[field.name].trim() === '')) {
+          errors[`${sectionKey}.${idx}.${field.name}`] = `${field.label} is required`
+        }
+        if (field.type === 'email' && entry[field.name] && entry[field.name].trim() !== '') {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+          if (!emailRegex.test(entry[field.name])) {
+            errors[`${sectionKey}.${idx}.${field.name}`] = 'Invalid email address'
+          }
+        }
+      }
+    })
+
+    // Special: Customer Support Contact must have at least one Primary role
+    if (sectionName === 'Customer Support Contact') {
+      const hasPrimary = entries.some((e) => e.contactRole === 'Primary')
+      if (!hasPrimary && entries.length > 0) {
+        errors[`${sectionKey}._section_primary`] = 'At least one contact must have the Primary role'
+      }
+    }
+  }
+
+  return errors
+}
+
 // Required lifecycle state for each task type
 const REQUIRED_LIFECYCLE: Record<string, string> = {
   [TaskType.T01]: 'None',
@@ -254,9 +498,50 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
   // File state: docName -> File | null
   const [files, setFiles] = useState<Record<string, File | null>>({})
 
+  // Determine which sections are repeatable
+  const repeatableSectionNames = useMemo(() => {
+    if (!schema?.sectionMeta) return new Set<string>()
+    return new Set(schema.sectionMeta.filter((m) => m.repeatable).map((m) => m.name))
+  }, [schema])
+
+  // Repeatable section data: sectionKey -> entries[]
+  const [repeatableData, setRepeatableData] = useState<Record<string, RepeatableEntry[]>>({})
+  const [repeatableErrors, setRepeatableErrors] = useState<Record<string, string>>({})
+
+  // Initialize repeatable data when schema loads or initialData changes
+  useEffect(() => {
+    if (!schema) return
+    const sections = groupBySection(schema.fields)
+    const newRepData: Record<string, RepeatableEntry[]> = {}
+
+    for (const { sectionName, fields } of sections) {
+      if (!repeatableSectionNames.has(sectionName)) continue
+      const sectionKey = sectionName.replace(/\s+/g, '_')
+      const meta = getSectionMeta(sectionName, schema.sectionMeta)
+      const minEntries = meta?.minEntries ?? 1
+
+      // Try to restore from initialData
+      if (initialData?.[`_repeatable_${sectionKey}`]) {
+        try {
+          const parsed = JSON.parse(initialData[`_repeatable_${sectionKey}`] as string)
+          if (Array.isArray(parsed) && parsed.length >= 1) {
+            newRepData[sectionKey] = parsed
+            continue
+          }
+        } catch { /* ignore */ }
+      }
+
+      // Default: create minEntries empty entries
+      newRepData[sectionKey] = Array.from({ length: minEntries }, () => createEmptyEntry(fields))
+    }
+
+    setRepeatableData(newRepData)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schema, repeatableSectionNames])
+
   const zodSchema = useMemo(
-    () => (schema ? buildZodSchema(schema.fields) : z.object({})),
-    [schema],
+    () => (schema ? buildZodSchema(schema.fields, repeatableSectionNames) : z.object({})),
+    [schema, repeatableSectionNames],
   )
 
   const {
@@ -307,6 +592,18 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
     }
   }, [schema])
 
+  const handleRepeatableChange = useCallback((sectionKey: string, entries: RepeatableEntry[]) => {
+    setRepeatableData((prev) => ({ ...prev, [sectionKey]: entries }))
+    // Clear errors for this section when user edits
+    setRepeatableErrors((prev) => {
+      const next = { ...prev }
+      for (const key of Object.keys(next)) {
+        if (key.startsWith(sectionKey + '.')) delete next[key]
+      }
+      return next
+    })
+  }, [])
+
   if (isLoading || !schema) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 pb-32">
@@ -319,8 +616,30 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
 
   const sections = groupBySection(schema.fields)
 
+  // Get repeatable section info for validation
+  const repeatableSectionInfos = sections
+    .filter(({ sectionName }) => repeatableSectionNames.has(sectionName))
+    .map(({ sectionName, fields }) => ({
+      sectionName,
+      fields,
+      meta: getSectionMeta(sectionName, schema.sectionMeta),
+    }))
+
   function onFormSubmit(data: FieldValues) {
-    onSubmit(data as Record<string, string | boolean>)
+    // Validate repeatable sections
+    const repErrors = validateRepeatableSections(repeatableSectionInfos, repeatableData)
+    if (Object.keys(repErrors).length > 0) {
+      setRepeatableErrors(repErrors)
+      return
+    }
+    setRepeatableErrors({})
+
+    // Merge repeatable data into formData as JSON strings
+    const merged: AnyRecord = { ...data }
+    for (const [sectionKey, entries] of Object.entries(repeatableData)) {
+      merged[`_repeatable_${sectionKey}`] = JSON.stringify(entries)
+    }
+    onSubmit(merged)
   }
 
   // Format task label e.g. T01 -> T-01
@@ -347,6 +666,37 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
           {/* Form Sections */}
           {sections.map(({ sectionName, fields }) => {
             const meta = getSectionMeta(sectionName, schema.sectionMeta)
+
+            // --- Repeatable section ---
+            if (repeatableSectionNames.has(sectionName)) {
+              const sectionKey = sectionName.replace(/\s+/g, '_')
+              const entries = repeatableData[sectionKey] ?? []
+
+              // Check for section-level errors
+              const sectionError = repeatableErrors[`${sectionKey}._section`]
+              const primaryError = repeatableErrors[`${sectionKey}._section_primary`]
+
+              return (
+                <div key={sectionName}>
+                  <RepeatableSection
+                    sectionName={sectionName}
+                    meta={meta}
+                    fields={fields}
+                    entries={entries}
+                    onChange={(newEntries) => handleRepeatableChange(sectionKey, newEntries)}
+                    validationErrors={repeatableErrors}
+                  />
+                  {sectionError && (
+                    <p className="text-xs text-error mt-2 ml-1">{sectionError}</p>
+                  )}
+                  {primaryError && (
+                    <p className="text-xs text-error mt-2 ml-1">{primaryError}</p>
+                  )}
+                </div>
+              )
+            }
+
+            // --- Flat section (original logic) ---
             const icon = meta?.icon
             const iconBg = meta?.iconBg ?? 'bg-surface-container-lowest'
             const iconColor = meta?.colorAccent ?? 'text-primary'
