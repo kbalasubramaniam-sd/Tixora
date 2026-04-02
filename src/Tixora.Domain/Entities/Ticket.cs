@@ -29,4 +29,5 @@ public class Ticket
     public User? AssignedTo { get; set; }
     public ICollection<StageLog> StageLogs { get; set; } = new List<StageLog>();
     public ICollection<AuditEntry> AuditEntries { get; set; } = new List<AuditEntry>();
+    public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }
