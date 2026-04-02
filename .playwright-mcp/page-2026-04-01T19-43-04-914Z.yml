@@ -1,0 +1,417 @@
+- generic [active] [ref=e1]:
+  - heading "Tixora — Workflow & Roles Overview" [level=1] [ref=e2]
+  - paragraph [ref=e3]: Strategic Partner Management Portal · MVP 1 · Draft for Business Review
+  - generic [ref=e4]:
+    - generic [ref=e5]: "Your Name:"
+    - textbox "Your Name:" [ref=e6]:
+      - /placeholder: Enter your name before adding feedback...
+    - generic [ref=e7]: Your name will be attached to all feedback you leave
+  - generic [ref=e8]:
+    - heading "Open Questions (Pending Confirmation)" [level=3] [ref=e9]
+    - list [ref=e10]:
+      - listitem [ref=e11]:
+        - strong [ref=e12]: Partner Director
+        - text: — Is this the correct title? Is it one person or a pool? Which department?
+      - listitem [ref=e13]:
+        - strong [ref=e14]: Partner Ops Review
+        - text: (T-03, Stage 1) — Is this done by the Partnership Team or a separate ops group?
+  - generic [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e18]: "?"
+      - generic [ref=e19]: Your answers to the open questions above
+    - generic [ref=e20]:
+      - button "Answer" [ref=e21] [cursor=pointer]
+      - button "Correction" [ref=e22] [cursor=pointer]
+      - button "More Questions" [ref=e23] [cursor=pointer]
+    - textbox "e.g. Partner Director is actually called 'Head of Partnerships' and it's one person — Ahmed from the BD team..." [ref=e24]
+  - generic [ref=e25]: Products
+  - table [ref=e26]:
+    - rowgroup [ref=e27]:
+      - row "Product Code Access Type Partners" [ref=e28]:
+        - columnheader "Product" [ref=e29]
+        - columnheader "Code" [ref=e30]
+        - columnheader "Access Type" [ref=e31]
+        - columnheader "Partners" [ref=e32]
+    - rowgroup [ref=e33]:
+      - row "Rabet — Insurance data to ICP RBT Portal + API 43+ insurance companies" [ref=e34]:
+        - cell "Rabet — Insurance data to ICP" [ref=e35]:
+          - strong [ref=e36]: Rabet
+          - text: — Insurance data to ICP
+        - cell "RBT" [ref=e37]
+        - cell "Portal + API" [ref=e38]
+        - cell "43+ insurance companies" [ref=e39]
+      - row "Rhoon — Mortgage transactions RHN Portal + API 180+ financing entities" [ref=e40]:
+        - cell "Rhoon — Mortgage transactions" [ref=e41]:
+          - strong [ref=e42]: Rhoon
+          - text: — Mortgage transactions
+        - cell "RHN" [ref=e43]
+        - cell "Portal + API" [ref=e44]
+        - cell "180+ financing entities" [ref=e45]
+      - row "Wtheeq — Vehicle insurance data WTQ API only 38+ insurance companies" [ref=e46]:
+        - cell "Wtheeq — Vehicle insurance data" [ref=e47]:
+          - strong [ref=e48]: Wtheeq
+          - text: — Vehicle insurance data
+        - cell "WTQ" [ref=e49]
+        - cell "API only" [ref=e50]
+        - cell "38+ insurance companies" [ref=e51]
+      - row "Mulem — Motor insurance pricing MLM API only Insurance companies" [ref=e52]:
+        - cell "Mulem — Motor insurance pricing" [ref=e53]:
+          - strong [ref=e54]: Mulem
+          - text: — Motor insurance pricing
+        - cell "MLM" [ref=e55]
+        - cell "API only" [ref=e56]
+        - cell "Insurance companies" [ref=e57]
+  - generic [ref=e59]:
+    - generic [ref=e60]:
+      - generic [ref=e61]: "?"
+      - generic [ref=e62]: Feedback on Products
+    - generic [ref=e63]:
+      - button "Looks Good" [ref=e64] [cursor=pointer]
+      - button "Correction" [ref=e65] [cursor=pointer]
+      - button "Something Missing" [ref=e66] [cursor=pointer]
+    - textbox "Any corrections to product names, access types, or partner counts?" [ref=e67]
+  - generic [ref=e68]: Roles
+  - generic [ref=e69]:
+    - generic [ref=e70]:
+      - generic [ref=e71]: Requester
+      - generic [ref=e72]: Partnership Team. Raises tickets on behalf of partners.
+      - generic [ref=e73]: Raises all ticket types
+    - generic [ref=e74]:
+      - generic [ref=e75]: Legal Team
+      - generic [ref=e76]: Reviews agreement details and compliance documentation.
+      - generic [ref=e77]: Processes T-01 stages
+    - generic [ref=e78]:
+      - generic [ref=e79]: Product Team
+      - generic [ref=e80]: Reviews product-related submissions and UAT readiness.
+      - generic [ref=e81]: Processes T-01, T-02 stages
+    - generic [ref=e82]:
+      - generic [ref=e83]: Approver (EA)
+      - generic [ref=e84]: Executive Authority from CEO office. Final sign-off on agreements.
+      - generic [ref=e85]: Processes T-01 approval
+    - generic [ref=e86]:
+      - generic [ref=e87]: Partner Director
+      - generic [ref=e88]:
+        - text: Approves production access for partners.
+        - emphasis [ref=e89]: (Pending confirmation)
+      - generic [ref=e90]: Processes T-03 approval
+    - generic [ref=e91]:
+      - generic [ref=e92]: Integration Team
+      - generic [ref=e93]: Manages UAT lifecycle, API provisioning, IP whitelisting, credentials.
+      - generic [ref=e94]: Processes T-02, T-03 stages
+      - generic [ref=e95]: Raises T-04
+    - generic [ref=e96]:
+      - generic [ref=e97]: Dev Team
+      - generic [ref=e98]: Handles first-pass production provisioning (account setup, configuration).
+      - generic [ref=e99]: Processes T-03 stages
+    - generic [ref=e100]:
+      - generic [ref=e101]: Business Team
+      - generic [ref=e102]: Handles second-pass production provisioning (business validation, activation).
+      - generic [ref=e103]: Processes T-03 stages
+    - generic [ref=e104]:
+      - generic [ref=e105]: System Administrator
+      - generic [ref=e106]: Manages users, SLA configuration, business hours, workflow rules.
+      - generic [ref=e107]: System config
+  - generic [ref=e109]:
+    - generic [ref=e110]:
+      - generic [ref=e111]: "?"
+      - generic [ref=e112]: Feedback on Roles
+    - generic [ref=e113]:
+      - button "Looks Good" [ref=e114] [cursor=pointer]
+      - button "Correction" [ref=e115] [cursor=pointer]
+      - button "Missing Role" [ref=e116] [cursor=pointer]
+      - button "Wrong Name" [ref=e117] [cursor=pointer]
+    - textbox "Are these roles correct? Any missing teams? Wrong names or descriptions?" [ref=e118]
+  - generic [ref=e119]: Partner Lifecycle (per product)
+  - generic [ref=e120]:
+    - generic [ref=e121]:
+      - generic [ref=e122]: None
+      - generic [ref=e123]: Partner exists, no action yet
+    - generic [ref=e124]: →
+    - generic [ref=e125]:
+      - generic [ref=e126]: Onboarded
+      - generic [ref=e127]: T-01 completed
+    - generic [ref=e128]: →
+    - generic [ref=e129]:
+      - generic [ref=e130]: UAT Active
+      - generic [ref=e131]: T-02 Phase 1 done
+    - generic [ref=e132]: →
+    - generic [ref=e133]:
+      - generic [ref=e134]: Live
+      - generic [ref=e135]: T-03 completed
+  - paragraph [ref=e136]:
+    - text: T-04 (Support) is available once a partner reaches
+    - strong [ref=e137]: Live
+    - text: state. It does not advance the lifecycle.
+  - generic [ref=e139]:
+    - generic [ref=e140]:
+      - generic [ref=e141]: "?"
+      - generic [ref=e142]: Feedback on Partner Lifecycle
+    - generic [ref=e143]:
+      - button "Looks Good" [ref=e144] [cursor=pointer]
+      - button "Correction" [ref=e145] [cursor=pointer]
+      - button "Missing State" [ref=e146] [cursor=pointer]
+    - textbox "Is this lifecycle flow correct? Any missing states or wrong triggers?" [ref=e147]
+  - generic [ref=e148]: Stage Type Legend
+  - generic [ref=e149]:
+    - generic [ref=e150]: Review
+    - generic [ref=e152]: Approval
+    - generic [ref=e154]: Provisioning
+    - generic [ref=e156]: Phase Gate (external wait)
+    - generic [ref=e158]: Complete
+  - generic [ref=e160]:
+    - generic [ref=e161]:
+      - generic [ref=e162]: T-01 · Agreement Validation & Sign-off
+      - generic [ref=e163]: "Lifecycle: None → Onboarded"
+    - generic [ref=e164]:
+      - generic [ref=e166]:
+        - generic [ref=e167]: Stage 1
+        - generic [ref=e168]: Legal Review
+        - generic [ref=e169]:
+          - generic [ref=e170]: Legal Team
+          - generic [ref=e171]: "SLA: 24 business hours"
+      - generic [ref=e172]: →
+      - generic [ref=e174]:
+        - generic [ref=e175]: Stage 2
+        - generic [ref=e176]: Product Review
+        - generic [ref=e177]:
+          - generic [ref=e178]: Product Team
+          - generic [ref=e179]: "SLA: 16 business hours"
+      - generic [ref=e180]: →
+      - generic [ref=e182]:
+        - generic [ref=e183]: Stage 3
+        - generic [ref=e184]: EA Sign-off
+        - generic [ref=e185]:
+          - generic [ref=e186]: Approver (EA)
+          - generic [ref=e187]: "SLA: 8 business hours"
+      - generic [ref=e188]: →
+      - generic [ref=e190]:
+        - generic [ref=e191]: Complete
+        - generic [ref=e192]: Stakeholder Notification
+        - generic [ref=e194]: Auto · No SLA
+  - generic [ref=e196]:
+    - generic [ref=e197]:
+      - generic [ref=e198]: "?"
+      - generic [ref=e199]: Feedback on T-01 Workflow
+    - generic [ref=e200]:
+      - button "Looks Good" [ref=e201] [cursor=pointer]
+      - button "Wrong Order" [ref=e202] [cursor=pointer]
+      - button "Wrong Role" [ref=e203] [cursor=pointer]
+      - button "Missing Stage" [ref=e204] [cursor=pointer]
+      - button "Wrong SLA" [ref=e205] [cursor=pointer]
+    - textbox "Are the stages, roles, order, and SLA targets correct for T-01?" [ref=e206]
+  - generic [ref=e207]:
+    - generic [ref=e208]:
+      - generic [ref=e209]: T-02 · UAT Access Creation
+      - generic [ref=e210]: "Lifecycle: Onboarded → UAT Active"
+    - generic [ref=e211]:
+      - generic [ref=e213]:
+        - generic [ref=e214]: Stage 1
+        - generic [ref=e215]: Product Team Review
+        - generic [ref=e216]:
+          - generic [ref=e217]: Product Team
+          - generic [ref=e218]: "SLA: 8 business hours"
+      - generic [ref=e219]: →
+      - generic [ref=e221]:
+        - generic [ref=e222]: Stage 2 · Phase 1
+        - generic [ref=e223]: Access Provisioning
+        - generic [ref=e224]:
+          - generic [ref=e225]: Integration Team
+          - generic [ref=e226]: "SLA: 8 business hours"
+      - generic [ref=e227]: →
+      - generic [ref=e229]:
+        - generic [ref=e230]: Stage 3
+        - generic [ref=e231]: Awaiting UAT Signal
+        - generic [ref=e232]:
+          - generic [ref=e233]: Requester
+          - generic [ref=e234]: No SLA (external wait)
+      - generic [ref=e235]: →
+      - generic [ref=e237]:
+        - generic [ref=e238]: Stage 4 · Phase 2
+        - generic [ref=e239]: UAT Sign-off
+        - generic [ref=e240]:
+          - generic [ref=e241]: Integration Team
+          - generic [ref=e242]: "SLA: 8 business hours"
+  - generic [ref=e244]:
+    - generic [ref=e245]:
+      - generic [ref=e246]: "?"
+      - generic [ref=e247]: Feedback on T-02 Workflow
+    - generic [ref=e248]:
+      - button "Looks Good" [ref=e249] [cursor=pointer]
+      - button "Wrong Order" [ref=e250] [cursor=pointer]
+      - button "Wrong Role" [ref=e251] [cursor=pointer]
+      - button "Missing Stage" [ref=e252] [cursor=pointer]
+      - button "Wrong SLA" [ref=e253] [cursor=pointer]
+    - textbox "Are the stages, roles, order, and SLA targets correct for T-02? Is the two-phase structure right?" [ref=e254]
+  - generic [ref=e255]:
+    - generic [ref=e256]:
+      - generic [ref=e257]: T-03 · Production Account Creation — Portal Only
+      - generic [ref=e258]: "Lifecycle: UAT Active → Live"
+    - paragraph [ref=e259]: For Rabet & Rhoon when API toggle is OFF
+    - generic [ref=e260]:
+      - generic [ref=e262]:
+        - generic [ref=e263]: Stage 1
+        - generic [ref=e264]: Partner Ops Review
+        - generic [ref=e265]:
+          - generic [ref=e266]: Pending confirmation
+          - generic [ref=e267]: "SLA: 8 business hours"
+      - generic [ref=e268]: →
+      - generic [ref=e270]:
+        - generic [ref=e271]: Stage 2
+        - generic [ref=e272]: Partner Director Approval
+        - generic [ref=e273]:
+          - generic [ref=e274]: Partner Director
+          - generic [ref=e275]: "SLA: 8 business hours"
+      - generic [ref=e276]: →
+      - generic [ref=e278]:
+        - generic [ref=e279]: Stage 3
+        - generic [ref=e280]: Dev Provisioning
+        - generic [ref=e281]:
+          - generic [ref=e282]: Dev Team
+          - generic [ref=e283]: "SLA: 8 business hours"
+      - generic [ref=e284]: →
+      - generic [ref=e286]:
+        - generic [ref=e287]: Stage 4
+        - generic [ref=e288]: Business Provisioning
+        - generic [ref=e289]:
+          - generic [ref=e290]: Business Team
+          - generic [ref=e291]: "SLA: 8 business hours"
+  - generic [ref=e293]:
+    - generic [ref=e294]:
+      - generic [ref=e295]: "?"
+      - generic [ref=e296]: Feedback on T-03 Portal Only Workflow
+    - generic [ref=e297]:
+      - button "Looks Good" [ref=e298] [cursor=pointer]
+      - button "Wrong Order" [ref=e299] [cursor=pointer]
+      - button "Wrong Role" [ref=e300] [cursor=pointer]
+      - button "Missing Stage" [ref=e301] [cursor=pointer]
+      - button "Wrong SLA" [ref=e302] [cursor=pointer]
+    - textbox "Is Dev then Business the right order? Are the SLA targets correct?" [ref=e303]
+  - generic [ref=e304]:
+    - generic [ref=e305]:
+      - generic [ref=e306]: T-03 · Production Account Creation — Portal + API
+      - generic [ref=e307]: "Lifecycle: UAT Active → Live"
+    - paragraph [ref=e308]: For Rabet & Rhoon when API toggle is ON
+    - generic [ref=e309]:
+      - generic [ref=e311]:
+        - generic [ref=e312]: Stage 1
+        - generic [ref=e313]: Partner Ops Review
+        - generic [ref=e314]:
+          - generic [ref=e315]: Pending confirmation
+          - generic [ref=e316]: "SLA: 8 business hours"
+      - generic [ref=e317]: →
+      - generic [ref=e319]:
+        - generic [ref=e320]: Stage 2
+        - generic [ref=e321]: Partner Director Approval
+        - generic [ref=e322]:
+          - generic [ref=e323]: Partner Director
+          - generic [ref=e324]: "SLA: 8 business hours"
+      - generic [ref=e325]: →
+      - generic [ref=e327]:
+        - generic [ref=e328]: Stage 3
+        - generic [ref=e329]: Dev Provisioning
+        - generic [ref=e330]:
+          - generic [ref=e331]: Dev Team
+          - generic [ref=e332]: "SLA: 24 business hours"
+      - generic [ref=e333]: →
+      - generic [ref=e335]:
+        - generic [ref=e336]: Stage 4
+        - generic [ref=e337]: Business Provisioning
+        - generic [ref=e338]:
+          - generic [ref=e339]: Business Team
+          - generic [ref=e340]: "SLA: 24 business hours"
+      - generic [ref=e341]: →
+      - generic [ref=e343]:
+        - generic [ref=e344]: Stage 5
+        - generic [ref=e345]: API Provisioning
+        - generic [ref=e346]:
+          - generic [ref=e347]: Integration Team
+          - generic [ref=e348]: "SLA: 24 business hours"
+  - generic [ref=e350]:
+    - generic [ref=e351]:
+      - generic [ref=e352]: "?"
+      - generic [ref=e353]: Feedback on T-03 Portal + API Workflow
+    - generic [ref=e354]:
+      - button "Looks Good" [ref=e355] [cursor=pointer]
+      - button "Wrong Order" [ref=e356] [cursor=pointer]
+      - button "Wrong Role" [ref=e357] [cursor=pointer]
+      - button "Missing Stage" [ref=e358] [cursor=pointer]
+      - button "Wrong SLA" [ref=e359] [cursor=pointer]
+    - textbox "Is this the right flow when API is included? Should API provisioning be after Business or parallel?" [ref=e360]
+  - generic [ref=e361]:
+    - generic [ref=e362]:
+      - generic [ref=e363]: T-03 · Production Account Creation — API Only
+      - generic [ref=e364]: "Lifecycle: UAT Active → Live"
+    - paragraph [ref=e365]: For Wtheeq & Mulem (API-only products, no portal toggle)
+    - generic [ref=e366]:
+      - generic [ref=e368]:
+        - generic [ref=e369]: Stage 1
+        - generic [ref=e370]: Partner Ops Review
+        - generic [ref=e371]:
+          - generic [ref=e372]: Pending confirmation
+          - generic [ref=e373]: "SLA: 8 business hours"
+      - generic [ref=e374]: →
+      - generic [ref=e376]:
+        - generic [ref=e377]: Stage 2
+        - generic [ref=e378]: Partner Director Approval
+        - generic [ref=e379]:
+          - generic [ref=e380]: Partner Director
+          - generic [ref=e381]: "SLA: 8 business hours"
+      - generic [ref=e382]: →
+      - generic [ref=e384]:
+        - generic [ref=e385]: Stage 3
+        - generic [ref=e386]: API Provisioning
+        - generic [ref=e387]:
+          - generic [ref=e388]: Integration Team
+          - generic [ref=e389]: "SLA: 24 business hours"
+  - generic [ref=e391]:
+    - generic [ref=e392]:
+      - generic [ref=e393]: "?"
+      - generic [ref=e394]: Feedback on T-03 API Only Workflow
+    - generic [ref=e395]:
+      - button "Looks Good" [ref=e396] [cursor=pointer]
+      - button "Wrong Order" [ref=e397] [cursor=pointer]
+      - button "Wrong Role" [ref=e398] [cursor=pointer]
+      - button "Missing Stage" [ref=e399] [cursor=pointer]
+      - button "Wrong SLA" [ref=e400] [cursor=pointer]
+    - textbox "For API-only products (Wtheeq, Mulem) — is this flow correct?" [ref=e401]
+  - generic [ref=e402]:
+    - generic [ref=e403]:
+      - generic [ref=e404]: T-04 · Access & Credential Support
+      - generic [ref=e405]: No lifecycle change (Live partners only)
+    - paragraph [ref=e406]: Raised by Requester or Integration Team
+    - generic [ref=e409]:
+      - generic [ref=e410]: Stage 1
+      - generic [ref=e411]: Verify & Resolve
+      - generic [ref=e412]:
+        - generic [ref=e413]: Dev Team
+        - generic [ref=e414]: "SLA: 2 business hours"
+    - paragraph [ref=e415]:
+      - strong [ref=e416]: "Issue types:"
+      - text: Portal Login Issue (RBT, RHN) · API Credential Issue (all) · Portal Password Reset (WTQ, MLM)
+  - generic [ref=e418]:
+    - generic [ref=e419]:
+      - generic [ref=e420]: "?"
+      - generic [ref=e421]: Feedback on T-04 Workflow
+    - generic [ref=e422]:
+      - button "Looks Good" [ref=e423] [cursor=pointer]
+      - button "Wrong Role" [ref=e424] [cursor=pointer]
+      - button "Missing Stage" [ref=e425] [cursor=pointer]
+      - button "Wrong SLA" [ref=e426] [cursor=pointer]
+      - button "Missing Issue Type" [ref=e427] [cursor=pointer]
+    - textbox "Is Dev Team the right owner? Are the issue types complete? Is 2 hours the right SLA?" [ref=e428]
+  - generic [ref=e429]: General Comments
+  - generic [ref=e431]:
+    - generic [ref=e432]:
+      - generic [ref=e433]: "?"
+      - generic [ref=e434]: Anything else we missed?
+    - generic [ref=e435]:
+      - button "General Comment" [ref=e436] [cursor=pointer]
+      - button "Missing Workflow" [ref=e437] [cursor=pointer]
+      - button "Question" [ref=e438] [cursor=pointer]
+    - textbox "Any overall comments, missing workflows, or questions about the system?" [ref=e439]
+  - paragraph [ref=e440]: Tixora MVP 1 · Generated for business review · Roles and workflows subject to confirmation
+  - generic [ref=e441]:
+    - generic [ref=e442]:
+      - strong [ref=e443]: "0"
+      - text: feedback items saved
+    - button "Export Feedback as File" [disabled] [ref=e444]
