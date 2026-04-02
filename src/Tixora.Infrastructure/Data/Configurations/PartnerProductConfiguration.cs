@@ -14,7 +14,7 @@ public class PartnerProductConfiguration : IEntityTypeConfiguration<PartnerProdu
 
         builder.Property(pp => pp.ProductCode).HasConversion<int>();
         builder.Property(pp => pp.LifecycleState).HasConversion<int>().HasDefaultValue(LifecycleState.None);
-        builder.Property(pp => pp.CompanyCode).HasMaxLength(50);
+        builder.Property(pp => pp.CompanyCode).IsRequired().HasMaxLength(50);
 
         builder.HasOne(pp => pp.Product)
             .WithMany()

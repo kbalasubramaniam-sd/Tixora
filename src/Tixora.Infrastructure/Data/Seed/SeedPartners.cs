@@ -49,7 +49,7 @@ public static class SeedPartners
             }
         );
 
-        // PartnerProducts — all start at LifecycleState.None, no CompanyCode
+        // PartnerProducts — CompanyCode = {Alias}-{ProductCode}
         modelBuilder.Entity<PartnerProduct>().HasData(
             // Al Ain Insurance → Rabet
             new PartnerProduct
@@ -58,7 +58,7 @@ public static class SeedPartners
                 PartnerId = AlAinInsuranceId,
                 ProductCode = ProductCode.RBT,
                 LifecycleState = LifecycleState.None,
-                CompanyCode = null,
+                CompanyCode = "AAI-RBT",
                 StateChangedAt = now,
                 CreatedAt = now
             },
@@ -69,7 +69,7 @@ public static class SeedPartners
                 PartnerId = AlAinInsuranceId,
                 ProductCode = ProductCode.WTQ,
                 LifecycleState = LifecycleState.None,
-                CompanyCode = null,
+                CompanyCode = "AAI-WTQ",
                 StateChangedAt = now,
                 CreatedAt = now
             },
@@ -80,7 +80,7 @@ public static class SeedPartners
                 PartnerId = DubaiIslamicBankId,
                 ProductCode = ProductCode.RHN,
                 LifecycleState = LifecycleState.None,
-                CompanyCode = null,
+                CompanyCode = "DIB-RHN",
                 StateChangedAt = now,
                 CreatedAt = now
             },
@@ -91,7 +91,7 @@ public static class SeedPartners
                 PartnerId = DubaiIslamicBankId,
                 ProductCode = ProductCode.MLM,
                 LifecycleState = LifecycleState.None,
-                CompanyCode = null,
+                CompanyCode = "DIB-MLM",
                 StateChangedAt = now,
                 CreatedAt = now
             },
@@ -102,7 +102,7 @@ public static class SeedPartners
                 PartnerId = EmiratesInsuranceId,
                 ProductCode = ProductCode.RBT,
                 LifecycleState = LifecycleState.None,
-                CompanyCode = null,
+                CompanyCode = "EIC-RBT",
                 StateChangedAt = now,
                 CreatedAt = now
             },
@@ -113,7 +113,7 @@ public static class SeedPartners
                 PartnerId = EmiratesInsuranceId,
                 ProductCode = ProductCode.RHN,
                 LifecycleState = LifecycleState.None,
-                CompanyCode = null,
+                CompanyCode = "EIC-RHN",
                 StateChangedAt = now,
                 CreatedAt = now
             }

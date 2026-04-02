@@ -5,7 +5,7 @@ export interface PartnerProductDetail {
   productCode: ProductCode
   productName: string
   lifecycleState: LifecycleState
-  companyCode: string | null
+  companyCode: string
 }
 
 export interface PartnerSummary {

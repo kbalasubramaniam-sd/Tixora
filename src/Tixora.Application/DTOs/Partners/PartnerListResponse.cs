@@ -3,4 +3,4 @@ namespace Tixora.Application.DTOs.Partners;
 
 public record PartnerListResponse(Guid Id, string Name, string? Alias, List<PartnerProductInfo> Products);
 
-public record PartnerProductInfo(string ProductCode, string ProductName, string LifecycleState, string? CompanyCode);
+public record PartnerProductInfo(string ProductCode, string ProductName, string LifecycleState, string CompanyCode);

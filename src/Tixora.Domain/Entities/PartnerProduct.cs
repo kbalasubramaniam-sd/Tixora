@@ -9,9 +9,9 @@ public class PartnerProduct
     public ProductCode ProductCode { get; set; }
     public LifecycleState LifecycleState { get; set; } = LifecycleState.None;
     /// <summary>
-    /// Company code assigned to this partner on this product. Set during T-02 submission. Null until then.
+    /// Company code assigned to this partner for this product (e.g. AAI-RBT). Required.
     /// </summary>
-    public string? CompanyCode { get; set; }
+    public string CompanyCode { get; set; } = null!;
     public DateTime StateChangedAt { get; set; }
     public DateTime CreatedAt { get; set; }
 
