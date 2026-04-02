@@ -3,16 +3,16 @@ import { TicketStatus } from '@/types/enums'
 import { STATUS_LABELS } from '@/utils/labels'
 
 const statusVariant: Record<TicketStatus, ChipVariant> = {
-  [TicketStatus.Draft]: 'default',
   [TicketStatus.Submitted]: 'info',
   [TicketStatus.InReview]: 'default',
   [TicketStatus.PendingRequesterAction]: 'warning',
-  [TicketStatus.Approved]: 'success',
   [TicketStatus.InProvisioning]: 'default',
+  [TicketStatus.Phase1Complete]: 'success',
+  [TicketStatus.AwaitingUatSignal]: 'warning',
+  [TicketStatus.Phase2InReview]: 'default',
   [TicketStatus.Completed]: 'success',
   [TicketStatus.Rejected]: 'error',
   [TicketStatus.Cancelled]: 'default',
-  [TicketStatus.SlaBreached]: 'error',
 }
 
 interface StatusChipProps {

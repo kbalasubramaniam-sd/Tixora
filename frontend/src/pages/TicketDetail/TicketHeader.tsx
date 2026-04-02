@@ -7,12 +7,13 @@ const statusStyles: Record<string, string> = {
   [TicketStatus.Submitted]: 'bg-secondary-container text-on-secondary-container',
   [TicketStatus.InReview]: 'bg-primary-container text-on-primary-container',
   [TicketStatus.PendingRequesterAction]: 'bg-warning-container text-warning',
-  [TicketStatus.Approved]: 'bg-primary-container text-on-primary-container',
   [TicketStatus.InProvisioning]: 'bg-primary-container text-on-primary-container',
+  [TicketStatus.Phase1Complete]: 'bg-success-container text-success',
+  [TicketStatus.AwaitingUatSignal]: 'bg-warning-container text-warning',
+  [TicketStatus.Phase2InReview]: 'bg-primary-container text-on-primary-container',
   [TicketStatus.Completed]: 'bg-success-container text-success',
   [TicketStatus.Rejected]: 'bg-error-badge text-on-error-badge',
   [TicketStatus.Cancelled]: 'bg-surface-container-highest text-on-surface-variant',
-  [TicketStatus.SlaBreached]: 'bg-error-badge text-on-error-badge font-black',
 }
 
 

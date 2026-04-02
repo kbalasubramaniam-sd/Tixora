@@ -27,16 +27,16 @@ export const TASK_LABELS_SHORT: Record<string, string> = {
 }
 
 export const STATUS_LABELS: Record<TicketStatus, string> = {
-  [TicketStatus.Draft]: 'Draft',
   [TicketStatus.Submitted]: 'Submitted',
   [TicketStatus.InReview]: 'In Review',
   [TicketStatus.PendingRequesterAction]: 'Pending Action',
-  [TicketStatus.Approved]: 'Approved',
   [TicketStatus.InProvisioning]: 'In Provisioning',
+  [TicketStatus.Phase1Complete]: 'Phase 1 Complete',
+  [TicketStatus.AwaitingUatSignal]: 'Awaiting UAT Signal',
+  [TicketStatus.Phase2InReview]: 'Phase 2 Review',
   [TicketStatus.Completed]: 'Completed',
   [TicketStatus.Rejected]: 'Rejected',
   [TicketStatus.Cancelled]: 'Cancelled',
-  [TicketStatus.SlaBreached]: 'SLA Breached',
 }
 
 export const SLA_LABELS: Record<SlaStatus, string> = {

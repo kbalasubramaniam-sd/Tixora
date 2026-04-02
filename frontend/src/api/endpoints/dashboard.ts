@@ -80,7 +80,7 @@ const mockTickets: TicketSummary[] = [
     taskType: TaskType.T03,
     partnerName: 'Emirates Logistics Corp',
     requesterName: 'Omar R.',
-    status: TicketStatus.Approved,
+    status: TicketStatus.InReview,
     currentStage: 'Account Provisioning',
     slaStatus: SlaStatus.OnTrack,
     slaHoursRemaining: 20,

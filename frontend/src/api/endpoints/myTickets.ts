@@ -38,7 +38,7 @@ const mockMyTickets: TicketSummary[] = [
     taskType: TaskType.T03,
     partnerName: 'Emirates Logistics Corp',
     requesterName: 'Fatima Al-Rashid',
-    status: TicketStatus.SlaBreached,
+    status: TicketStatus.InReview,
     currentStage: 'Compliance Check',
     slaStatus: SlaStatus.Breached,
     slaHoursRemaining: -3.0,
@@ -80,7 +80,7 @@ const mockMyTickets: TicketSummary[] = [
     taskType: TaskType.T01,
     partnerName: 'Mashreq Global',
     requesterName: 'Fatima Al-Rashid',
-    status: TicketStatus.Approved,
+    status: TicketStatus.InReview,
     currentStage: 'EA Sign-off',
     slaStatus: SlaStatus.OnTrack,
     slaHoursRemaining: 12,
@@ -105,7 +105,7 @@ const mockMyTickets: TicketSummary[] = [
 
 const STATUS_MAP: Record<string, TicketStatus[]> = {
   Open: [TicketStatus.Submitted, TicketStatus.PendingRequesterAction],
-  InProgress: [TicketStatus.InReview, TicketStatus.Approved, TicketStatus.InProvisioning, TicketStatus.SlaBreached],
+  InProgress: [TicketStatus.InReview, TicketStatus.InProvisioning, TicketStatus.Phase1Complete, TicketStatus.AwaitingUatSignal, TicketStatus.Phase2InReview],
   Completed: [TicketStatus.Completed],
   Cancelled: [TicketStatus.Cancelled, TicketStatus.Rejected],
 }

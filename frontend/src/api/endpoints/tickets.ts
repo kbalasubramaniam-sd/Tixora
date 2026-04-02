@@ -117,7 +117,7 @@ const mockTicketDetails: Record<string, TicketDetail> = {
     partnerName: 'Emirates Logistics Corp',
     companyCode: 'ELC-RBT-2026',
     requesterName: 'Admin Ops',
-    status: TicketStatus.Approved,
+    status: TicketStatus.InReview,
     currentStage: 'Account Provisioning',
     slaStatus: SlaStatus.OnTrack,
     slaHoursRemaining: 20,

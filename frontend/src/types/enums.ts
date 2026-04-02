@@ -15,16 +15,16 @@ export const TaskType = {
 export type TaskType = (typeof TaskType)[keyof typeof TaskType]
 
 export const TicketStatus = {
-  Draft: 'Draft',
   Submitted: 'Submitted',
   InReview: 'InReview',
   PendingRequesterAction: 'PendingRequesterAction',
-  Approved: 'Approved',
   InProvisioning: 'InProvisioning',
+  Phase1Complete: 'Phase1Complete',
+  AwaitingUatSignal: 'AwaitingUatSignal',
+  Phase2InReview: 'Phase2InReview',
   Completed: 'Completed',
   Rejected: 'Rejected',
   Cancelled: 'Cancelled',
-  SlaBreached: 'SlaBreached',
 } as const
 export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus]
 
