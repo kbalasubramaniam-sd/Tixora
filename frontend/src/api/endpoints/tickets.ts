@@ -24,3 +24,31 @@ export async function fetchComments(ticketId: string): Promise<CommentResponse[]
 export async function postComment(ticketId: string, content: string): Promise<void> {
   await apiClient.post(`/tickets/${ticketId}/comments`, { content })
 }
+
+// --- Documents (E3.2) ---
+
+export interface DocumentResponse {
+  id: string
+  fileName: string
+  contentType: string
+  sizeBytes: number
+  uploadedBy: string
+  uploadedAt: string
+}
+
+export async function fetchDocuments(ticketId: string): Promise<DocumentResponse[]> {
+  const res = await apiClient.get<DocumentResponse[]>(`/tickets/${ticketId}/documents`)
+  return res.data
+}
+
+export async function uploadDocument(ticketId: string, file: File): Promise<void> {
+  const formData = new FormData()
+  formData.append('file', file)
+  await apiClient.post(`/tickets/${ticketId}/documents`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}
+
+export function getDocumentDownloadUrl(documentId: string): string {
+  return `${apiClient.defaults.baseURL}/documents/${documentId}`
+}
