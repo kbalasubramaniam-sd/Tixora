@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<ITixoraDbContext>(provider => provider.GetRequiredService<TixoraDbContext>());
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IWorkflowEngine, WorkflowEngine>();
+        services.AddScoped<ITicketQueryService, TicketQueryService>();
 
         return services;
     }
