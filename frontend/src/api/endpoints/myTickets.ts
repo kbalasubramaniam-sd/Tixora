@@ -103,7 +103,7 @@ const mockMyTickets: TicketSummary[] = [
   },
 ]
 
-const STATUS_MAP: Record<string, string[]> = {
+const STATUS_MAP: Record<string, TicketStatus[]> = {
   Open: [TicketStatus.Submitted, TicketStatus.PendingRequesterAction],
   InProgress: [TicketStatus.InReview, TicketStatus.Approved, TicketStatus.InProvisioning, TicketStatus.SlaBreached],
   Completed: [TicketStatus.Completed],
