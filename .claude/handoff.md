@@ -107,7 +107,7 @@ All backend endpoints are live and tested. **64 tests passing** (26 unit + 38 in
 | E3.1 | Comments | DONE | YES | POST/GET /api/tickets/{id}/comments |
 | E3.2 | Documents | DONE | YES | POST/GET /api/tickets/{id}/documents, GET /api/documents/{id} |
 | E3.3 | Audit Trail | — | YES (already in E2) | GET /api/tickets/{id} → auditTrail[] |
-| E3.4 | SLA Engine | — | NO | SLA fields in ticket responses |
+| E3.4 | SLA Engine | DONE | YES | SLA fields in ticket responses |
 | E3.5 | Notifications | — | NO | GET/PUT /api/notifications |
 
 ### E3.1 Comments (BE DONE — FE: NOT WIRED)
@@ -159,6 +159,21 @@ All backend endpoints are live and tested. **64 tests passing** (26 unit + 38 in
 - Wire upload into S-02 New Request (FileUpload component) and S-03 Ticket Detail Documents tab
 - Download: `GET /api/documents/{id}` returns the file directly (use as href or fetch blob)
 
+### E3.4 SLA Engine (BE DONE — FE: NOT WIRED)
+
+**What changed:**
+- `TicketSummaryResponse.SlaStatus` now returns real values: `"OnTrack"`, `"AtRisk"`, `"Critical"`, `"Breached"` (was always "OnTrack")
+- `TicketSummaryResponse.SlaHoursRemaining` now returns real remaining hours (was always 0)
+- `TicketDetailResponse` — same fields, now live data
+- Business hours: Sun-Thu, 08:00-17:00 GST. SLA pauses during clarification.
+
+**FE wiring notes:**
+- No new endpoints — SLA data flows through existing ticket responses
+- S-03 Ticket Detail: SLA progress bar can now show real % (elapsed / target)
+- S-04 Team Queue: SLA Status column now has real values — can color-code AtRisk/Critical/Breached
+- S-01 Dashboard: stats endpoint now reflects real SLA data
+- Remove hardcoded "100% SLA Integrity" — use real slaStatus from response
+- SlaStatus `"OnTrack"` with `slaHoursRemaining = 0` means stage has no SLA tracking (e.g., UAT wait gate)
+
 ## Next Steps
-- **E3.4: SLA Engine** — in progress
-- **E3.5: Notifications** — pending
+- **E3.5: Notifications** — in progress
