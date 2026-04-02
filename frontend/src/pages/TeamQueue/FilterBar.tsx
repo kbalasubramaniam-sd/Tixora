@@ -7,15 +7,17 @@ interface FilterOption {
 }
 
 interface FilterBarProps {
-  product: string
-  task: string
-  slaStatus: string
-  onProductChange: (v: string) => void
-  onTaskChange: (v: string) => void
-  onSlaChange: (v: string) => void
-  onClear: () => void
+  product?: string
+  onProductChange?: (v: string) => void
+  task?: string
+  onTaskChange?: (v: string) => void
+  slaStatus?: string
+  onSlaChange?: (v: string) => void
   status?: string
   onStatusChange?: (v: string) => void
+  lifecycle?: string
+  onLifecycleChange?: (v: string) => void
+  onClear: () => void
 }
 
 const products: FilterOption[] = [
@@ -47,6 +49,14 @@ const ticketStatuses: FilterOption[] = [
   { label: 'In Progress', value: 'InProgress' },
   { label: 'Completed', value: 'Completed' },
   { label: 'Cancelled', value: 'Cancelled' },
+]
+
+const lifecycleStates: FilterOption[] = [
+  { label: 'All', value: 'All' },
+  { label: 'Live', value: 'Live' },
+  { label: 'UAT Active', value: 'UatActive' },
+  { label: 'UAT Complete', value: 'UatCompleted' },
+  { label: 'Onboarded', value: 'Onboarded' },
 ]
 
 function FilterChip({
@@ -149,17 +159,31 @@ function FilterChip({
   )
 }
 
-export function FilterBar({ product, task, slaStatus, onProductChange, onTaskChange, onSlaChange, onClear, status, onStatusChange }: FilterBarProps) {
-  const hasFilters = product !== 'All' || task !== 'All' || slaStatus !== 'All' || (status !== undefined && status !== 'All')
+export function FilterBar({ product, onProductChange, task, onTaskChange, slaStatus, onSlaChange, status, onStatusChange, lifecycle, onLifecycleChange, onClear }: FilterBarProps) {
+  const hasFilters =
+    (product !== undefined && product !== 'All') ||
+    (task !== undefined && task !== 'All') ||
+    (slaStatus !== undefined && slaStatus !== 'All') ||
+    (status !== undefined && status !== 'All') ||
+    (lifecycle !== undefined && lifecycle !== 'All')
 
   return (
     <div className="bg-surface-bright rounded-lg p-3 mb-8 flex flex-wrap items-center justify-between gap-3 shadow-sm border border-surface-container-high">
       <div className="flex flex-wrap items-center gap-2">
-        <FilterChip label="Product" value={product} options={products} onChange={onProductChange} />
-        <FilterChip label="Task" value={task} options={tasks} onChange={onTaskChange} />
-        <FilterChip label="SLA Status" value={slaStatus} options={slaStatuses} onChange={onSlaChange} />
+        {product !== undefined && onProductChange && (
+          <FilterChip label="Product" value={product} options={products} onChange={onProductChange} />
+        )}
+        {task !== undefined && onTaskChange && (
+          <FilterChip label="Task" value={task} options={tasks} onChange={onTaskChange} />
+        )}
+        {slaStatus !== undefined && onSlaChange && (
+          <FilterChip label="SLA Status" value={slaStatus} options={slaStatuses} onChange={onSlaChange} />
+        )}
         {status !== undefined && onStatusChange && (
           <FilterChip label="Status" value={status} options={ticketStatuses} onChange={onStatusChange} />
+        )}
+        {lifecycle !== undefined && onLifecycleChange && (
+          <FilterChip label="Lifecycle" value={lifecycle} options={lifecycleStates} onChange={onLifecycleChange} />
         )}
       </div>
       {hasFilters && (
