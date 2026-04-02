@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import { usePartners } from '@/api/hooks/usePartners'
 import { FilterBar } from '@/pages/TeamQueue/FilterBar'
-import { SearchableDropdown } from '@/components/ui/SearchableDropdown'
 import { PartnerRow } from './PartnerRow'
 
 export default function Partners() {
@@ -26,9 +25,12 @@ export default function Partners() {
   // Total count (unfiltered) for "Showing X of Y"
   const { data: allPartners = [] } = usePartners()
 
-  // Build searchable dropdown options from all partners
-  const searchOptions = useMemo(
-    () => allPartners.map((p) => ({ label: p.name, value: p.id, sublabel: p.refId })),
+  // Build partner options for searchable filter chip
+  const partnerOptions = useMemo(
+    () => [
+      { label: 'All', value: 'All' },
+      ...allPartners.map((p) => ({ label: p.name, value: p.id })),
+    ],
     [allPartners],
   )
 
@@ -54,24 +56,17 @@ export default function Partners() {
         <p className="text-on-surface-variant mt-2 text-lg">Manage and explore Tixora's global partner network.</p>
       </header>
 
-      {/* Filter Bar with inline partner search */}
+      {/* Filter Bar */}
       <FilterBar
+        partner={selectedPartnerId || 'All'}
+        onPartnerChange={(v) => setSelectedPartnerId(v === 'All' ? '' : v)}
+        partnerOptions={partnerOptions}
         product={product}
         onProductChange={setProduct}
         lifecycle={lifecycle}
         onLifecycleChange={setLifecycle}
         onClear={clearFilters}
-        hasExtraFilters={!!selectedPartnerId}
-      >
-        <SearchableDropdown
-          options={searchOptions}
-          value={selectedPartnerId}
-          onChange={setSelectedPartnerId}
-          placeholder="Search partner..."
-          icon="search"
-          compact
-        />
-      </FilterBar>
+      />
 
       {/* Result Count */}
       <div className="mb-4 text-sm text-on-surface-variant">

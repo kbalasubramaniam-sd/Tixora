@@ -17,6 +17,9 @@ interface FilterBarProps {
   onStatusChange?: (v: string) => void
   lifecycle?: string
   onLifecycleChange?: (v: string) => void
+  partner?: string
+  onPartnerChange?: (v: string) => void
+  partnerOptions?: FilterOption[]
   onClear: () => void
   children?: React.ReactNode
   hasExtraFilters?: boolean
@@ -66,24 +69,43 @@ function FilterChip({
   value,
   options,
   onChange,
+  searchable = false,
+  wide = false,
 }: {
   label: string
   value: string
   options: FilterOption[]
   onChange: (v: string) => void
+  searchable?: boolean
+  wide?: boolean
 }) {
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
   const ref = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
   const displayValue = options.find((o) => o.value === value)?.label ?? 'All'
-  const isActive = value !== 'All'
+  const isActive = value !== 'All' && value !== ''
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+        setSearch('')
+      }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (open && searchable) {
+      setTimeout(() => searchRef.current?.focus(), 0)
+    }
+  }, [open, searchable])
+
+  const filtered = searchable && search
+    ? options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()))
+    : options
 
   return (
     <div ref={ref} className="relative">
@@ -91,26 +113,28 @@ function FilterChip({
         onClick={() => setOpen(!open)}
         className={cn(
           'flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-colors',
+          wide ? 'min-w-[220px]' : '',
           isActive
             ? 'border-primary/20 bg-primary/5 hover:bg-primary/10'
             : 'border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low',
         )}
       >
-        <span className="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant/60">
+        <span className="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant/60 flex-shrink-0">
           {label}
         </span>
-        <span className={cn('text-xs font-bold', isActive ? 'text-primary' : 'text-on-surface')}>
+        <span className={cn('text-xs font-bold truncate flex-1 text-left', wide ? 'max-w-[150px]' : '', isActive ? 'text-primary' : 'text-on-surface')}>
           {displayValue}
         </span>
         {isActive ? (
           <span
-            className="material-symbols-outlined text-[14px] text-primary hover:text-error transition-colors"
+            className="material-symbols-outlined text-[14px] text-primary hover:text-error transition-colors flex-shrink-0"
             role="button"
             tabIndex={0}
             onClick={(e) => {
               e.stopPropagation()
               onChange('All')
               setOpen(false)
+              setSearch('')
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -118,56 +142,83 @@ function FilterChip({
                 e.stopPropagation()
                 onChange('All')
                 setOpen(false)
+                setSearch('')
               }
             }}
           >
             close
           </span>
         ) : (
-          <span className="material-symbols-outlined text-[14px] text-on-surface-variant">expand_more</span>
+          <span className="material-symbols-outlined text-[14px] text-on-surface-variant flex-shrink-0">expand_more</span>
         )}
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-2 bg-surface-container-lowest rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-outline-variant/30 p-1.5 z-50 min-w-[180px] animate-[fadeIn_0.15s_ease-out]">
-          {options.map((opt) => {
-            const isSelected = value === opt.value
-            return (
-              <button
-                key={opt.value}
-                onClick={() => {
-                  onChange(opt.value)
-                  setOpen(false)
-                }}
-                className={cn(
-                  'w-full text-left px-3 py-[7px] text-[13px] font-medium rounded-lg transition-colors flex items-center gap-2.5',
-                  isSelected
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface',
-                )}
-              >
-                <span className={cn('w-4 flex items-center justify-center flex-shrink-0', !isSelected && 'invisible')}>
-                  <span className="material-symbols-outlined text-[15px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    check
-                  </span>
-                </span>
-                {opt.label}
-              </button>
-            )
-          })}
+        <div className={cn(
+          'absolute top-full left-0 mt-2 bg-surface-container-lowest rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-outline-variant/30 p-1.5 z-50 animate-[fadeIn_0.15s_ease-out]',
+          searchable ? 'min-w-[260px] max-h-[320px] flex flex-col' : 'min-w-[180px]',
+        )}>
+          {searchable && (
+            <div className="px-2 pb-1.5 mb-1 border-b border-outline-variant/20">
+              <input
+                ref={searchRef}
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Type to search..."
+                className="w-full bg-surface-container-low border-none rounded-lg px-3 py-1.5 text-xs font-medium text-on-surface placeholder-slate-400 focus:ring-1 focus:ring-primary/20 outline-none"
+                autoComplete="off"
+              />
+            </div>
+          )}
+          <div className={searchable ? 'overflow-y-auto flex-1' : ''}>
+            {filtered.length === 0 ? (
+              <div className="px-3 py-3 text-xs text-on-surface-variant text-center">No results</div>
+            ) : (
+              filtered.map((opt) => {
+                const isSelected = value === opt.value
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      onChange(opt.value)
+                      setOpen(false)
+                      setSearch('')
+                    }}
+                    className={cn(
+                      'w-full text-left px-3 py-[7px] text-[13px] font-medium rounded-lg transition-colors flex items-center gap-2.5',
+                      isSelected
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface',
+                    )}
+                  >
+                    <span className={cn('w-4 flex items-center justify-center flex-shrink-0', !isSelected && 'invisible')}>
+                      <span className="material-symbols-outlined text-[15px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        check
+                      </span>
+                    </span>
+                    {opt.label}
+                  </button>
+                )
+              })
+            )}
+          </div>
         </div>
       )}
     </div>
   )
 }
 
-export function FilterBar({ product, onProductChange, task, onTaskChange, slaStatus, onSlaChange, status, onStatusChange, lifecycle, onLifecycleChange, onClear, children, hasExtraFilters }: FilterBarProps) {
+export { FilterChip }
+
+export function FilterBar({ product, onProductChange, task, onTaskChange, slaStatus, onSlaChange, status, onStatusChange, lifecycle, onLifecycleChange, partner, onPartnerChange, partnerOptions, onClear, children, hasExtraFilters }: FilterBarProps) {
   const hasFilters =
     (product !== undefined && product !== 'All') ||
     (task !== undefined && task !== 'All') ||
     (slaStatus !== undefined && slaStatus !== 'All') ||
     (status !== undefined && status !== 'All') ||
     (lifecycle !== undefined && lifecycle !== 'All') ||
+    (partner !== undefined && partner !== 'All' && partner !== '') ||
     !!hasExtraFilters
 
   return (
@@ -187,6 +238,9 @@ export function FilterBar({ product, onProductChange, task, onTaskChange, slaSta
         )}
         {lifecycle !== undefined && onLifecycleChange && (
           <FilterChip label="Lifecycle" value={lifecycle} options={lifecycleStates} onChange={onLifecycleChange} />
+        )}
+        {partner !== undefined && onPartnerChange && partnerOptions && (
+          <FilterChip label="Partner" value={partner} options={partnerOptions} onChange={onPartnerChange} searchable wide />
         )}
         {children}
       </div>
