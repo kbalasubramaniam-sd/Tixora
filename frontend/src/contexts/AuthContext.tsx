@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import { apiClient } from '@/api/client'
+import { queryClient } from '@/main'
 import type { User, AuthResponse, LoginRequest } from '@/types/user'
 import { UserRole } from '@/types/enums'
 
@@ -78,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('tixora_token')
     setToken(null)
     setUser(null)
+    queryClient.clear()
   }, [])
 
   return (

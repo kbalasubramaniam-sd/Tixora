@@ -86,8 +86,8 @@ export function ActionsPanel({ ticket }: ActionsPanelProps) {
 
       await apiClient.post(`/tickets/${ticket.id}/${endpoint}`, body)
 
-      // Invalidate ticket detail + lists
-      await queryClient.invalidateQueries({ queryKey: ['ticket-detail'] })
+      // Invalidate ticket detail + all lists
+      await queryClient.invalidateQueries({ queryKey: ['ticket', ticket.id] })
       await queryClient.invalidateQueries({ queryKey: ['my-tickets'] })
       await queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       await queryClient.invalidateQueries({ queryKey: ['team-queue'] })

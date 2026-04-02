@@ -8,6 +8,7 @@ export function getInitials(name: string): string {
 }
 
 export function formatTime(hours: number): string {
+  if (hours === 0) return '—'
   const abs = Math.abs(hours)
   const h = Math.floor(abs)
   const m = Math.round((abs - h) * 60)
