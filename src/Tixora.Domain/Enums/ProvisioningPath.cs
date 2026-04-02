@@ -2,8 +2,9 @@ namespace Tixora.Domain.Enums;
 
 /// <summary>
 /// Resolved at T-03 submission. Determines which workflow stages the ticket follows.
-/// All products are Portal + API. For Rabet/Rhoon the user chooses the path;
-/// for Wtheeq/Mulem the path is always ApiOnly (read-only portal needs no provisioning).
+/// All products have ProductAccessMode = Both (Portal + API), but the provisioning path
+/// varies: Rabet/Rhoon let the user choose; Wtheeq/Mulem always route ApiOnly because
+/// their read-only portal requires no account provisioning (PortalType = ReadOnly).
 /// </summary>
 public enum ProvisioningPath
 {
