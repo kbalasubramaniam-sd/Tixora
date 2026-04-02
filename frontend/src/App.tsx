@@ -10,6 +10,7 @@ const TicketDetail = lazy(() => import('@/pages/TicketDetail'))
 const TeamQueue = lazy(() => import('@/pages/TeamQueue'))
 const MyTickets = lazy(() => import('@/pages/MyTickets'))
 const Partners = lazy(() => import('@/pages/Partners'))
+const Notifications = lazy(() => import('@/pages/Notifications'))
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="team-queue" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><TeamQueue /></Suspense>} />
           <Route path="my-tickets" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><MyTickets /></Suspense>} />
           <Route path="partners" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><Partners /></Suspense>} />
+          <Route path="notifications" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><Notifications /></Suspense>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
