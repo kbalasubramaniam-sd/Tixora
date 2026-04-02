@@ -1,6 +1,7 @@
 // File: tests/Tixora.API.Tests/Controllers/TicketsControllerQueryTests.cs
 using System.Net;
 using System.Net.Http.Json;
+using Tixora.Application.DTOs.Common;
 using Tixora.Application.DTOs.Tickets;
 
 namespace Tixora.API.Tests.Controllers;
@@ -44,9 +45,9 @@ public class TicketsControllerQueryTests : IClassFixture<CustomWebApplicationFac
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var tickets = await response.Content.ReadFromJsonAsync<List<TicketSummaryResponse>>();
-        Assert.NotNull(tickets);
-        Assert.Contains(tickets, t => t.TicketId == ticket.TicketId);
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<TicketSummaryResponse>>();
+        Assert.NotNull(result);
+        Assert.Contains(result.Items, t => t.TicketId == ticket.TicketId);
     }
 
     [Fact]
@@ -62,9 +63,9 @@ public class TicketsControllerQueryTests : IClassFixture<CustomWebApplicationFac
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var tickets = await response.Content.ReadFromJsonAsync<List<TicketSummaryResponse>>();
-        Assert.NotNull(tickets);
-        Assert.Empty(tickets);
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<TicketSummaryResponse>>();
+        Assert.NotNull(result);
+        Assert.Empty(result.Items);
     }
 
     [Fact]

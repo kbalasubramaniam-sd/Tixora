@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Tixora.Application.DTOs.Common;
 using Tixora.Application.DTOs.Notifications;
 using Tixora.Application.Interfaces;
 using Tixora.Domain.Entities;
@@ -59,17 +60,24 @@ public class NotificationService : INotificationService
             await _db.SaveChangesAsync();
     }
 
-    public async Task<List<NotificationResponse>> GetNotificationsAsync(Guid userId, bool unreadOnly = false)
+    public async Task<PagedResult<NotificationResponse>> GetNotificationsAsync(Guid userId, bool unreadOnly = false, int page = 1, int pageSize = 20)
     {
+        pageSize = Math.Clamp(pageSize, 1, 100);
+        page = Math.Max(1, page);
+
         var query = _db.Notifications
             .Where(n => n.RecipientUserId == userId);
 
         if (unreadOnly)
             query = query.Where(n => !n.IsRead);
 
-        return await query
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+        var items = await query
             .OrderByDescending(n => n.CreatedAt)
-            .Take(50)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(n => new NotificationResponse(
                 n.Id.ToString(),
                 n.Type.ToString(),
@@ -82,6 +90,8 @@ public class NotificationService : INotificationService
                 n.CreatedAt
             ))
             .ToListAsync();
+
+        return new PagedResult<NotificationResponse>(items, totalCount, page, pageSize, totalPages);
     }
 
     public async Task<int> GetUnreadCountAsync(Guid userId)

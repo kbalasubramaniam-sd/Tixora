@@ -1,6 +1,7 @@
 // File: src/Tixora.Infrastructure/Services/TicketQueryService.cs
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Tixora.Application.DTOs.Common;
 using Tixora.Application.DTOs.Dashboard;
 using Tixora.Application.DTOs.Tickets;
 using Tixora.Application.Interfaces;
@@ -25,12 +26,22 @@ public class TicketQueryService : ITicketQueryService
 
     // ─── GetMyTicketsAsync ───────────────────────────────
 
-    public async Task<List<TicketSummaryResponse>> GetMyTicketsAsync(Guid userId)
+    public async Task<PagedResult<TicketSummaryResponse>> GetMyTicketsAsync(Guid userId, int page = 1, int pageSize = 20)
     {
-        var tickets = await _db.Tickets
+        pageSize = Math.Clamp(pageSize, 1, 100);
+        page = Math.Max(1, page);
+
+        var baseQuery = _db.Tickets
             .AsNoTracking()
-            .Where(t => t.CreatedByUserId == userId)
+            .Where(t => t.CreatedByUserId == userId);
+
+        var totalCount = await baseQuery.CountAsync();
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+        var tickets = await baseQuery
             .OrderByDescending(t => t.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(t => new
             {
                 t.Id,
@@ -51,7 +62,7 @@ public class TicketQueryService : ITicketQueryService
 
         var slaMap = await GetSlaMapAsync(tickets.Select(t => t.Id).ToList());
 
-        return tickets.Select(t =>
+        var items = tickets.Select(t =>
         {
             var (status, remaining) = slaMap.GetValueOrDefault(t.Id, (SlaStatus.OnTrack, 0));
             return new TicketSummaryResponse(
@@ -59,13 +70,19 @@ public class TicketQueryService : ITicketQueryService
                 t.PartnerName, t.RequesterName, t.Status, t.CurrentStage,
                 status.ToString(), remaining, t.CreatedAt, t.UpdatedAt);
         }).ToList();
+
+        return new PagedResult<TicketSummaryResponse>(items, totalCount, page, pageSize, totalPages);
     }
 
     // ─── GetTeamQueueAsync ───────────────────────────────
 
-    public async Task<List<TicketSummaryResponse>> GetTeamQueueAsync(
-        Guid userId, UserRole role, string? product, string? task, string? partner, string? requester, string? status)
+    public async Task<PagedResult<TicketSummaryResponse>> GetTeamQueueAsync(
+        Guid userId, UserRole role, string? product, string? task, string? partner, string? requester, string? status,
+        int page = 1, int pageSize = 20)
     {
+        pageSize = Math.Clamp(pageSize, 1, 100);
+        page = Math.Max(1, page);
+
         var query = _db.Tickets
             .AsNoTracking()
             .Where(t => !TerminalStatuses.Contains(t.Status));
@@ -88,6 +105,10 @@ public class TicketQueryService : ITicketQueryService
         if (!string.IsNullOrEmpty(status) && status != "All" && Enum.TryParse<TicketStatus>(status, out var ts))
             query = query.Where(t => t.Status == ts);
 
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+        // Fetch all matching tickets to sort by SLA urgency in memory, then paginate
         var tickets = await query
             .Select(t => new
             {
@@ -108,7 +129,7 @@ public class TicketQueryService : ITicketQueryService
 
         var slaMap = await GetSlaMapAsync(tickets.Select(t => t.Id).ToList());
 
-        return tickets.Select(t =>
+        var items = tickets.Select(t =>
         {
             var (slaStatus, remaining) = slaMap.GetValueOrDefault(t.Id, (SlaStatus.OnTrack, 0));
             return new TicketSummaryResponse(
@@ -118,7 +139,11 @@ public class TicketQueryService : ITicketQueryService
         })
         .OrderBy(t => SlaUrgencyOrder(t.SlaStatus))
         .ThenBy(t => t.SlaHoursRemaining)
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
         .ToList();
+
+        return new PagedResult<TicketSummaryResponse>(items, totalCount, page, pageSize, totalPages);
     }
 
     // ─── GetActionRequiredAsync ──────────────────────────
