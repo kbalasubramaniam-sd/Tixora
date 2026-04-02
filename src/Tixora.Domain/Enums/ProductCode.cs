@@ -5,15 +5,15 @@ namespace Tixora.Domain.Enums;
 /// </summary>
 public enum ProductCode
 {
-    /// <summary>Rabet — transactional portal + API.</summary>
+    /// <summary>Rabet — Insurance data to ICP. Transactional portal + API.</summary>
     RBT = 0,
 
-    /// <summary>Rhoon — transactional portal + API.</summary>
+    /// <summary>Rhoon — Mortgage transactions. Transactional portal + API.</summary>
     RHN = 1,
 
-    /// <summary>Wtheeq — API-only, read-only portal.</summary>
+    /// <summary>Wtheeq — Vehicle insurance data. Read-only portal + API.</summary>
     WTQ = 2,
 
-    /// <summary>Mulem — API-only, read-only portal.</summary>
+    /// <summary>Mulem — Motor insurance pricing. Read-only portal + API.</summary>
     MLM = 3
 }
