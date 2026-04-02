@@ -1,5 +1,7 @@
 import type { PartnerSummary } from '@/api/endpoints/partners'
 import { LifecycleState } from '@/types/enums'
+import { PRODUCT_LABELS } from '@/utils/labels'
+import { getInitials } from '@/utils/format'
 
 const statusBadge: Record<string, string> = {
   [LifecycleState.Live]: 'bg-teal-100 text-teal-800',
@@ -24,6 +26,10 @@ interface PartnerRowProps {
 export function PartnerRow({ partner }: PartnerRowProps) {
   return (
     <div className="group flex items-center bg-surface-container-lowest p-6 rounded-xl hover:shadow-[0_10px_40px_rgba(23,29,28,0.06)] transition-all duration-300 cursor-pointer">
+      {/* Initial circle */}
+      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm mr-4 flex-shrink-0">
+        {getInitials(partner.name)}
+      </div>
       <div className="flex-1">
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-bold text-on-surface">{partner.name}</h3>
@@ -37,7 +43,7 @@ export function PartnerRow({ partner }: PartnerRowProps) {
               key={code}
               className="bg-primary/10 text-primary px-2.5 py-0.5 rounded text-[10px] font-extrabold tracking-wider"
             >
-              {code}
+              {PRODUCT_LABELS[code] ?? code}
             </span>
           ))}
         </div>
