@@ -1,36 +1,40 @@
 import { useState, useMemo } from 'react'
-import { useNotifications } from '@/api/hooks/useNotifications'
+import { useNotifications, useMarkRead, useMarkAllRead } from '@/api/hooks/useNotifications'
 import { NotificationStats } from './NotificationStats'
 import { NotificationCard } from './NotificationCard'
+import { timeAgo } from '@/utils/format'
 import type { NotificationItem } from '@/api/endpoints/notifications'
 
 function groupByTime(notifications: NotificationItem[]): { label: string; items: NotificationItem[] }[] {
   const today: NotificationItem[] = []
   const yesterday: NotificationItem[] = []
+  const older: NotificationItem[] = []
+
+  const now = new Date()
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterdayStart = new Date(todayStart.getTime() - 86_400_000)
 
   for (const n of notifications) {
-    if (n.timestamp === 'Yesterday') {
-      yesterday.push(n)
-    } else {
-      today.push(n)
-    }
+    const d = new Date(n.createdAt)
+    if (d >= todayStart) today.push(n)
+    else if (d >= yesterdayStart) yesterday.push(n)
+    else older.push(n)
   }
 
   const groups: { label: string; items: NotificationItem[] }[] = []
   if (today.length > 0) groups.push({ label: 'Today', items: today })
   if (yesterday.length > 0) groups.push({ label: 'Yesterday', items: yesterday })
+  if (older.length > 0) groups.push({ label: 'Earlier', items: older })
   return groups
 }
 
 export default function Notifications() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
-  const { data: notifications = [], isLoading } = useNotifications()
+  const { data: notifications = [], isLoading } = useNotifications(filter === 'unread')
+  const markRead = useMarkRead()
+  const markAllRead = useMarkAllRead()
 
-  const filtered = filter === 'unread'
-    ? notifications.filter((n) => !n.read)
-    : notifications
-
-  const groups = useMemo(() => groupByTime(filtered), [filtered])
+  const groups = useMemo(() => groupByTime(notifications), [notifications])
 
   if (isLoading) {
     return (
@@ -53,8 +57,12 @@ export default function Notifications() {
           <h2 className="text-4xl font-extrabold tracking-tight text-on-surface">Notifications</h2>
         </div>
         <div className="flex items-center gap-3">
-          <button className="text-sm font-bold text-primary px-4 py-2 hover:bg-primary/5 rounded-lg transition-colors">
-            Mark All Read
+          <button
+            onClick={() => markAllRead.mutate()}
+            disabled={markAllRead.isPending}
+            className="text-sm font-bold text-primary px-4 py-2 hover:bg-primary/5 rounded-lg transition-colors disabled:opacity-50"
+          >
+            {markAllRead.isPending ? 'Marking...' : 'Mark All Read'}
           </button>
           <div className="flex p-1 bg-surface-container-low rounded-xl">
             <button
@@ -81,11 +89,11 @@ export default function Notifications() {
         </div>
       </div>
 
-      {/* Stats (derived from data) */}
+      {/* Stats */}
       <NotificationStats notifications={notifications} />
 
-      {/* Notification List with time groups */}
-      {filtered.length === 0 ? (
+      {/* Notification List */}
+      {notifications.length === 0 ? (
         <div className="bg-surface-container-lowest rounded-xl p-12 text-center shadow-sm">
           <span className="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-3 block">notifications_off</span>
           <h3 className="text-lg font-bold text-on-surface mb-1">No notifications</h3>
@@ -101,20 +109,15 @@ export default function Notifications() {
               </div>
               <div className="space-y-3">
                 {group.items.map((notification) => (
-                  <NotificationCard key={notification.id} notification={notification} />
+                  <NotificationCard
+                    key={notification.id}
+                    notification={notification}
+                    onMarkRead={(id) => markRead.mutate(id)}
+                  />
                 ))}
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Load More */}
-      {filtered.length > 0 && (
-        <div className="mt-10 flex justify-center">
-          <button className="text-sm font-bold text-secondary px-8 py-3 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors">
-            Load more (24 older)
-          </button>
         </div>
       )}
     </div>

@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import { useAuth } from '@/contexts/AuthContext'
+import { useUnreadCount } from '@/api/hooks/useNotifications'
 import { Chip } from '@/components/ui/Chip'
 
 interface TopBarProps {
@@ -9,7 +11,9 @@ interface TopBarProps {
 
 export function TopBar({ onMenuToggle, showMenuButton }: TopBarProps) {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const { data: unreadCount = 0 } = useUnreadCount()
 
   const initials = user
     ? user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
@@ -55,11 +59,16 @@ export function TopBar({ onMenuToggle, showMenuButton }: TopBarProps) {
       <div className="flex items-center gap-3">
         {/* Notification bell */}
         <button
+          onClick={() => navigate('/notifications')}
           className="relative p-2 rounded-lg hover:bg-surface-container-low transition-colors"
           aria-label="Notifications"
         >
           <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
-          <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </button>
 
         {/* User avatar */}

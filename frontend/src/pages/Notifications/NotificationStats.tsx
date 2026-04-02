@@ -1,15 +1,14 @@
-import { NotificationType } from '@/types/enums'
 import type { NotificationItem } from '@/api/endpoints/notifications'
 
 interface NotificationStatsProps {
   notifications: NotificationItem[]
 }
 
-const SLA_TYPES = new Set<string>([NotificationType.SlaBreach, NotificationType.SlaWarning75, NotificationType.SlaWarning90])
+const SLA_TYPES = new Set<string>(['SlaBreach', 'SlaWarning75', 'SlaWarning90'])
 
 export function NotificationStats({ notifications }: NotificationStatsProps) {
-  const criticalCount = notifications.filter((n) => !n.read && SLA_TYPES.has(n.type)).length
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const criticalCount = notifications.filter((n) => !n.isRead && SLA_TYPES.has(n.type)).length
+  const unreadCount = notifications.filter((n) => !n.isRead).length
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
