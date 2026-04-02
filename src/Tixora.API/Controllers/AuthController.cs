@@ -1,0 +1,63 @@
+// File: src/Tixora.API/Controllers/AuthController.cs
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Tixora.Application.DTOs.Auth;
+using Tixora.Application.Interfaces;
+
+namespace Tixora.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase
+{
+    private readonly IAuthService _authService;
+
+    public AuthController(IAuthService authService)
+    {
+        _authService = authService;
+    }
+
+    /// <summary>
+    /// Authenticate with email and password. Returns a JWT token and user profile.
+    /// </summary>
+    [HttpPost("login")]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    {
+        var result = await _authService.LoginAsync(request);
+
+        if (result is null)
+            return Unauthorized(new { message = "Invalid email or password." });
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Get the current authenticated user's profile from JWT claims.
+    /// </summary>
+    [HttpGet("me")]
+    [Authorize]
+    [ProducesResponseType(typeof(UserProfileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public IActionResult Me()
+    {
+        var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        var email = User.FindFirstValue(JwtRegisteredClaimNames.Email);
+        var role = User.FindFirstValue(ClaimTypes.Role);
+        var name = User.FindFirstValue(ClaimTypes.Name);
+
+        if (userId is null || email is null || role is null || name is null)
+            return Unauthorized();
+
+        var profile = new UserProfileResponse(
+            Guid.Parse(userId),
+            name,
+            email,
+            role);
+
+        return Ok(profile);
+    }
+}
