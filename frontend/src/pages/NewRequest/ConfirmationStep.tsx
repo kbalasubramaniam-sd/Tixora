@@ -2,11 +2,12 @@ import { Link } from 'react-router'
 import { Button } from '@/components/ui/Button'
 
 interface ConfirmationStepProps {
+  id: string
   ticketId: string
   routedTo: string
 }
 
-export function ConfirmationStep({ ticketId, routedTo }: ConfirmationStepProps) {
+export function ConfirmationStep({ id, ticketId, routedTo }: ConfirmationStepProps) {
   return (
     <div className="max-w-lg mx-auto text-center py-16">
       <div className="bg-surface-container-lowest rounded-3xl p-12 shadow-xl shadow-teal-900/5">
@@ -29,7 +30,7 @@ export function ConfirmationStep({ ticketId, routedTo }: ConfirmationStepProps) 
         </p>
 
         <div className="flex flex-col gap-3">
-          <Link to={`/tickets/${ticketId}`}>
+          <Link to={`/tickets/${id}`}>
             <Button className="w-full shadow-lg shadow-primary/20 rounded-xl">View Ticket</Button>
           </Link>
           <Link to="/new-request">

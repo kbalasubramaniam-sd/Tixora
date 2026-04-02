@@ -15,11 +15,11 @@ export function Modal({ open, onOpenChange, title, description, children, classN
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-on-surface/20 backdrop-blur-sm transition-opacity duration-200" />
+        <Dialog.Overlay className="fixed inset-0 bg-on-surface/20 backdrop-blur-sm z-[100] transition-opacity duration-200" />
         <Dialog.Content
           className={cn(
-            'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
-            'glass rounded-3xl p-8 shadow-ambient',
+            'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101]',
+            'bg-white rounded-3xl p-8 shadow-ambient',
             'w-full max-w-md max-h-[85vh] overflow-y-auto',
             'transition-all duration-200',
             className,

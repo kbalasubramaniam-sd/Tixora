@@ -803,7 +803,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
 
       {/* Metadata Sidebar */}
       {user && (
-        <aside className="hidden xl:block fixed top-48 right-12 w-64 space-y-6 z-30">
+        <aside className="hidden xl:block fixed top-64 right-12 w-64 space-y-6 z-30">
           <div className="p-6 rounded-2xl bg-slate-100/50">
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
               Request Metadata
