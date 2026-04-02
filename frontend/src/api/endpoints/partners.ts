@@ -54,32 +54,73 @@ const mockPartners: PartnerSummary[] = [
   },
 ]
 
+// Backend response shape
+interface BackendPartner {
+  id: string
+  name: string
+  alias: string
+  products: {
+    productCode: string
+    productName: string
+    lifecycleState: string
+    companyCode: string | null
+  }[]
+}
+
+// Lifecycle priority: highest state across all products
+const LIFECYCLE_ORDER: LifecycleState[] = [
+  LifecycleState.None,
+  LifecycleState.Onboarded,
+  LifecycleState.UatActive,
+  LifecycleState.UatCompleted,
+  LifecycleState.Live,
+]
+
+function mapBackendPartner(p: BackendPartner): PartnerSummary {
+  const products = p.products.map((pp) => pp.productCode as ProductCode)
+  const states = p.products.map((pp) => pp.lifecycleState as LifecycleState)
+  const highestState = states.reduce(
+    (best, s) => (LIFECYCLE_ORDER.indexOf(s) > LIFECYCLE_ORDER.indexOf(best) ? s : best),
+    LifecycleState.None,
+  )
+  return {
+    id: p.id,
+    name: p.name,
+    refId: p.alias,
+    products,
+    lifecycleState: highestState,
+  }
+}
+
 export interface PartnerFilters {
   search?: string
   lifecycleState?: string
   product?: string
 }
 
+function applyFilters(partners: PartnerSummary[], filters?: PartnerFilters): PartnerSummary[] {
+  let results = partners
+  if (filters?.search) {
+    const q = filters.search.toLowerCase()
+    results = results.filter(
+      (p) => p.name.toLowerCase().includes(q) || p.refId.toLowerCase().includes(q),
+    )
+  }
+  if (filters?.lifecycleState && filters.lifecycleState !== 'All') {
+    results = results.filter((p) => p.lifecycleState === filters.lifecycleState)
+  }
+  if (filters?.product && filters.product !== 'All') {
+    results = results.filter((p) => p.products.includes(filters.product as ProductCode))
+  }
+  return results
+}
+
 export async function fetchPartners(filters?: PartnerFilters): Promise<PartnerSummary[]> {
   try {
-    const res = await apiClient.get<PartnerSummary[]>('/partners', { params: filters })
-    return res.data
+    const res = await apiClient.get<BackendPartner[]>('/partners')
+    const mapped = res.data.map(mapBackendPartner)
+    return applyFilters(mapped, filters)
   } catch {
-    let results = [...mockPartners]
-
-    if (filters?.search) {
-      const q = filters.search.toLowerCase()
-      results = results.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.refId.toLowerCase().includes(q),
-      )
-    }
-    if (filters?.lifecycleState && filters.lifecycleState !== 'All') {
-      results = results.filter((p) => p.lifecycleState === filters.lifecycleState)
-    }
-    if (filters?.product && filters.product !== 'All') {
-      results = results.filter((p) => p.products.includes(filters.product as ProductCode))
-    }
-
-    return results
+    return applyFilters([...mockPartners], filters)
   }
 }

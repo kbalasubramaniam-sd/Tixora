@@ -7,7 +7,6 @@ import { ReviewStep } from './ReviewStep'
 import { ConfirmationStep } from './ConfirmationStep'
 import { useSubmitTicket } from '@/api/hooks/useProducts'
 import type { Product, TaskOption } from '@/types/product'
-import type { ProductCode, TaskType } from '@/types/enums'
 
 const STEPS = [
   { label: 'Product' },
@@ -21,7 +20,7 @@ export default function NewRequest() {
   const [product, setProduct] = useState<Product | null>(null)
   const [task, setTask] = useState<TaskOption | null>(null)
   const [formData, setFormData] = useState<Record<string, string | boolean>>({})
-  const [result, setResult] = useState<{ ticketId: string; routedTo: string } | null>(null)
+  const [result, setResult] = useState<{ ticketId: string; currentStageName: string | null } | null>(null)
 
   const submitMutation = useSubmitTicket()
 
@@ -45,19 +44,26 @@ export default function NewRequest() {
 
   async function handleFinalSubmit() {
     if (!product || !task) return
+
+    // Extract top-level fields from formData, rest goes into JSON blob
+    const { partnerName: partnerId, issueType, apiOptIn, ...rest } = formData
+    const provisioningPath = apiOptIn ? 'PortalAndApi' : 'PortalOnly'
+
     const res = await submitMutation.mutateAsync({
-      productCode: product.code as ProductCode,
-      taskType: task.type as TaskType,
-      formData,
-      documents: [],
+      productCode: product.code,
+      taskType: task.type,
+      partnerId: partnerId as string,
+      provisioningPath: task.type === 'T03' ? provisioningPath : null,
+      issueType: task.type === 'T04' ? (issueType as string) : null,
+      formData: JSON.stringify(rest),
     })
-    setResult(res)
+    setResult({ ticketId: res.ticketId, currentStageName: res.currentStageName })
     setStep(4)
   }
 
   // Confirmation is step 4 — no stepper shown
   if (step === 4 && result) {
-    return <ConfirmationStep ticketId={result.ticketId} routedTo={result.routedTo} />
+    return <ConfirmationStep ticketId={result.ticketId} routedTo={result.currentStageName ?? 'Processing'} />
   }
 
   return (

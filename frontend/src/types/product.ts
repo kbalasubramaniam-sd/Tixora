@@ -57,13 +57,25 @@ export interface FormSchema {
 }
 
 export interface TicketCreateRequest {
-  productCode: ProductCode
-  taskType: TaskType
-  formData: Record<string, string | boolean>
-  documents: { name: string; file: File }[]
+  productCode: string
+  taskType: string
+  partnerId: string
+  provisioningPath?: string | null
+  issueType?: string | null
+  formData: string
 }
 
 export interface TicketCreateResponse {
+  id: string
   ticketId: string
-  routedTo: string
+  productCode: string
+  taskType: string
+  status: string
+  currentStageOrder: number
+  currentStageName: string | null
+  assignedToName: string | null
+  partnerName: string
+  provisioningPath: string | null
+  issueType: string | null
+  createdAt: string
 }

@@ -398,12 +398,33 @@ const defaultFormSchema: FormSchema = {
   requiredDocuments: [],
 }
 
+// --- UI metadata for products (not from backend) ---
+
+const productUiMeta: Record<string, Omit<Product, 'code' | 'name' | 'description'>> = {
+  RBT: { accessType: 'Portal + API', icon: 'hub', bgIcon: 'lan', iconBg: 'bg-primary-container/10', iconColor: 'text-primary' },
+  RHN: { accessType: 'Portal + API', icon: 'account_balance', bgIcon: 'cloud_sync', iconBg: 'bg-tertiary-container/10', iconColor: 'text-tertiary' },
+  WTQ: { accessType: 'API', icon: 'encrypted', bgIcon: 'code', iconBg: 'bg-slate-200', iconColor: 'text-on-surface' },
+  MLM: { accessType: 'API', icon: 'psychology', bgIcon: 'directions_car', iconBg: 'bg-primary/10', iconColor: 'text-primary' },
+}
+
+interface BackendProduct {
+  code: string
+  name: string
+  description: string
+  portalType: string
+}
+
 // --- API calls with mock fallback ---
 
 export async function fetchProducts(): Promise<Product[]> {
   try {
-    const res = await apiClient.get<Product[]>('/products')
-    return res.data
+    const res = await apiClient.get<BackendProduct[]>('/products')
+    return res.data.map((p) => ({
+      code: p.code as ProductCode,
+      name: p.name,
+      description: `${p.code} • ${p.description}`,
+      ...productUiMeta[p.code] ?? productUiMeta.RBT,
+    }))
   } catch {
     return mockProducts
   }
@@ -437,12 +458,22 @@ export async function submitTicket(request: TicketCreateRequest): Promise<Ticket
     const res = await apiClient.post<TicketCreateResponse>('/tickets', request)
     return res.data
   } catch {
-    // Dev mock: generate fake ticket ID
+    // Dev mock: generate fake ticket response
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-    const seq = String(Math.floor(Math.random() * 9999)).padStart(4, '0')
+    const seq = String(Math.floor(Math.random() * 999)).padStart(3, '0')
     return {
+      id: crypto.randomUUID(),
       ticketId: `SPM-${request.productCode}-${request.taskType}-${date}-${seq}`,
-      routedTo: 'Legal Review',
+      productCode: request.productCode,
+      taskType: request.taskType,
+      status: 'Submitted',
+      currentStageOrder: 1,
+      currentStageName: 'Legal Review',
+      assignedToName: 'Sarah Ahmad',
+      partnerName: 'Mock Partner',
+      provisioningPath: request.provisioningPath ?? null,
+      issueType: request.issueType ?? null,
+      createdAt: new Date().toISOString(),
     }
   }
 }
