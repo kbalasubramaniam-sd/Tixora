@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMyTickets } from '@/api/hooks/useMyTickets'
+import { ApiError } from '@/components/ui/ApiError'
 import { FilterBar } from '@/pages/TeamQueue/FilterBar'
 import { QueueTable } from '@/pages/TeamQueue/QueueTable'
 
@@ -16,7 +17,7 @@ export default function MyTickets() {
     status: status !== 'All' ? status : undefined,
   }
 
-  const { data: tickets = [], isLoading } = useMyTickets(
+  const { data: tickets = [], isLoading, isError, refetch } = useMyTickets(
     Object.values(filters).some(Boolean) ? filters : undefined,
   )
 
@@ -25,6 +26,10 @@ export default function MyTickets() {
     setTask('All')
     setSlaStatus('All')
     setStatus('All')
+  }
+
+  if (isError) {
+    return <ApiError title="Failed to load your tickets" onRetry={() => refetch()} />
   }
 
   if (isLoading) {

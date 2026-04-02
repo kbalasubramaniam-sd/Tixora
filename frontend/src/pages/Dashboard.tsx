@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useDashboardStats, useActionRequired, useRecentActivity } from '@/api/hooks/useDashboard'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { ApiError } from '@/components/ui/ApiError'
 import { TicketRow } from '@/components/shared/TicketRow'
 import { UserRole } from '@/types/enums'
 import { cn } from '@/utils/cn'
@@ -28,9 +29,9 @@ const roleLabel: Record<string, string> = {
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const { data: stats, isLoading: statsLoading } = useDashboardStats()
-  const { data: tickets, isLoading: ticketsLoading } = useActionRequired()
-  const { data: activity, isLoading: activityLoading } = useRecentActivity()
+  const { data: stats, isLoading: statsLoading, isError: statsError } = useDashboardStats()
+  const { data: tickets, isLoading: ticketsLoading, isError: ticketsError } = useActionRequired()
+  const { data: activity, isLoading: activityLoading, isError: activityError } = useRecentActivity()
 
   const isRequester = user?.role === UserRole.PartnershipTeam || user?.role === UserRole.SystemAdministrator
 
@@ -63,7 +64,9 @@ export default function Dashboard() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        {statsLoading ? (
+        {statsError ? (
+          <div className="col-span-full"><ApiError title="Failed to load stats" /></div>
+        ) : statsLoading ? (
           [1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-surface-container-lowest p-6 rounded-xl shadow-xl shadow-teal-900/5 animate-pulse">
               <div className="flex justify-between items-start mb-4">
@@ -108,7 +111,9 @@ export default function Dashboard() {
               </Link>
             </div>
 
-            {ticketsLoading ? (
+            {ticketsError ? (
+              <ApiError title="Failed to load tickets" />
+            ) : ticketsLoading ? (
               <div className="divide-y divide-surface-container-low">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="p-5 animate-pulse">
@@ -145,7 +150,9 @@ export default function Dashboard() {
           <div className="bg-surface-container-lowest rounded-xl shadow-xl shadow-teal-900/5 p-6 h-full">
             <h2 className="text-lg font-extrabold text-on-surface tracking-tight uppercase mb-8">Recent Activity</h2>
 
-            {activityLoading ? (
+            {activityError ? (
+              <ApiError title="Failed to load activity" />
+            ) : activityLoading ? (
               <div className="space-y-8">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex gap-4 animate-pulse">

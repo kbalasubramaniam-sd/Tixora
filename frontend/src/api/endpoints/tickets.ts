@@ -249,15 +249,9 @@ function findMockTicket(id: string): TicketDetail | undefined {
   return Object.values(mockTicketDetails)[0]
 }
 
-// --- API calls with mock fallback ---
+// --- API calls ---
 
 export async function fetchTicketDetail(id: string): Promise<TicketDetail> {
-  try {
-    const res = await apiClient.get<TicketDetail>(`/tickets/${id}`)
-    return res.data
-  } catch {
-    const mock = findMockTicket(id)
-    if (!mock) throw new Error(`Ticket not found: ${id}`)
-    return mock
-  }
+  const res = await apiClient.get<TicketDetail>(`/tickets/${id}`)
+  return res.data
 }

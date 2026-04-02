@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router'
 import { cn } from '@/utils/cn'
 import { useTicketDetail } from '@/api/hooks/useTickets'
+import { ApiError } from '@/components/ui/ApiError'
 import { TicketHeader } from './TicketHeader'
 import { WorkflowStepper } from './WorkflowStepper'
 import { TicketDetailsCard } from './TicketDetailsCard'
@@ -22,7 +23,7 @@ const tabs: { id: TabId; label: string }[] = [
 
 export default function TicketDetail() {
   const { id } = useParams<{ id: string }>()
-  const { data: ticket, isLoading, error } = useTicketDetail(id ?? '')
+  const { data: ticket, isLoading, isError, refetch } = useTicketDetail(id ?? '')
   const [activeTab, setActiveTab] = useState<TabId>('comments')
 
   if (isLoading) {
@@ -33,13 +34,8 @@ export default function TicketDetail() {
     )
   }
 
-  if (error || !ticket) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-2">
-        <span className="material-symbols-outlined text-error text-3xl">error</span>
-        <p className="text-sm text-on-surface-variant">Ticket not found</p>
-      </div>
-    )
+  if (isError || !ticket) {
+    return <ApiError title="Failed to load ticket" message={`Could not fetch ticket ${id}.`} onRetry={() => refetch()} />
   }
 
   return (

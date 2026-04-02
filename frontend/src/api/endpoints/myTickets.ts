@@ -118,26 +118,6 @@ export interface MyTicketsFilters {
 }
 
 export async function fetchMyTickets(filters?: MyTicketsFilters): Promise<TicketSummary[]> {
-  try {
-    const res = await apiClient.get<TicketSummary[]>('/tickets/mine', { params: filters })
-    return res.data
-  } catch {
-    let results = [...mockMyTickets]
-
-    if (filters?.product && filters.product !== 'All') {
-      results = results.filter((t) => t.productCode === filters.product)
-    }
-    if (filters?.task && filters.task !== 'All') {
-      results = results.filter((t) => t.taskType === filters.task)
-    }
-    if (filters?.slaStatus && filters.slaStatus !== 'All') {
-      results = results.filter((t) => t.slaStatus === filters.slaStatus)
-    }
-    if (filters?.status && filters.status !== 'All') {
-      const allowed = STATUS_MAP[filters.status] ?? []
-      results = results.filter((t) => allowed.includes(t.status))
-    }
-
-    return results
-  }
+  const res = await apiClient.get<TicketSummary[]>('/tickets/my', { params: filters })
+  return res.data
 }

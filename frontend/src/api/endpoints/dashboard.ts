@@ -125,31 +125,19 @@ const mockActivity: ActivityEntry[] = [
   { id: '5', title: 'User Access Granted', description: 'Ahmed K. granted reviewer access to Rabet product.', timestamp: 'Yesterday, 14:20', icon: 'person_add', iconBg: 'bg-primary-container', iconColor: 'text-on-primary-container' },
 ]
 
-// --- API calls with mock fallback ---
+// --- API calls ---
 
-export async function fetchDashboardStats(role: UserRole): Promise<DashboardStats> {
-  try {
-    const res = await apiClient.get<DashboardStats>('/dashboard/stats')
-    return res.data
-  } catch {
-    return mockStats[role] ?? mockStats.PartnershipTeam
-  }
+export async function fetchDashboardStats(): Promise<DashboardStats> {
+  const res = await apiClient.get<DashboardStats>('/dashboard/stats')
+  return res.data
 }
 
 export async function fetchActionRequired(): Promise<TicketSummary[]> {
-  try {
-    const res = await apiClient.get<TicketSummary[]>('/dashboard/action-required')
-    return res.data
-  } catch {
-    return mockTickets
-  }
+  const res = await apiClient.get<TicketSummary[]>('/dashboard/action-required')
+  return res.data
 }
 
 export async function fetchRecentActivity(): Promise<ActivityEntry[]> {
-  try {
-    const res = await apiClient.get<ActivityEntry[]>('/dashboard/activity')
-    return res.data
-  } catch {
-    return mockActivity
-  }
+  const res = await apiClient.get<ActivityEntry[]>('/dashboard/activity')
+  return res.data
 }

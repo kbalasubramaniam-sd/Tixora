@@ -159,28 +159,6 @@ export interface TeamQueueFilters {
 }
 
 export async function fetchTeamQueue(filters?: TeamQueueFilters): Promise<TicketSummary[]> {
-  try {
-    const res = await apiClient.get<TicketSummary[]>('/dashboard/team-queue', { params: filters })
-    return res.data
-  } catch {
-    let results = [...mockTeamQueue]
-
-    if (filters?.product && filters.product !== 'All') {
-      results = results.filter((t) => t.productCode === filters.product)
-    }
-    if (filters?.task && filters.task !== 'All') {
-      results = results.filter((t) => t.taskType === filters.task)
-    }
-    if (filters?.slaStatus && filters.slaStatus !== 'All') {
-      results = results.filter((t) => t.slaStatus === filters.slaStatus)
-    }
-    if (filters?.partner && filters.partner !== 'All') {
-      results = results.filter((t) => t.partnerName === filters.partner)
-    }
-    if (filters?.requester && filters.requester !== 'All') {
-      results = results.filter((t) => t.requesterName === filters.requester)
-    }
-
-    return results
-  }
+  const res = await apiClient.get<TicketSummary[]>('/dashboard/team-queue', { params: filters })
+  return res.data
 }

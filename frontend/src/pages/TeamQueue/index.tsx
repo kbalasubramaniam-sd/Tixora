@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { useTeamQueue } from '@/api/hooks/useTeamQueue'
+import { ApiError } from '@/components/ui/ApiError'
 import { FilterBar } from './FilterBar'
 import { UrgencySection } from './UrgencySection'
 import { QueueTable } from './QueueTable'
@@ -21,7 +22,7 @@ export default function TeamQueue() {
     requester: requester !== 'All' ? requester : undefined,
   }
 
-  const { data: tickets = [], isLoading } = useTeamQueue(
+  const { data: tickets = [], isLoading, isError, refetch } = useTeamQueue(
     Object.values(filters).some(Boolean) ? filters : undefined,
   )
 
@@ -44,6 +45,10 @@ export default function TeamQueue() {
     setSlaStatus('All')
     setPartner('All')
     setRequester('All')
+  }
+
+  if (isError) {
+    return <ApiError title="Failed to load team queue" onRetry={() => refetch()} />
   }
 
   if (isLoading) {
