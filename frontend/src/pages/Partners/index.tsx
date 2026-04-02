@@ -43,7 +43,7 @@ export default function Partners() {
       <section className="mb-8">
         <div className="relative group">
           <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-            <span className="material-symbols-outlined text-primary transition-transform group-focus-within:scale-110">search</span>
+            <span className="material-symbols-outlined text-teal-600 transition-transform group-focus-within:scale-110">search</span>
           </div>
           <input
             type="text"

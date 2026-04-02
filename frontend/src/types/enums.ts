@@ -30,9 +30,9 @@ export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus]
 
 export const LifecycleState = {
   None: 'None',
-  Agreed: 'Agreed',
-  UatActive: 'UatActive',
   Onboarded: 'Onboarded',
+  UatActive: 'UatActive',
+  UatCompleted: 'UatCompleted',
   Live: 'Live',
 } as const
 export type LifecycleState = (typeof LifecycleState)[keyof typeof LifecycleState]

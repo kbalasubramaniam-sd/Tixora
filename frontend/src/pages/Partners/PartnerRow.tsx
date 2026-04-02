@@ -3,17 +3,17 @@ import { LifecycleState } from '@/types/enums'
 
 const statusBadge: Record<string, string> = {
   [LifecycleState.Live]: 'bg-teal-100 text-teal-800',
+  [LifecycleState.UatCompleted]: 'bg-teal-50 text-teal-700',
   [LifecycleState.UatActive]: 'bg-amber-100 text-amber-800',
   [LifecycleState.Onboarded]: 'bg-secondary-container text-on-secondary-container',
-  [LifecycleState.Agreed]: 'bg-surface-container-highest text-on-surface-variant',
   [LifecycleState.None]: 'bg-surface-container text-on-surface-variant',
 }
 
 const statusLabel: Record<string, string> = {
   [LifecycleState.Live]: 'LIVE',
+  [LifecycleState.UatCompleted]: 'UAT_COMPLETE',
   [LifecycleState.UatActive]: 'UAT_ACTIVE',
   [LifecycleState.Onboarded]: 'ONBOARDED',
-  [LifecycleState.Agreed]: 'AGREED',
   [LifecycleState.None]: 'NONE',
 }
 

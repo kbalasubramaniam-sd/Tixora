@@ -21,7 +21,7 @@ const mockTicketDetails: Record<string, TicketDetail> = {
     updatedAt: '2026-04-01T10:30:00Z',
     createdBy: 'Admin Ops',
     assignedTo: 'Sarah Chen',
-    lifecycleState: LifecycleState.Agreed,
+    lifecycleState: LifecycleState.Onboarded,
     formData: {
       partnerName: 'ABC Insurance Co.',
       companyCode: 'ABC-RBT-2026',

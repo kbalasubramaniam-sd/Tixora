@@ -36,7 +36,7 @@ const mockPartners: PartnerSummary[] = [
     name: 'National Bank of Fujairah',
     refId: 'REF-10004',
     products: [ProductCode.MLM],
-    lifecycleState: LifecycleState.Agreed,
+    lifecycleState: LifecycleState.UatCompleted,
   },
   {
     id: 'p-5',
