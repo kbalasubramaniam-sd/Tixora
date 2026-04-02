@@ -105,7 +105,7 @@ All backend endpoints are live and tested. **64 tests passing** (26 unit + 38 in
 | # | Chunk | BE Status | FE Wirable | Endpoints |
 |---|-------|-----------|------------|-----------|
 | E3.1 | Comments | DONE | YES | POST/GET /api/tickets/{id}/comments |
-| E3.2 | Documents | IN PROGRESS | NO | POST/GET /api/tickets/{id}/documents, GET /api/documents/{id} |
+| E3.2 | Documents | DONE | YES | POST/GET /api/tickets/{id}/documents, GET /api/documents/{id} |
 | E3.3 | Audit Trail | — | YES (already in E2) | GET /api/tickets/{id} → auditTrail[] |
 | E3.4 | SLA Engine | — | NO | SLA fields in ticket responses |
 | E3.5 | Notifications | — | NO | GET/PUT /api/notifications |
@@ -133,6 +133,32 @@ All backend endpoints are live and tested. **64 tests passing** (26 unit + 38 in
 - Comments are append-only (no edit/delete in MVP 1)
 - Wire into S-03 Ticket Detail Comments tab
 
+### E3.2 Documents (BE DONE — FE: NOT WIRED)
+
+**Endpoints:**
+- `POST /api/tickets/{ticketId}/documents` — Upload file (multipart/form-data, field name: `file`). Returns 201.
+- `GET /api/tickets/{ticketId}/documents` — List documents for ticket, ordered by uploadedAt desc.
+- `GET /api/documents/{id}` — Download file (streams binary content with correct Content-Type).
+
+**Response shape (DocumentResponse):**
+```json
+{
+  "id": "guid-string",
+  "fileName": "agreement.pdf",
+  "contentType": "application/pdf",
+  "sizeBytes": 204800,
+  "uploadedBy": "Sarah Ahmad",
+  "uploadedAt": "2026-04-03T10:00:00Z"
+}
+```
+
+**Wiring notes:**
+- Auth required (Bearer token)
+- Max file size: 10MB. Allowed types: PDF, JPEG, PNG, Word, Excel, text
+- Files stored to disk (MVP 1), path in DB
+- Wire upload into S-02 New Request (FileUpload component) and S-03 Ticket Detail Documents tab
+- Download: `GET /api/documents/{id}` returns the file directly (use as href or fetch blob)
+
 ## Next Steps
-- **E3.2: Documents** — in progress
-- **E3.3-E3.5** — pending
+- **E3.4: SLA Engine** — in progress
+- **E3.5: Notifications** — pending
