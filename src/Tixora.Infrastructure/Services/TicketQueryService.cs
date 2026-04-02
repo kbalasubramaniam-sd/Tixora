@@ -64,7 +64,7 @@ public class TicketQueryService : ITicketQueryService
     // ─── GetTeamQueueAsync ───────────────────────────────
 
     public async Task<List<TicketSummaryResponse>> GetTeamQueueAsync(
-        Guid userId, UserRole role, string? product, string? task, string? partner, string? requester)
+        Guid userId, UserRole role, string? product, string? task, string? partner, string? requester, string? status)
     {
         var query = _db.Tickets
             .AsNoTracking()
@@ -85,9 +85,10 @@ public class TicketQueryService : ITicketQueryService
             query = query.Where(t => t.PartnerProduct.Partner.Name.Contains(partner));
         if (!string.IsNullOrEmpty(requester) && requester != "All")
             query = query.Where(t => t.CreatedBy.FullName.Contains(requester));
+        if (!string.IsNullOrEmpty(status) && status != "All" && Enum.TryParse<TicketStatus>(status, out var ts))
+            query = query.Where(t => t.Status == ts);
 
         var tickets = await query
-            .OrderByDescending(t => t.UpdatedAt)
             .Select(t => new
             {
                 t.Id,
@@ -109,12 +110,15 @@ public class TicketQueryService : ITicketQueryService
 
         return tickets.Select(t =>
         {
-            var (status, remaining) = slaMap.GetValueOrDefault(t.Id, (SlaStatus.OnTrack, 0));
+            var (slaStatus, remaining) = slaMap.GetValueOrDefault(t.Id, (SlaStatus.OnTrack, 0));
             return new TicketSummaryResponse(
                 t.Id.ToString(), t.TicketId, t.ProductCode, t.TaskType,
                 t.PartnerName, t.RequesterName, t.Status, t.CurrentStage,
-                status.ToString(), remaining, t.CreatedAt, t.UpdatedAt);
-        }).ToList();
+                slaStatus.ToString(), remaining, t.CreatedAt, t.UpdatedAt);
+        })
+        .OrderBy(t => SlaUrgencyOrder(t.SlaStatus))
+        .ThenBy(t => t.SlaHoursRemaining)
+        .ToList();
     }
 
     // ─── GetActionRequiredAsync ──────────────────────────
@@ -137,8 +141,6 @@ public class TicketQueryService : ITicketQueryService
         }
 
         var tickets = await query
-            .OrderBy(t => t.CreatedAt)
-            .Take(20)
             .Select(t => new
             {
                 t.Id,
@@ -160,97 +162,73 @@ public class TicketQueryService : ITicketQueryService
 
         return tickets.Select(t =>
         {
-            var (status, remaining) = slaMap.GetValueOrDefault(t.Id, (SlaStatus.OnTrack, 0));
+            var (slaStatus, remaining) = slaMap.GetValueOrDefault(t.Id, (SlaStatus.OnTrack, 0));
             return new TicketSummaryResponse(
                 t.Id.ToString(), t.TicketId, t.ProductCode, t.TaskType,
                 t.PartnerName, t.RequesterName, t.Status, t.CurrentStage,
-                status.ToString(), remaining, t.CreatedAt, t.UpdatedAt);
-        }).ToList();
+                slaStatus.ToString(), remaining, t.CreatedAt, t.UpdatedAt);
+        })
+        .OrderBy(t => SlaUrgencyOrder(t.SlaStatus))
+        .ThenBy(t => t.SlaHoursRemaining)
+        .Take(5)
+        .ToList();
     }
 
     // ─── GetDashboardStatsAsync ──────────────────────────
 
     public async Task<DashboardStatsResponse> GetDashboardStatsAsync(Guid userId, UserRole role)
     {
-        return role switch
-        {
-            UserRole.PartnershipTeam => await BuildPartnershipStats(userId),
-            UserRole.SystemAdministrator => await BuildAdminStats(),
-            _ => await BuildTeamMemberStats(userId, role)
-        };
-    }
+        // Stat 1: Open/active tickets (role-scoped)
+        var openQuery = _db.Tickets.AsNoTracking()
+            .Where(t => !TerminalStatuses.Contains(t.Status));
 
-    private async Task<DashboardStatsResponse> BuildPartnershipStats(Guid userId)
-    {
-        var now = DateTime.UtcNow;
-        var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        if (role == UserRole.PartnershipTeam)
+            openQuery = openQuery.Where(t => t.CreatedByUserId == userId);
+        else if (role != UserRole.SystemAdministrator)
+            openQuery = openQuery.Where(t => t.WorkflowDefinition.Stages.Any(s => s.AssignedRole == role));
 
-        var myOpenCount = await _db.Tickets.AsNoTracking()
-            .CountAsync(t => t.CreatedByUserId == userId && !TerminalStatuses.Contains(t.Status));
+        var openCount = await openQuery.CountAsync();
 
-        var pendingMyAction = await _db.Tickets.AsNoTracking()
-            .CountAsync(t => (t.AssignedToUserId == userId && !TerminalStatuses.Contains(t.Status)) ||
-                             (t.Status == TicketStatus.PendingRequesterAction && t.CreatedByUserId == userId));
+        // Stat 2: SLA breaches (active trackers with Breached status, same role scope)
+        var breachedQuery = _db.SlaTrackers.AsNoTracking()
+            .Where(s => s.IsActive && s.Status == SlaStatus.Breached);
 
-        var completedThisMonth = await _db.Tickets.AsNoTracking()
-            .CountAsync(t => t.CreatedByUserId == userId && t.Status == TicketStatus.Completed && t.UpdatedAt >= monthStart);
+        if (role == UserRole.PartnershipTeam)
+            breachedQuery = breachedQuery.Where(s => s.Ticket.CreatedByUserId == userId);
+        else if (role != UserRole.SystemAdministrator)
+            breachedQuery = breachedQuery.Where(s => s.Ticket.WorkflowDefinition.Stages.Any(st => st.AssignedRole == role));
 
-        return new DashboardStatsResponse(
-            Stat1: new StatEntryResponse("My Open Requests", myOpenCount, "inbox", "bg-primary-container/10", "text-primary", "Active", "text-xs font-bold text-primary"),
-            Stat2: new StatEntryResponse("Pending My Action", pendingMyAction, "pending_actions", "bg-warning-container/20", "text-warning",
-                pendingMyAction > 0 ? "ACTION" : null,
-                pendingMyAction > 0 ? "bg-warning text-white px-2 py-0.5 rounded text-[10px] font-bold" : null,
-                pendingMyAction > 0 ? "text-warning" : null),
-            Stat3: new StatEntryResponse("Completed This Month", completedThisMonth, "task_alt", "bg-success-container/30", "text-success", "This Month"),
-            Stat4: new StatEntryResponse("Avg Resolution Time", "—", "schedule", "bg-secondary-container/30", "text-secondary", "Avg")
-        );
-    }
+        var breachCount = await breachedQuery.CountAsync();
 
-    private async Task<DashboardStatsResponse> BuildAdminStats()
-    {
-        var today = DateTime.UtcNow.Date;
+        // Stat 3: SLA compliance % (completed trackers that never breached / total completed)
+        var completedTrackersQuery = _db.SlaTrackers.AsNoTracking()
+            .Where(s => !s.IsActive && s.CompletedAtUtc != null);
 
-        var totalOpen = await _db.Tickets.AsNoTracking()
-            .CountAsync(t => !TerminalStatuses.Contains(t.Status));
+        if (role == UserRole.PartnershipTeam)
+            completedTrackersQuery = completedTrackersQuery.Where(s => s.Ticket.CreatedByUserId == userId);
+        else if (role != UserRole.SystemAdministrator)
+            completedTrackersQuery = completedTrackersQuery.Where(s => s.Ticket.WorkflowDefinition.Stages.Any(st => st.AssignedRole == role));
 
-        var createdToday = await _db.Tickets.AsNoTracking()
-            .CountAsync(t => t.CreatedAt >= today);
+        var totalCompleted = await completedTrackersQuery.CountAsync();
+        var compliantCount = await completedTrackersQuery.CountAsync(s => s.Status != SlaStatus.Breached);
+        var compliancePercent = totalCompleted > 0
+            ? Math.Round((double)compliantCount / totalCompleted * 100, 1)
+            : 100.0;
 
-        return new DashboardStatsResponse(
-            Stat1: new StatEntryResponse("Total Open Tickets", totalOpen, "inbox", "bg-primary-container/10", "text-primary"),
-            Stat2: new StatEntryResponse("SLA Breaches Today", 0, "warning", "bg-error-container/20", "text-error"),
-            Stat3: new StatEntryResponse("Tickets Created Today", createdToday, "bolt", "bg-secondary-container/30", "text-secondary", "Today", "text-xs font-bold text-on-surface-variant"),
-            Stat4: new StatEntryResponse("System Compliance", "—", "verified", "bg-primary-container/10", "text-primary", "Live", "text-xs font-bold text-on-surface-variant")
-        );
-    }
-
-    private async Task<DashboardStatsResponse> BuildTeamMemberStats(Guid userId, UserRole role)
-    {
-        var now = DateTime.UtcNow;
-        var weekStart = now.Date.AddDays(-(int)now.DayOfWeek);
-
-        var assignedToMe = await _db.Tickets.AsNoTracking()
-            .CountAsync(t => t.AssignedToUserId == userId && !TerminalStatuses.Contains(t.Status));
-
-        var completedThisWeek = await _db.StageLogs.AsNoTracking()
-            .CountAsync(sl => sl.ActorUserId == userId && sl.Action == StageAction.Approve && sl.Timestamp >= weekStart);
-
-        var isReviewer = role is UserRole.LegalTeam or UserRole.ProductTeam or UserRole.ExecutiveAuthority;
+        // Stat 4: Avg resolution time in business hours (from completed trackers)
+        var avgHours = totalCompleted > 0
+            ? Math.Round(await completedTrackersQuery.AverageAsync(s => s.BusinessHoursElapsed), 1)
+            : 0.0;
+        var avgDisplay = totalCompleted > 0 ? $"{avgHours}h" : "—";
 
         return new DashboardStatsResponse(
-            Stat1: new StatEntryResponse(isReviewer ? "In My Queue" : "Assigned to Me", assignedToMe, isReviewer ? "inbox" : "assignment",
-                "bg-primary-container/10", "text-primary", isReviewer ? "Queue" : "Active"),
-            Stat2: new StatEntryResponse(isReviewer ? "Near SLA Breach" : "SLA At Risk", 0, "warning", "bg-error-container/20", "text-error"),
-            Stat3: new StatEntryResponse(isReviewer ? "Processed Today" : "Completed This Week", completedThisWeek,
-                isReviewer ? "bolt" : "task_alt",
-                isReviewer ? "bg-secondary-container/30" : "bg-success-container/30",
-                isReviewer ? "text-secondary" : "text-success",
-                isReviewer ? "Today" : "This Week"),
-            Stat4: new StatEntryResponse(isReviewer ? "SLA Compliance Rate" : "Avg Completion Time", "—",
-                isReviewer ? "verified" : "schedule",
-                isReviewer ? "bg-primary-container/10" : "bg-secondary-container/30",
-                isReviewer ? "text-primary" : "text-secondary",
-                isReviewer ? "Live" : "Avg")
+            Stat1: new StatEntryResponse("Open Tickets", openCount, "inbox", "bg-primary-container/10", "text-primary", "Active", "text-xs font-bold text-primary"),
+            Stat2: new StatEntryResponse("SLA Breaches", breachCount, "warning", "bg-error-container/20", "text-error",
+                breachCount > 0 ? "ALERT" : null,
+                breachCount > 0 ? "bg-error text-white px-2 py-0.5 rounded text-[10px] font-bold" : null,
+                breachCount > 0 ? "text-error" : null),
+            Stat3: new StatEntryResponse("SLA Compliance", $"{compliancePercent}%", "verified", "bg-success-container/30", "text-success", "Rate"),
+            Stat4: new StatEntryResponse("Avg Resolution", avgDisplay, "schedule", "bg-secondary-container/30", "text-secondary", "Avg")
         );
     }
 
@@ -555,6 +533,15 @@ public class TicketQueryService : ITicketQueryService
         StageType.Provisioning => "settings",
         StageType.PhaseGate => "flag",
         _ => "circle"
+    };
+
+    private static int SlaUrgencyOrder(string slaStatus) => slaStatus switch
+    {
+        nameof(SlaStatus.Breached) => 0,
+        nameof(SlaStatus.Critical) => 1,
+        nameof(SlaStatus.AtRisk) => 2,
+        nameof(SlaStatus.OnTrack) => 3,
+        _ => 4
     };
 
     private static string MapAuditType(string actionType) => actionType switch

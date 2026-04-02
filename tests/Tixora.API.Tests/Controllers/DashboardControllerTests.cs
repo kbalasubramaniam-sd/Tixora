@@ -40,10 +40,10 @@ public class DashboardControllerTests : IClassFixture<CustomWebApplicationFactor
 
         var stats = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>();
         Assert.NotNull(stats);
-        Assert.Equal("My Open Requests", stats.Stat1.Label);
-        Assert.Equal("Pending My Action", stats.Stat2.Label);
-        Assert.Equal("Completed This Month", stats.Stat3.Label);
-        Assert.Equal("Avg Resolution Time", stats.Stat4.Label);
+        Assert.Equal("Open Tickets", stats.Stat1.Label);
+        Assert.Equal("SLA Breaches", stats.Stat2.Label);
+        Assert.Equal("SLA Compliance", stats.Stat3.Label);
+        Assert.Equal("Avg Resolution", stats.Stat4.Label);
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class DashboardControllerTests : IClassFixture<CustomWebApplicationFactor
 
         var stats = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>();
         Assert.NotNull(stats);
-        Assert.Equal("Total Open Tickets", stats.Stat1.Label);
+        Assert.Equal("Open Tickets", stats.Stat1.Label);
     }
 
     [Fact]
