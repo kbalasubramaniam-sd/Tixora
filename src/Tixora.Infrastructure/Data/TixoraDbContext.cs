@@ -20,6 +20,10 @@ public class TixoraDbContext : DbContext, ITixoraDbContext
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Document> Documents => Set<Document>();
+    public DbSet<SlaTracker> SlaTrackers => Set<SlaTracker>();
+    public DbSet<SlaPause> SlaPauses => Set<SlaPause>();
+    public DbSet<BusinessHoursConfig> BusinessHoursConfigs => Set<BusinessHoursConfig>();
+    public DbSet<Holiday> Holidays => Set<Holiday>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,5 +35,6 @@ public class TixoraDbContext : DbContext, ITixoraDbContext
         Seed.SeedUsers.Seed(modelBuilder);
         Seed.SeedPartners.Seed(modelBuilder);
         Seed.SeedWorkflows.Seed(modelBuilder);
+        Seed.SeedBusinessHours.Seed(modelBuilder);
     }
 }

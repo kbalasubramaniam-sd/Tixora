@@ -17,6 +17,10 @@ public interface ITixoraDbContext
     DbSet<AuditEntry> AuditEntries { get; }
     DbSet<Comment> Comments { get; }
     DbSet<Document> Documents { get; }
+    DbSet<SlaTracker> SlaTrackers { get; }
+    DbSet<SlaPause> SlaPauses { get; }
+    DbSet<BusinessHoursConfig> BusinessHoursConfigs { get; }
+    DbSet<Holiday> Holidays { get; }
 
     DatabaseFacade Database { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

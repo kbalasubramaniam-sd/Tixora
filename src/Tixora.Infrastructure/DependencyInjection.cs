@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddSingleton<IFileStorage>(new LocalFileStorage(
             Path.Combine(Directory.GetCurrentDirectory(), "uploads")));
         services.AddScoped<IDocumentService, DocumentService>();
+        services.AddScoped<ISlaService, SlaService>();
 
         return services;
     }
