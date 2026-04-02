@@ -86,6 +86,19 @@ public class SearchService : ISearchService
         if (request.DateTo.HasValue)
             query = query.Where(t => t.CreatedAt <= request.DateTo.Value);
 
+        // Pre-filter by SLA status before counting/paginating
+        if (!string.IsNullOrEmpty(request.SlaStatus) && Enum.TryParse<SlaStatus>(request.SlaStatus, out var slaFilter))
+        {
+            var slaMatchedIds = await _db.SlaTrackers
+                .AsNoTracking()
+                .Where(s => s.IsActive && s.Status == slaFilter)
+                .Select(s => s.TicketId)
+                .Distinct()
+                .ToListAsync();
+
+            query = query.Where(t => slaMatchedIds.Contains(t.Id));
+        }
+
         var totalCount = await query.CountAsync();
 
         var pageSize = Math.Clamp(request.PageSize, 1, 100);
@@ -118,7 +131,6 @@ public class SearchService : ISearchService
         var ticketIds = tickets.Select(t => t.Id).ToList();
         var slaMap = await GetSlaMapAsync(ticketIds);
 
-        // Apply SLA status filter in-memory if specified (since it comes from SlaTrackers, not the ticket itself)
         var items = tickets.Select(t =>
         {
             var (slaStatus, remaining) = slaMap.GetValueOrDefault(t.Id, (SlaStatus.OnTrack, 0));
@@ -127,12 +139,6 @@ public class SearchService : ISearchService
                 t.PartnerName, t.RequesterName, t.Status, t.CurrentStage,
                 slaStatus.ToString(), remaining, t.CreatedAt, t.UpdatedAt);
         }).ToList();
-
-        // If SLA status filter is specified, filter in-memory
-        if (!string.IsNullOrEmpty(request.SlaStatus) && Enum.TryParse<SlaStatus>(request.SlaStatus, out var slaFilter))
-        {
-            items = items.Where(t => t.SlaStatus == slaFilter.ToString()).ToList();
-        }
 
         return new PagedResult<TicketSummaryResponse>(
             Items: items,

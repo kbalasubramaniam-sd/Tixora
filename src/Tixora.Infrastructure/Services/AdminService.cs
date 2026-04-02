@@ -90,8 +90,14 @@ public class AdminService : IAdminService
             if (config != null)
             {
                 config.IsWorkingDay = update.IsWorkingDay;
-                config.StartTime = TimeOnly.Parse(update.StartTime);
-                config.EndTime = TimeOnly.Parse(update.EndTime);
+
+                if (!TimeOnly.TryParse(update.StartTime, out var startTime))
+                    throw new InvalidOperationException($"Invalid StartTime format: '{update.StartTime}'. Expected HH:mm format.");
+                if (!TimeOnly.TryParse(update.EndTime, out var endTime))
+                    throw new InvalidOperationException($"Invalid EndTime format: '{update.EndTime}'. Expected HH:mm format.");
+
+                config.StartTime = startTime;
+                config.EndTime = endTime;
             }
         }
 
