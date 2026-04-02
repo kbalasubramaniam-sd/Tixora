@@ -23,5 +23,9 @@ public class TixoraDbContext : DbContext, ITixoraDbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TixoraDbContext).Assembly);
+
+        // Seed reference data
+        Seed.SeedProducts.Seed(modelBuilder);
+        Seed.SeedUsers.Seed(modelBuilder);
     }
 }
