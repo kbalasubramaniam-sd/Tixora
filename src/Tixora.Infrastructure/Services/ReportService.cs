@@ -17,61 +17,68 @@ public class ReportService : IReportService
 
     public async Task<ReportOverviewResponse> GetOverviewAsync(DateTime? dateFrom, DateTime? dateTo)
     {
-        var query = _db.Tickets.AsQueryable();
+        var query = _db.Tickets.AsNoTracking().AsQueryable();
 
         if (dateFrom.HasValue)
             query = query.Where(t => t.CreatedAt >= dateFrom.Value);
         if (dateTo.HasValue)
             query = query.Where(t => t.CreatedAt <= dateTo.Value);
 
-        var tickets = await query.ToListAsync();
-
-        var totalTickets = tickets.Count;
-        var completedTickets = tickets.Count(t => t.Status == TicketStatus.Completed);
-        var rejectedTickets = tickets.Count(t => t.Status == TicketStatus.Rejected);
-        var cancelledTickets = tickets.Count(t => t.Status == TicketStatus.Cancelled);
+        // Server-side counts
+        var totalTickets = await query.CountAsync();
+        var completedTickets = await query.CountAsync(t => t.Status == TicketStatus.Completed);
+        var rejectedTickets = await query.CountAsync(t => t.Status == TicketStatus.Rejected);
+        var cancelledTickets = await query.CountAsync(t => t.Status == TicketStatus.Cancelled);
         var openTickets = totalTickets - completedTickets - rejectedTickets - cancelledTickets;
 
-        // SLA metrics from trackers
-        var ticketIds = tickets.Select(t => t.Id).ToList();
-        var trackers = await _db.SlaTrackers
-            .Where(s => ticketIds.Contains(s.TicketId) && s.CompletedAtUtc != null)
-            .ToListAsync();
+        // Server-side groupings — group by enum, project count, then map to string after materialization
+        var byProduct = (await query
+            .GroupBy(t => t.ProductCode)
+            .Select(g => new { Key = g.Key, Count = g.Count() })
+            .ToListAsync())
+            .Select(g => new ProductBreakdown(g.Key.ToString(), g.Count))
+            .OrderBy(b => b.ProductCode)
+            .ToList();
 
-        var totalCompletedTrackers = trackers.Count;
-        var breachedTrackers = trackers.Count(s => s.Status == SlaStatus.Breached);
+        var byTaskType = (await query
+            .GroupBy(t => t.TaskType)
+            .Select(g => new { Key = g.Key, Count = g.Count() })
+            .ToListAsync())
+            .Select(g => new TaskTypeBreakdown(g.Key.ToString(), g.Count))
+            .OrderBy(b => b.TaskType)
+            .ToList();
+
+        var byStatus = (await query
+            .GroupBy(t => t.Status)
+            .Select(g => new { Key = g.Key, Count = g.Count() })
+            .ToListAsync())
+            .Select(g => new StatusBreakdown(g.Key.ToString(), g.Count))
+            .OrderBy(b => b.Status)
+            .ToList();
+
+        // Only materialize ticket IDs for SLA lookups
+        var ticketIds = await query.Select(t => t.Id).ToListAsync();
+
+        // SLA metrics from trackers — server-side aggregation
+        var slaQuery = _db.SlaTrackers.AsNoTracking()
+            .Where(s => ticketIds.Contains(s.TicketId) && s.CompletedAtUtc != null);
+
+        var totalCompletedTrackers = await slaQuery.CountAsync();
+        var breachedTrackers = await slaQuery.CountAsync(s => s.Status == SlaStatus.Breached);
         var slaCompliancePercent = totalCompletedTrackers > 0
             ? Math.Round((double)(totalCompletedTrackers - breachedTrackers) / totalCompletedTrackers * 100, 1)
             : 100.0;
 
         // Breach count = tickets that had at least one breached tracker
-        var slaBreachCount = await _db.SlaTrackers
+        var slaBreachCount = await _db.SlaTrackers.AsNoTracking()
             .Where(s => ticketIds.Contains(s.TicketId) && s.Status == SlaStatus.Breached)
             .Select(s => s.TicketId)
             .Distinct()
             .CountAsync();
 
-        var avgResolutionHours = trackers.Count > 0
-            ? Math.Round(trackers.Average(s => s.BusinessHoursElapsed), 1)
+        var avgResolutionHours = totalCompletedTrackers > 0
+            ? Math.Round(await slaQuery.AverageAsync(s => s.BusinessHoursElapsed), 1)
             : 0.0;
-
-        var byProduct = tickets
-            .GroupBy(t => t.ProductCode.ToString())
-            .Select(g => new ProductBreakdown(g.Key, g.Count()))
-            .OrderBy(b => b.ProductCode)
-            .ToList();
-
-        var byTaskType = tickets
-            .GroupBy(t => t.TaskType.ToString())
-            .Select(g => new TaskTypeBreakdown(g.Key, g.Count()))
-            .OrderBy(b => b.TaskType)
-            .ToList();
-
-        var byStatus = tickets
-            .GroupBy(t => t.Status.ToString())
-            .Select(g => new StatusBreakdown(g.Key, g.Count()))
-            .OrderBy(b => b.Status)
-            .ToList();
 
         return new ReportOverviewResponse(
             TotalTickets: totalTickets,
@@ -110,7 +117,7 @@ public class ReportService : IReportService
         if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<TicketStatus>(status, true, out var ts))
             query = query.Where(t => t.Status == ts);
 
-        var tickets = await query.OrderByDescending(t => t.CreatedAt).ToListAsync();
+        var tickets = await query.OrderByDescending(t => t.CreatedAt).Take(10000).ToListAsync();
 
         var sb = new StringBuilder();
         sb.AppendLine("TicketId,ProductCode,TaskType,PartnerName,RequesterName,Status,CurrentStage,SlaStatus,CreatedAt,UpdatedAt");
