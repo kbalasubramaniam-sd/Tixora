@@ -14,6 +14,8 @@ interface FilterBarProps {
   onTaskChange: (v: string) => void
   onSlaChange: (v: string) => void
   onClear: () => void
+  status?: string
+  onStatusChange?: (v: string) => void
 }
 
 const products: FilterOption[] = [
@@ -37,6 +39,14 @@ const slaStatuses: FilterOption[] = [
   { label: 'On Track', value: 'OnTrack' },
   { label: 'At Risk', value: 'AtRisk' },
   { label: 'Breached', value: 'Breached' },
+]
+
+const ticketStatuses: FilterOption[] = [
+  { label: 'All', value: 'All' },
+  { label: 'Open', value: 'Open' },
+  { label: 'In Progress', value: 'InProgress' },
+  { label: 'Completed', value: 'Completed' },
+  { label: 'Cancelled', value: 'Cancelled' },
 ]
 
 function FilterChip({
@@ -139,8 +149,8 @@ function FilterChip({
   )
 }
 
-export function FilterBar({ product, task, slaStatus, onProductChange, onTaskChange, onSlaChange, onClear }: FilterBarProps) {
-  const hasFilters = product !== 'All' || task !== 'All' || slaStatus !== 'All'
+export function FilterBar({ product, task, slaStatus, onProductChange, onTaskChange, onSlaChange, onClear, status, onStatusChange }: FilterBarProps) {
+  const hasFilters = product !== 'All' || task !== 'All' || slaStatus !== 'All' || (status !== undefined && status !== 'All')
 
   return (
     <div className="bg-surface-bright rounded-lg p-3 mb-8 flex flex-wrap items-center justify-between gap-3 shadow-sm border border-surface-container-high">
@@ -148,6 +158,9 @@ export function FilterBar({ product, task, slaStatus, onProductChange, onTaskCha
         <FilterChip label="Product" value={product} options={products} onChange={onProductChange} />
         <FilterChip label="Task" value={task} options={tasks} onChange={onTaskChange} />
         <FilterChip label="SLA Status" value={slaStatus} options={slaStatuses} onChange={onSlaChange} />
+        {status !== undefined && onStatusChange && (
+          <FilterChip label="Status" value={status} options={ticketStatuses} onChange={onStatusChange} />
+        )}
       </div>
       {hasFilters && (
         <button
