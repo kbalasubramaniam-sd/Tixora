@@ -59,7 +59,12 @@ export default function MyTickets() {
       />
 
       {/* Ticket Table */}
-      <QueueTable tickets={tickets} />
+      <QueueTable
+        tickets={tickets}
+        emptyIcon="confirmation_number"
+        emptyTitle="No tickets found"
+        emptyMessage="You haven't submitted any requests yet, or no tickets match your filters."
+      />
     </div>
   )
 }

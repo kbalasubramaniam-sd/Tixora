@@ -8,6 +8,9 @@ import { SlaStatus } from '@/types/enums'
 
 interface QueueTableProps {
   tickets: TicketSummary[]
+  emptyIcon?: string
+  emptyTitle?: string
+  emptyMessage?: string
 }
 
 const slaDotColor: Record<string, string> = {
@@ -30,7 +33,7 @@ const stageIcon: Record<string, string> = {
 
 type SortKey = 'ticketId' | 'partnerName' | 'slaHoursRemaining'
 
-export function QueueTable({ tickets }: QueueTableProps) {
+export function QueueTable({ tickets, emptyIcon = 'inbox', emptyTitle = 'Your queue is clear', emptyMessage = 'No tickets currently assigned to your team' }: QueueTableProps) {
   const navigate = useNavigate()
   const [sortKey, setSortKey] = useState<SortKey>('slaHoursRemaining')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
@@ -59,9 +62,9 @@ export function QueueTable({ tickets }: QueueTableProps) {
   if (tickets.length === 0) {
     return (
       <div className="bg-surface-container-lowest rounded-xl p-12 text-center shadow-sm">
-        <span className="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-3 block">inbox</span>
-        <h3 className="text-lg font-bold text-on-surface mb-1">Your queue is clear</h3>
-        <p className="text-sm text-on-surface-variant">No tickets currently assigned to your team</p>
+        <span className="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-3 block">{emptyIcon}</span>
+        <h3 className="text-lg font-bold text-on-surface mb-1">{emptyTitle}</h3>
+        <p className="text-sm text-on-surface-variant">{emptyMessage}</p>
       </div>
     )
   }
