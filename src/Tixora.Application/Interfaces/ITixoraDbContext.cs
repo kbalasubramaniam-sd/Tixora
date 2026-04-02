@@ -16,6 +16,7 @@ public interface ITixoraDbContext
     DbSet<StageLog> StageLogs { get; }
     DbSet<AuditEntry> AuditEntries { get; }
     DbSet<Comment> Comments { get; }
+    DbSet<Document> Documents { get; }
 
     DatabaseFacade Database { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

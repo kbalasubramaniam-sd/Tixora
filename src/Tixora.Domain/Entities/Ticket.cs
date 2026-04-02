@@ -30,4 +30,5 @@ public class Ticket
     public ICollection<StageLog> StageLogs { get; set; } = new List<StageLog>();
     public ICollection<AuditEntry> AuditEntries { get; set; } = new List<AuditEntry>();
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    public ICollection<Document> Documents { get; set; } = new List<Document>();
 }
