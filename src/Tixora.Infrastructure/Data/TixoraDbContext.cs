@@ -24,6 +24,7 @@ public class TixoraDbContext : DbContext, ITixoraDbContext
     public DbSet<SlaPause> SlaPauses => Set<SlaPause>();
     public DbSet<BusinessHoursConfig> BusinessHoursConfigs => Set<BusinessHoursConfig>();
     public DbSet<Holiday> Holidays => Set<Holiday>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
