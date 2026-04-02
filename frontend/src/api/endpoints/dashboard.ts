@@ -6,19 +6,19 @@ import { SlaStatus, TicketStatus, ProductCode, TaskType } from '@/types/enums'
 // --- Mock data for development ---
 
 const mockStats: Record<string, DashboardStats> = {
-  Requester: {
+  PartnershipTeam: {
     stat1: { label: 'My Open Requests', value: 7, icon: 'inbox', iconBg: 'bg-primary-container/10', iconColor: 'text-primary', badge: 'Active', badgeStyle: 'text-xs font-bold text-primary' },
     stat2: { label: 'Pending My Action', value: 2, icon: 'pending_actions', iconBg: 'bg-warning-container/20', iconColor: 'text-warning', badge: 'ACTION', badgeStyle: 'bg-warning text-white px-2 py-0.5 rounded text-[10px] font-bold', valueColor: 'text-warning' },
     stat3: { label: 'Completed This Month', value: 14, icon: 'task_alt', iconBg: 'bg-success-container/30', iconColor: 'text-success', badge: 'This Month' },
     stat4: { label: 'Avg Resolution Time', value: '18h', icon: 'schedule', iconBg: 'bg-secondary-container/30', iconColor: 'text-secondary', badge: 'Avg' },
   },
-  Reviewer: {
+  LegalTeam: {
     stat1: { label: 'In My Queue', value: 5, icon: 'inbox', iconBg: 'bg-primary-container/10', iconColor: 'text-primary', badge: 'Queue' },
     stat2: { label: 'Near SLA Breach', value: 1, icon: 'warning', iconBg: 'bg-error-container/20', iconColor: 'text-error', badge: 'ALERT', badgeStyle: 'bg-error text-white px-2 py-0.5 rounded text-[10px] font-bold', valueColor: 'text-error' },
     stat3: { label: 'Processed Today', value: 8, icon: 'bolt', iconBg: 'bg-secondary-container/30', iconColor: 'text-secondary', badge: 'Today' },
     stat4: { label: 'SLA Compliance Rate', value: '94%', icon: 'verified', iconBg: 'bg-primary-container/10', iconColor: 'text-primary', badge: 'Live' },
   },
-  Approver: {
+  ExecutiveAuthority: {
     stat1: { label: 'In My Queue', value: 3, icon: 'inbox', iconBg: 'bg-primary-container/10', iconColor: 'text-primary', badge: 'Queue' },
     stat2: { label: 'Near SLA Breach', value: 0, icon: 'warning', iconBg: 'bg-error-container/20', iconColor: 'text-error' },
     stat3: { label: 'Processed Today', value: 5, icon: 'bolt', iconBg: 'bg-secondary-container/30', iconColor: 'text-secondary', badge: 'Today' },
@@ -30,7 +30,7 @@ const mockStats: Record<string, DashboardStats> = {
     stat3: { label: 'Completed This Week', value: 11, icon: 'task_alt', iconBg: 'bg-success-container/30', iconColor: 'text-success', badge: 'This Week' },
     stat4: { label: 'Avg Completion Time', value: '6h', icon: 'schedule', iconBg: 'bg-secondary-container/30', iconColor: 'text-secondary', badge: 'Avg' },
   },
-  ProvisioningAgent: {
+  DevTeam: {
     stat1: { label: 'Assigned to Me', value: 6, icon: 'assignment', iconBg: 'bg-primary-container/10', iconColor: 'text-primary', badge: 'Active' },
     stat2: { label: 'SLA At Risk', value: 2, icon: 'warning', iconBg: 'bg-error-container/20', iconColor: 'text-error', badge: 'CRITICAL', badgeStyle: 'bg-error text-white px-2 py-0.5 rounded text-[10px] font-bold', valueColor: 'text-error' },
     stat3: { label: 'Completed This Week', value: 9, icon: 'task_alt', iconBg: 'bg-success-container/30', iconColor: 'text-success', badge: 'This Week' },
@@ -132,7 +132,7 @@ export async function fetchDashboardStats(role: UserRole): Promise<DashboardStat
     const res = await apiClient.get<DashboardStats>('/dashboard/stats')
     return res.data
   } catch {
-    return mockStats[role] ?? mockStats.Requester
+    return mockStats[role] ?? mockStats.PartnershipTeam
   }
 }
 

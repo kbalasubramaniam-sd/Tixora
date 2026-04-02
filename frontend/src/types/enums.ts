@@ -46,11 +46,14 @@ export const SlaStatus = {
 export type SlaStatus = (typeof SlaStatus)[keyof typeof SlaStatus]
 
 export const UserRole = {
-  Requester: 'Requester',
-  Reviewer: 'Reviewer',
-  Approver: 'Approver',
+  PartnershipTeam: 'PartnershipTeam',
+  LegalTeam: 'LegalTeam',
+  ProductTeam: 'ProductTeam',
+  ExecutiveAuthority: 'ExecutiveAuthority',
   IntegrationTeam: 'IntegrationTeam',
-  ProvisioningAgent: 'ProvisioningAgent',
+  DevTeam: 'DevTeam',
+  BusinessTeam: 'BusinessTeam',
+  PartnerOps: 'PartnerOps',
   SystemAdministrator: 'SystemAdministrator',
 } as const
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]

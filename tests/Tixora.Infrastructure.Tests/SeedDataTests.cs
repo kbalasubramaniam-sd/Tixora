@@ -44,10 +44,10 @@ public class SeedDataTests : IDisposable
         Assert.Equal(12, users.Count);
 
         // Verify role distribution
-        Assert.Single(users, u => u.Role == UserRole.Requester);
+        Assert.Single(users, u => u.Role == UserRole.PartnershipTeam);
         Assert.Single(users, u => u.Role == UserRole.LegalTeam);
         Assert.Equal(2, users.Count(u => u.Role == UserRole.ProductTeam));
-        Assert.Single(users, u => u.Role == UserRole.Approver);
+        Assert.Single(users, u => u.Role == UserRole.ExecutiveAuthority);
         Assert.Single(users, u => u.Role == UserRole.IntegrationTeam);
         Assert.Single(users, u => u.Role == UserRole.DevTeam);
         Assert.Single(users, u => u.Role == UserRole.BusinessTeam);

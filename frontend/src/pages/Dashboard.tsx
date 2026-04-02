@@ -15,11 +15,14 @@ function getGreeting(): string {
 }
 
 const roleLabel: Record<string, string> = {
-  [UserRole.Requester]: 'Requester',
-  [UserRole.Reviewer]: 'Reviewer',
-  [UserRole.Approver]: 'Approver',
+  [UserRole.PartnershipTeam]: 'Partnership Team',
+  [UserRole.LegalTeam]: 'Legal Team',
+  [UserRole.ProductTeam]: 'Product Team',
+  [UserRole.ExecutiveAuthority]: 'Executive Authority',
   [UserRole.IntegrationTeam]: 'Integration Team',
-  [UserRole.ProvisioningAgent]: 'Provisioning Agent',
+  [UserRole.DevTeam]: 'Dev Team',
+  [UserRole.BusinessTeam]: 'Business Team',
+  [UserRole.PartnerOps]: 'Partner Ops',
   [UserRole.SystemAdministrator]: 'System Administrator',
 }
 
@@ -29,7 +32,7 @@ export default function Dashboard() {
   const { data: tickets, isLoading: ticketsLoading } = useActionRequired()
   const { data: activity, isLoading: activityLoading } = useRecentActivity()
 
-  const isRequester = user?.role === UserRole.Requester || user?.role === UserRole.SystemAdministrator
+  const isRequester = user?.role === UserRole.PartnershipTeam || user?.role === UserRole.SystemAdministrator
 
   return (
     <div>

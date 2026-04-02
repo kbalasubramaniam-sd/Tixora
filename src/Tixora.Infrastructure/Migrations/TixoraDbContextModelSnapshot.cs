@@ -290,7 +290,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0001-0001-000000000001"),
-                            AssignedRole = 1,
+                            AssignedRole = 2,
                             SlaBusinessHours = 24,
                             StageName = "Legal Review",
                             StageOrder = 1,
@@ -300,7 +300,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0001-0002-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 16,
                             StageName = "Product Review",
                             StageOrder = 2,
@@ -310,7 +310,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0001-0003-000000000001"),
-                            AssignedRole = 3,
+                            AssignedRole = 4,
                             SlaBusinessHours = 8,
                             StageName = "EA Sign-off",
                             StageOrder = 3,
@@ -320,7 +320,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0001-0004-000000000001"),
-                            AssignedRole = 0,
+                            AssignedRole = 1,
                             SlaBusinessHours = 0,
                             StageName = "Stakeholder Notification",
                             StageOrder = 4,
@@ -330,7 +330,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0002-0001-000000000001"),
-                            AssignedRole = 1,
+                            AssignedRole = 2,
                             SlaBusinessHours = 24,
                             StageName = "Legal Review",
                             StageOrder = 1,
@@ -340,7 +340,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0002-0002-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 16,
                             StageName = "Product Review",
                             StageOrder = 2,
@@ -350,7 +350,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0002-0003-000000000001"),
-                            AssignedRole = 3,
+                            AssignedRole = 4,
                             SlaBusinessHours = 8,
                             StageName = "EA Sign-off",
                             StageOrder = 3,
@@ -360,7 +360,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0002-0004-000000000001"),
-                            AssignedRole = 0,
+                            AssignedRole = 1,
                             SlaBusinessHours = 0,
                             StageName = "Stakeholder Notification",
                             StageOrder = 4,
@@ -370,7 +370,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0003-0001-000000000001"),
-                            AssignedRole = 1,
+                            AssignedRole = 2,
                             SlaBusinessHours = 24,
                             StageName = "Legal Review",
                             StageOrder = 1,
@@ -380,7 +380,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0003-0002-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 16,
                             StageName = "Product Review",
                             StageOrder = 2,
@@ -390,7 +390,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0003-0003-000000000001"),
-                            AssignedRole = 3,
+                            AssignedRole = 4,
                             SlaBusinessHours = 8,
                             StageName = "EA Sign-off",
                             StageOrder = 3,
@@ -400,7 +400,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0003-0004-000000000001"),
-                            AssignedRole = 0,
+                            AssignedRole = 1,
                             SlaBusinessHours = 0,
                             StageName = "Stakeholder Notification",
                             StageOrder = 4,
@@ -410,7 +410,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0004-0001-000000000001"),
-                            AssignedRole = 1,
+                            AssignedRole = 2,
                             SlaBusinessHours = 24,
                             StageName = "Legal Review",
                             StageOrder = 1,
@@ -420,7 +420,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0004-0002-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 16,
                             StageName = "Product Review",
                             StageOrder = 2,
@@ -430,7 +430,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0004-0003-000000000001"),
-                            AssignedRole = 3,
+                            AssignedRole = 4,
                             SlaBusinessHours = 8,
                             StageName = "EA Sign-off",
                             StageOrder = 3,
@@ -440,7 +440,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0101-0004-0004-000000000001"),
-                            AssignedRole = 0,
+                            AssignedRole = 1,
                             SlaBusinessHours = 0,
                             StageName = "Stakeholder Notification",
                             StageOrder = 4,
@@ -450,7 +450,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0001-0001-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 8,
                             StageName = "Product Team Review",
                             StageOrder = 1,
@@ -460,7 +460,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0001-0002-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "Access Provisioning",
                             StageOrder = 2,
@@ -470,7 +470,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0001-0003-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 8,
                             StageName = "API Credential Creation",
                             StageOrder = 3,
@@ -480,7 +480,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0001-0004-000000000001"),
-                            AssignedRole = 0,
+                            AssignedRole = 1,
                             SlaBusinessHours = 0,
                             StageName = "Awaiting UAT Signal",
                             StageOrder = 4,
@@ -490,7 +490,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0001-0005-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "UAT Sign-off",
                             StageOrder = 5,
@@ -500,7 +500,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0002-0001-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 8,
                             StageName = "Product Team Review",
                             StageOrder = 1,
@@ -510,7 +510,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0002-0002-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "Access Provisioning",
                             StageOrder = 2,
@@ -520,7 +520,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0002-0003-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 8,
                             StageName = "API Credential Creation",
                             StageOrder = 3,
@@ -530,7 +530,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0002-0004-000000000001"),
-                            AssignedRole = 0,
+                            AssignedRole = 1,
                             SlaBusinessHours = 0,
                             StageName = "Awaiting UAT Signal",
                             StageOrder = 4,
@@ -540,7 +540,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0002-0005-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "UAT Sign-off",
                             StageOrder = 5,
@@ -550,7 +550,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0003-0001-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 8,
                             StageName = "Product Team Review",
                             StageOrder = 1,
@@ -560,7 +560,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0003-0002-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "Access Provisioning",
                             StageOrder = 2,
@@ -570,7 +570,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0003-0003-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 8,
                             StageName = "API Credential Creation",
                             StageOrder = 3,
@@ -580,7 +580,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0003-0004-000000000001"),
-                            AssignedRole = 0,
+                            AssignedRole = 1,
                             SlaBusinessHours = 0,
                             StageName = "Awaiting UAT Signal",
                             StageOrder = 4,
@@ -590,7 +590,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0003-0005-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "UAT Sign-off",
                             StageOrder = 5,
@@ -600,7 +600,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0004-0001-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 8,
                             StageName = "Product Team Review",
                             StageOrder = 1,
@@ -610,7 +610,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0004-0002-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "Access Provisioning",
                             StageOrder = 2,
@@ -620,7 +620,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0004-0003-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 8,
                             StageName = "API Credential Creation",
                             StageOrder = 3,
@@ -630,7 +630,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0004-0004-000000000001"),
-                            AssignedRole = 0,
+                            AssignedRole = 1,
                             SlaBusinessHours = 0,
                             StageName = "Awaiting UAT Signal",
                             StageOrder = 4,
@@ -640,7 +640,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0004-0005-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "UAT Sign-off",
                             StageOrder = 5,
@@ -650,7 +650,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0001-0001-000000000001"),
-                            AssignedRole = 7,
+                            AssignedRole = 8,
                             SlaBusinessHours = 8,
                             StageName = "Partner Ops Review",
                             StageOrder = 1,
@@ -660,7 +660,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0001-0002-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 8,
                             StageName = "Product Team Sign-off",
                             StageOrder = 2,
@@ -670,7 +670,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0001-0003-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 8,
                             StageName = "Dev Provisioning",
                             StageOrder = 3,
@@ -680,7 +680,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0001-0004-000000000001"),
-                            AssignedRole = 6,
+                            AssignedRole = 7,
                             SlaBusinessHours = 8,
                             StageName = "Business Provisioning",
                             StageOrder = 4,
@@ -690,7 +690,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0003-0001-000000000001"),
-                            AssignedRole = 7,
+                            AssignedRole = 8,
                             SlaBusinessHours = 8,
                             StageName = "Partner Ops Review",
                             StageOrder = 1,
@@ -700,7 +700,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0003-0002-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 8,
                             StageName = "Product Team Sign-off",
                             StageOrder = 2,
@@ -710,7 +710,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0003-0003-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 8,
                             StageName = "Dev Provisioning",
                             StageOrder = 3,
@@ -720,7 +720,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0003-0004-000000000001"),
-                            AssignedRole = 6,
+                            AssignedRole = 7,
                             SlaBusinessHours = 8,
                             StageName = "Business Provisioning",
                             StageOrder = 4,
@@ -730,7 +730,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0002-0001-000000000001"),
-                            AssignedRole = 7,
+                            AssignedRole = 8,
                             SlaBusinessHours = 8,
                             StageName = "Partner Ops Review",
                             StageOrder = 1,
@@ -740,7 +740,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0002-0002-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 8,
                             StageName = "Product Team Sign-off",
                             StageOrder = 2,
@@ -750,7 +750,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0002-0003-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 24,
                             StageName = "Dev Provisioning",
                             StageOrder = 3,
@@ -760,7 +760,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0002-0004-000000000001"),
-                            AssignedRole = 6,
+                            AssignedRole = 7,
                             SlaBusinessHours = 24,
                             StageName = "Business Provisioning",
                             StageOrder = 4,
@@ -770,7 +770,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0002-0005-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 24,
                             StageName = "API Provisioning",
                             StageOrder = 5,
@@ -780,7 +780,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0004-0001-000000000001"),
-                            AssignedRole = 7,
+                            AssignedRole = 8,
                             SlaBusinessHours = 8,
                             StageName = "Partner Ops Review",
                             StageOrder = 1,
@@ -790,7 +790,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0004-0002-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 8,
                             StageName = "Product Team Sign-off",
                             StageOrder = 2,
@@ -800,7 +800,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0004-0003-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 24,
                             StageName = "Dev Provisioning",
                             StageOrder = 3,
@@ -810,7 +810,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0004-0004-000000000001"),
-                            AssignedRole = 6,
+                            AssignedRole = 7,
                             SlaBusinessHours = 24,
                             StageName = "Business Provisioning",
                             StageOrder = 4,
@@ -820,7 +820,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0004-0005-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 24,
                             StageName = "API Provisioning",
                             StageOrder = 5,
@@ -830,7 +830,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0005-0001-000000000001"),
-                            AssignedRole = 7,
+                            AssignedRole = 8,
                             SlaBusinessHours = 8,
                             StageName = "Partner Ops Review",
                             StageOrder = 1,
@@ -840,7 +840,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0005-0002-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 8,
                             StageName = "Product Team Sign-off",
                             StageOrder = 2,
@@ -850,7 +850,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0005-0003-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 24,
                             StageName = "API Provisioning",
                             StageOrder = 3,
@@ -860,7 +860,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0006-0001-000000000001"),
-                            AssignedRole = 7,
+                            AssignedRole = 8,
                             SlaBusinessHours = 8,
                             StageName = "Partner Ops Review",
                             StageOrder = 1,
@@ -870,7 +870,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0006-0002-000000000001"),
-                            AssignedRole = 2,
+                            AssignedRole = 3,
                             SlaBusinessHours = 8,
                             StageName = "Product Team Sign-off",
                             StageOrder = 2,
@@ -880,7 +880,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0006-0003-000000000001"),
-                            AssignedRole = 4,
+                            AssignedRole = 5,
                             SlaBusinessHours = 24,
                             StageName = "API Provisioning",
                             StageOrder = 3,
@@ -890,7 +890,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0104-0001-0001-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 2,
                             StageName = "Verify & Resolve",
                             StageOrder = 1,
@@ -900,7 +900,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0104-0002-0001-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 2,
                             StageName = "Verify & Resolve",
                             StageOrder = 1,
@@ -910,7 +910,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0104-0003-0001-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 2,
                             StageName = "Verify & Resolve",
                             StageOrder = 1,
@@ -920,7 +920,7 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0104-0004-0001-000000000001"),
-                            AssignedRole = 5,
+                            AssignedRole = 6,
                             SlaBusinessHours = 2,
                             StageName = "Verify & Resolve",
                             StageOrder = 1,
@@ -1100,7 +1100,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Sarah Ahmad",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 0
+                            Role = 1
                         },
                         new
                         {
@@ -1110,7 +1110,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Omar Khalid",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 1
+                            Role = 2
                         },
                         new
                         {
@@ -1120,7 +1120,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Hannoun",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 2
+                            Role = 3
                         },
                         new
                         {
@@ -1130,7 +1130,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Albaha",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 2
+                            Role = 3
                         },
                         new
                         {
@@ -1140,7 +1140,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Fatima Noor",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 3
+                            Role = 4
                         },
                         new
                         {
@@ -1150,7 +1150,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Khalid Rashed",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 4
+                            Role = 5
                         },
                         new
                         {
@@ -1160,7 +1160,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Ahmed Tariq",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 5
+                            Role = 6
                         },
                         new
                         {
@@ -1170,7 +1170,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Layla Hassan",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 6
+                            Role = 7
                         },
                         new
                         {
@@ -1180,7 +1180,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Vilina Sequeira",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 7
+                            Role = 8
                         },
                         new
                         {
@@ -1190,7 +1190,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Sara Raeed",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 7
+                            Role = 8
                         },
                         new
                         {
@@ -1200,7 +1200,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Shayman Ali",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 7
+                            Role = 8
                         },
                         new
                         {
@@ -1210,7 +1210,7 @@ namespace Tixora.Infrastructure.Migrations
                             FullName = "Admin User",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 8
+                            Role = 9
                         });
                 });
 

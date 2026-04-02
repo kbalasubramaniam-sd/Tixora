@@ -35,7 +35,7 @@ public static class SeedUsers
                 FullName = "Sarah Ahmad",
                 Email = "sarah.ahmad@tixora.ae",
                 PasswordHash = PasswordHash,
-                Role = UserRole.Requester,
+                Role = UserRole.PartnershipTeam,
                 IsActive = true,
                 CreatedAt = now
             },
@@ -75,7 +75,7 @@ public static class SeedUsers
                 FullName = "Fatima Noor",
                 Email = "fatima.noor@tixora.ae",
                 PasswordHash = PasswordHash,
-                Role = UserRole.Approver,
+                Role = UserRole.ExecutiveAuthority,
                 IsActive = true,
                 CreatedAt = now
             },
