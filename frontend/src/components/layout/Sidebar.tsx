@@ -143,15 +143,21 @@ function SidebarContent({ collapsed, onClose, showClose, onToggleCollapse }: { c
 
       {/* Collapse toggle */}
       {onToggleCollapse && (
-        <button
-          onClick={onToggleCollapse}
-          className="mt-2 mx-auto flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container-highest text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          <span className="material-symbols-outlined text-[18px]">
-            {collapsed ? 'chevron_right' : 'chevron_left'}
-          </span>
-        </button>
+        <div className="pt-3 mt-auto border-t border-outline-variant/20">
+          <button
+            onClick={onToggleCollapse}
+            className={cn(
+              'flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-colors',
+              collapsed && 'justify-center px-2',
+            )}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <span className="material-symbols-outlined text-xl flex-shrink-0">
+              {collapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left'}
+            </span>
+            {!collapsed && <span className="text-[11px] font-semibold uppercase tracking-wider">Collapse</span>}
+          </button>
+        </div>
       )}
     </aside>
   )
