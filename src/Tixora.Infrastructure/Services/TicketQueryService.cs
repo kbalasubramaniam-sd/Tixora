@@ -12,41 +12,53 @@ namespace Tixora.Infrastructure.Services;
 public class TicketQueryService : ITicketQueryService
 {
     private readonly ITixoraDbContext _db;
+    private readonly ISlaService _slaService;
 
     private static readonly TicketStatus[] TerminalStatuses =
         [TicketStatus.Completed, TicketStatus.Rejected, TicketStatus.Cancelled];
 
-    public TicketQueryService(ITixoraDbContext db)
+    public TicketQueryService(ITixoraDbContext db, ISlaService slaService)
     {
         _db = db;
+        _slaService = slaService;
     }
 
     // ─── GetMyTicketsAsync ───────────────────────────────
 
     public async Task<List<TicketSummaryResponse>> GetMyTicketsAsync(Guid userId)
     {
-        return await _db.Tickets
+        var tickets = await _db.Tickets
             .AsNoTracking()
             .Where(t => t.CreatedByUserId == userId)
             .OrderByDescending(t => t.CreatedAt)
-            .Select(t => new TicketSummaryResponse(
-                t.Id.ToString(),
+            .Select(t => new
+            {
+                t.Id,
                 t.TicketId,
-                t.ProductCode.ToString(),
-                t.TaskType.ToString(),
-                t.PartnerProduct.Partner.Name,
-                t.CreatedBy.FullName,
-                t.Status.ToString(),
-                TerminalStatuses.Contains(t.Status) ? "" :
+                ProductCode = t.ProductCode.ToString(),
+                TaskType = t.TaskType.ToString(),
+                PartnerName = t.PartnerProduct.Partner.Name,
+                RequesterName = t.CreatedBy.FullName,
+                Status = t.Status.ToString(),
+                CurrentStage = TerminalStatuses.Contains(t.Status) ? "" :
                     t.WorkflowDefinition.Stages
                         .Where(s => s.StageOrder == t.CurrentStageOrder)
                         .Select(s => s.StageName).FirstOrDefault() ?? "",
-                "OnTrack",
-                0,
                 t.CreatedAt,
                 t.UpdatedAt
-            ))
+            })
             .ToListAsync();
+
+        var slaMap = await GetSlaMapAsync(tickets.Select(t => t.Id).ToList());
+
+        return tickets.Select(t =>
+        {
+            var (status, remaining) = slaMap.GetValueOrDefault(t.Id, (SlaStatus.OnTrack, 0));
+            return new TicketSummaryResponse(
+                t.Id.ToString(), t.TicketId, t.ProductCode, t.TaskType,
+                t.PartnerName, t.RequesterName, t.Status, t.CurrentStage,
+                status.ToString(), remaining, t.CreatedAt, t.UpdatedAt);
+        }).ToList();
     }
 
     // ─── GetTeamQueueAsync ───────────────────────────────
@@ -74,25 +86,35 @@ public class TicketQueryService : ITicketQueryService
         if (!string.IsNullOrEmpty(requester) && requester != "All")
             query = query.Where(t => t.CreatedBy.FullName.Contains(requester));
 
-        return await query
+        var tickets = await query
             .OrderByDescending(t => t.UpdatedAt)
-            .Select(t => new TicketSummaryResponse(
-                t.Id.ToString(),
+            .Select(t => new
+            {
+                t.Id,
                 t.TicketId,
-                t.ProductCode.ToString(),
-                t.TaskType.ToString(),
-                t.PartnerProduct.Partner.Name,
-                t.CreatedBy.FullName,
-                t.Status.ToString(),
-                t.WorkflowDefinition.Stages
+                ProductCode = t.ProductCode.ToString(),
+                TaskType = t.TaskType.ToString(),
+                PartnerName = t.PartnerProduct.Partner.Name,
+                RequesterName = t.CreatedBy.FullName,
+                Status = t.Status.ToString(),
+                CurrentStage = t.WorkflowDefinition.Stages
                     .Where(s => s.StageOrder == t.CurrentStageOrder)
                     .Select(s => s.StageName).FirstOrDefault() ?? "",
-                "OnTrack",
-                0,
                 t.CreatedAt,
                 t.UpdatedAt
-            ))
+            })
             .ToListAsync();
+
+        var slaMap = await GetSlaMapAsync(tickets.Select(t => t.Id).ToList());
+
+        return tickets.Select(t =>
+        {
+            var (status, remaining) = slaMap.GetValueOrDefault(t.Id, (SlaStatus.OnTrack, 0));
+            return new TicketSummaryResponse(
+                t.Id.ToString(), t.TicketId, t.ProductCode, t.TaskType,
+                t.PartnerName, t.RequesterName, t.Status, t.CurrentStage,
+                status.ToString(), remaining, t.CreatedAt, t.UpdatedAt);
+        }).ToList();
     }
 
     // ─── GetActionRequiredAsync ──────────────────────────
@@ -114,26 +136,36 @@ public class TicketQueryService : ITicketQueryService
             query = query.Where(t => t.AssignedToUserId == userId);
         }
 
-        return await query
+        var tickets = await query
             .OrderBy(t => t.CreatedAt)
             .Take(20)
-            .Select(t => new TicketSummaryResponse(
-                t.Id.ToString(),
+            .Select(t => new
+            {
+                t.Id,
                 t.TicketId,
-                t.ProductCode.ToString(),
-                t.TaskType.ToString(),
-                t.PartnerProduct.Partner.Name,
-                t.CreatedBy.FullName,
-                t.Status.ToString(),
-                t.WorkflowDefinition.Stages
+                ProductCode = t.ProductCode.ToString(),
+                TaskType = t.TaskType.ToString(),
+                PartnerName = t.PartnerProduct.Partner.Name,
+                RequesterName = t.CreatedBy.FullName,
+                Status = t.Status.ToString(),
+                CurrentStage = t.WorkflowDefinition.Stages
                     .Where(s => s.StageOrder == t.CurrentStageOrder)
                     .Select(s => s.StageName).FirstOrDefault() ?? "",
-                "OnTrack",
-                0,
                 t.CreatedAt,
                 t.UpdatedAt
-            ))
+            })
             .ToListAsync();
+
+        var slaMap = await GetSlaMapAsync(tickets.Select(t => t.Id).ToList());
+
+        return tickets.Select(t =>
+        {
+            var (status, remaining) = slaMap.GetValueOrDefault(t.Id, (SlaStatus.OnTrack, 0));
+            return new TicketSummaryResponse(
+                t.Id.ToString(), t.TicketId, t.ProductCode, t.TaskType,
+                t.PartnerName, t.RequesterName, t.Status, t.CurrentStage,
+                status.ToString(), remaining, t.CreatedAt, t.UpdatedAt);
+        }).ToList();
     }
 
     // ─── GetDashboardStatsAsync ──────────────────────────
@@ -436,6 +468,9 @@ public class TicketQueryService : ITicketQueryService
         // Compute allowed actions for the current user
         var allowedActions = ComputeAllowedActions(ticket, actorUserId, actorRole);
 
+        // Get real SLA data
+        var (slaStatus, slaHoursRemaining) = await _slaService.GetCurrentSlaAsync(ticket.Id);
+
         return new TicketDetailResponse(
             Id: ticket.Id.ToString(),
             TicketId: ticket.TicketId,
@@ -445,8 +480,8 @@ public class TicketQueryService : ITicketQueryService
             RequesterName: ticket.CreatedBy.FullName,
             Status: ticket.Status.ToString(),
             CurrentStage: currentStageName,
-            SlaStatus: "OnTrack",
-            SlaHoursRemaining: 0,
+            SlaStatus: slaStatus.ToString(),
+            SlaHoursRemaining: slaHoursRemaining,
             CreatedAt: ticket.CreatedAt,
             UpdatedAt: ticket.UpdatedAt,
             CompanyCode: ticket.PartnerProduct.CompanyCode ?? "",
@@ -463,6 +498,21 @@ public class TicketQueryService : ITicketQueryService
             AllowedActions: allowedActions,
             RejectedTicketRef: rejectedTicketRef
         );
+    }
+
+    private async Task<Dictionary<Guid, (SlaStatus Status, double HoursRemaining)>> GetSlaMapAsync(List<Guid> ticketIds)
+    {
+        if (ticketIds.Count == 0) return new();
+
+        var activeTrackers = await _db.SlaTrackers
+            .AsNoTracking()
+            .Where(s => s.IsActive && ticketIds.Contains(s.TicketId))
+            .Select(s => new { s.TicketId, s.Status, s.TargetBusinessHours, s.BusinessHoursElapsed })
+            .ToListAsync();
+
+        return activeTrackers.ToDictionary(
+            t => t.TicketId,
+            t => (t.Status, Math.Max(0, Math.Round(t.TargetBusinessHours - t.BusinessHoursElapsed, 2))));
     }
 
     private static string[] ComputeAllowedActions(Ticket ticket, Guid actorUserId, UserRole actorRole)

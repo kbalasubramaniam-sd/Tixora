@@ -31,4 +31,5 @@ public class Ticket
     public ICollection<AuditEntry> AuditEntries { get; set; } = new List<AuditEntry>();
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public ICollection<Document> Documents { get; set; } = new List<Document>();
+    public ICollection<SlaTracker> SlaTrackers { get; set; } = new List<SlaTracker>();
 }

@@ -10,10 +10,12 @@ namespace Tixora.Infrastructure.Services;
 public class WorkflowEngine : IWorkflowEngine
 {
     private readonly ITixoraDbContext _db;
+    private readonly ISlaService _slaService;
 
-    public WorkflowEngine(ITixoraDbContext db)
+    public WorkflowEngine(ITixoraDbContext db, ISlaService slaService)
     {
         _db = db;
+        _slaService = slaService;
     }
 
     // ─────────────────────────────────────────────────────
@@ -350,6 +352,9 @@ public class WorkflowEngine : IWorkflowEngine
         // 12. SaveChanges
         await _db.SaveChangesAsync();
 
+        // 12b. Start SLA tracking for stage 1
+        await _slaService.StartTrackingAsync(ticket.Id, 1, stage1.SlaBusinessHours);
+
         // 13. Return TicketResponse
         return new TicketResponse(
             Id: ticket.Id,
@@ -426,6 +431,9 @@ public class WorkflowEngine : IWorkflowEngine
             });
         }
 
+        // Complete SLA tracking for current stage before advancing
+        var currentStageOrder = currentStage.StageOrder;
+
         if (isLastStage)
         {
             // ── Complete the ticket ──
@@ -475,6 +483,17 @@ public class WorkflowEngine : IWorkflowEngine
         }
 
         await _db.SaveChangesAsync();
+
+        // SLA: complete current stage tracking
+        await _slaService.CompleteTrackingAsync(ticket.Id, currentStageOrder);
+
+        // SLA: start tracking for next stage (if not last)
+        if (!isLastStage)
+        {
+            var nextStageForSla = stages.First(s => s.StageOrder > currentStage.StageOrder);
+            await _slaService.StartTrackingAsync(ticket.Id, nextStageForSla.StageOrder, nextStageForSla.SlaBusinessHours);
+        }
+
         return BuildResponseFromTicket(ticket);
     }
 
@@ -564,6 +583,10 @@ public class WorkflowEngine : IWorkflowEngine
         });
 
         await _db.SaveChangesAsync();
+
+        // SLA: pause tracking while awaiting clarification
+        await _slaService.PauseAsync(ticket.Id, ticket.CurrentStageOrder);
+
         return BuildResponseFromTicket(ticket);
     }
 
@@ -613,6 +636,10 @@ public class WorkflowEngine : IWorkflowEngine
         });
 
         await _db.SaveChangesAsync();
+
+        // SLA: resume tracking after clarification response
+        await _slaService.ResumeAsync(ticket.Id, ticket.CurrentStageOrder);
+
         return BuildResponseFromTicket(ticket);
     }
 
