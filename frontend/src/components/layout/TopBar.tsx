@@ -3,12 +3,11 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Chip } from '@/components/ui/Chip'
 
 interface TopBarProps {
-  notificationCount?: number
   onMenuToggle?: () => void
   showMenuButton?: boolean
 }
 
-export function TopBar({ notificationCount = 0, onMenuToggle, showMenuButton }: TopBarProps) {
+export function TopBar({ onMenuToggle, showMenuButton }: TopBarProps) {
   const { user, logout } = useAuth()
   const [showUserMenu, setShowUserMenu] = useState(false)
 
@@ -31,7 +30,7 @@ export function TopBar({ notificationCount = 0, onMenuToggle, showMenuButton }: 
 
       {/* Logo */}
       <div className="flex flex-col mr-4">
-        <span className="text-xl font-bold tracking-tight text-primary leading-tight">Tixora</span>
+        <span className="text-xl font-bold tracking-tighter text-primary leading-tight">Tixora</span>
         <span className="text-[0.6875rem] text-on-surface-variant leading-tight hidden sm:block">
           Powering Every Request
         </span>
@@ -57,14 +56,10 @@ export function TopBar({ notificationCount = 0, onMenuToggle, showMenuButton }: 
         {/* Notification bell */}
         <button
           className="relative p-2 rounded-lg hover:bg-surface-container-low transition-colors"
-          aria-label={notificationCount > 0 ? `Notifications, ${notificationCount} unread` : 'Notifications'}
+          aria-label="Notifications"
         >
           <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
-          {notificationCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary-container text-on-primary text-[10px] font-bold flex items-center justify-center">
-              {notificationCount > 9 ? '9+' : notificationCount}
-            </span>
-          )}
+          <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
         </button>
 
         {/* User avatar */}

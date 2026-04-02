@@ -226,7 +226,7 @@ export function FilterBar({ product, onProductChange, task, onTaskChange, slaSta
     !!hasExtraFilters
 
   return (
-    <div className="bg-surface-bright rounded-lg p-3 mb-8 flex flex-wrap items-center justify-between gap-3 shadow-sm border border-surface-container-high">
+    <div className="bg-surface-container-low rounded-xl p-4 mb-8 flex flex-wrap items-center justify-between gap-3">
       <div className="flex flex-wrap items-center gap-2">
         {product !== undefined && onProductChange && (
           <FilterChip label="Product" value={product} options={products} onChange={onProductChange} />

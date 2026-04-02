@@ -48,38 +48,36 @@ interface TicketHeaderProps {
 
 export function TicketHeader({ ticket }: TicketHeaderProps) {
   return (
-    <section className="space-y-4">
-      <div className="space-y-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-              High Priority
-            </span>
-            <span className="text-on-surface-variant text-xs font-medium">Ticket ID</span>
-          </div>
-          <h2 className="text-2xl font-black tracking-tight text-on-surface">{ticket.ticketId}</h2>
+    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+            High Priority
+          </span>
+          <span className="text-on-surface-variant text-xs font-medium">Ticket ID</span>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center h-7 px-3 rounded-full text-xs font-bold bg-surface-container-highest text-on-surface">
-            {PRODUCT_LABELS[ticket.productCode] ?? ticket.productCode}
-          </span>
-          <span className="inline-flex items-center h-7 px-3 rounded-full text-xs font-bold bg-surface-container-highest text-on-surface">
-            {TASK_LABELS[ticket.taskType] ?? ticket.taskType}
-          </span>
-          <span className={cn('inline-flex items-center h-7 px-3 rounded-full text-xs font-bold', statusStyles[ticket.status])}>
-            {STATUS_LABELS[ticket.status] ?? ticket.status}
-          </span>
-          <span className={cn('inline-flex items-center h-7 px-3 gap-1 rounded-full text-xs font-bold', slaChipStyles[ticket.slaStatus])}>
-            <span className="material-symbols-outlined text-[14px]">schedule</span>
-            {formatSlaChip(ticket.slaStatus, ticket.slaHoursRemaining)}
-          </span>
-          {ticket.accessPath && (
-            <span className="inline-flex items-center h-7 px-3 rounded-full text-xs font-bold bg-surface-container-highest text-on-surface">
-              {accessPathLabel[ticket.accessPath]}
-            </span>
-          )}
-        </div>
+        <h2 className="text-2xl font-black tracking-tight text-on-surface">{ticket.ticketId}</h2>
       </div>
-    </section>
+      <div className="flex flex-wrap gap-2">
+        <span className="bg-surface-container-highest text-on-surface px-3 py-1.5 rounded-full text-xs font-bold">
+          {PRODUCT_LABELS[ticket.productCode] ?? ticket.productCode}
+        </span>
+        <span className="bg-surface-container-highest text-on-surface px-3 py-1.5 rounded-full text-xs font-bold">
+          {TASK_LABELS[ticket.taskType] ?? ticket.taskType}
+        </span>
+        <span className={cn('px-3 py-1.5 rounded-full text-xs font-bold', statusStyles[ticket.status])}>
+          {STATUS_LABELS[ticket.status] ?? ticket.status}
+        </span>
+        <span className={cn('px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1', slaChipStyles[ticket.slaStatus])}>
+          <span className="material-symbols-outlined text-sm">schedule</span>
+          {formatSlaChip(ticket.slaStatus, ticket.slaHoursRemaining)}
+        </span>
+        {ticket.accessPath && (
+          <span className="bg-surface-container-highest text-on-surface px-3 py-1.5 rounded-full text-xs font-bold">
+            {accessPathLabel[ticket.accessPath]}
+          </span>
+        )}
+      </div>
+    </div>
   )
 }

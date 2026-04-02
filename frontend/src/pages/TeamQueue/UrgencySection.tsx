@@ -23,36 +23,33 @@ export function UrgencySection({ tickets }: UrgencySectionProps) {
   if (breached.length === 0 && atRisk.length === 0) return null
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+    <div className="space-y-6 mb-12">
       {/* SLA Breached */}
       {breached.length > 0 && (
-        <section className="bg-error-surface rounded-xl p-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="font-bold text-on-surface tracking-tight flex items-center gap-2">
-              <span className="material-symbols-outlined text-error" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
-              SLA BREACHED
+        <section className="bg-error-container/20 p-6 rounded-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="w-2 h-2 rounded-full bg-error animate-pulse" />
+            <h2 className="text-sm font-bold text-error uppercase tracking-wider font-label">
+              SLA Breached ({breached.length} {breached.length === 1 ? 'Item' : 'Items'})
             </h2>
-            <span className="bg-error-container text-on-error-container px-2 py-0.5 rounded text-[10px] font-black tracking-widest">
-              {breached.length} {breached.length === 1 ? 'ITEM' : 'ITEMS'}
-            </span>
           </div>
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {breached.map((ticket) => (
               <div
                 key={ticket.id}
                 onClick={() => navigate(`/tickets/${ticket.id}`)}
-                className="bg-surface-container-lowest p-4 rounded-lg flex items-center justify-between border-l-4 border-error shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-surface-container-highest p-4 rounded-lg flex flex-col justify-between shadow-sm border-l-4 border-error cursor-pointer hover:shadow-md transition-shadow"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/tickets/${ticket.id}`) }}
               >
                 <div>
-                  <span className="text-[10px] font-bold text-secondary tracking-widest mb-1 block">{ticket.ticketId}</span>
-                  <h3 className="font-bold text-on-surface">{ticket.partnerName} — {TASK_LABELS_SHORT[ticket.taskType]}</h3>
+                  <p className="text-xs font-mono text-on-surface-variant mb-1">{ticket.ticketId}</p>
+                  <p className="font-bold text-on-surface">{ticket.partnerName}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-error font-black text-sm uppercase tracking-tighter">{formatSlaTime(ticket.slaHoursRemaining)}</p>
-                  <span className="text-[10px] font-bold text-tertiary-container uppercase tracking-widest">CRITICAL</span>
+                <div className="flex justify-between items-center mt-3">
+                  <span className="text-xs font-bold text-error uppercase">{formatSlaTime(ticket.slaHoursRemaining)}</span>
+                  <span className="text-[10px] bg-error-container text-on-error-container px-2 py-0.5 rounded font-bold uppercase">Critical</span>
                 </div>
               </div>
             ))}
@@ -62,33 +59,37 @@ export function UrgencySection({ tickets }: UrgencySectionProps) {
 
       {/* Approaching SLA */}
       {atRisk.length > 0 && (
-        <section className="bg-warning-surface rounded-xl p-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="font-bold text-on-surface tracking-tight flex items-center gap-2">
-              <span className="material-symbols-outlined text-warning" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
-              APPROACHING SLA
+        <section className="bg-tertiary-fixed/20 p-6 rounded-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse" />
+            <h2 className="text-sm font-bold text-tertiary uppercase tracking-wider font-label">
+              Approaching SLA ({atRisk.length} {atRisk.length === 1 ? 'Item' : 'Items'})
             </h2>
-            <span className="bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded text-[10px] font-black tracking-widest">
-              {atRisk.length} {atRisk.length === 1 ? 'ITEM' : 'ITEMS'}
-            </span>
           </div>
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {atRisk.map((ticket) => (
               <div
                 key={ticket.id}
                 onClick={() => navigate(`/tickets/${ticket.id}`)}
-                className="bg-surface-container-lowest p-4 rounded-lg flex items-center justify-between border-l-4 border-warning shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-surface-container-highest p-4 rounded-lg flex items-center justify-between shadow-sm border-l-4 border-tertiary cursor-pointer hover:shadow-md transition-shadow"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/tickets/${ticket.id}`) }}
               >
-                <div>
-                  <span className="text-[10px] font-bold text-secondary tracking-widest mb-1 block">{ticket.ticketId}</span>
-                  <h3 className="font-bold text-on-surface">{ticket.partnerName}</h3>
+                <div className="flex items-center gap-4">
+                  <div className="bg-surface-container-low p-2 rounded-lg">
+                    <span className="material-symbols-outlined text-tertiary">schedule</span>
+                  </div>
+                  <div>
+                    <p className="text-xs font-mono text-on-surface-variant">{ticket.ticketId}</p>
+                    <p className="font-bold text-on-surface">{ticket.partnerName}</p>
+                  </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-warning font-black text-sm uppercase tracking-tighter">{formatSlaTime(ticket.slaHoursRemaining)}</p>
-                  <span className="text-[10px] font-bold text-tertiary-container uppercase tracking-widest">HIGH</span>
+                  <p className="text-xs font-bold text-tertiary">{formatSlaTime(ticket.slaHoursRemaining)}</p>
+                  <div className="w-24 h-1.5 bg-surface-container-low rounded-full mt-1">
+                    <div className="bg-tertiary h-full w-[70%] rounded-full" />
+                  </div>
                 </div>
               </div>
             ))}
@@ -96,9 +97,6 @@ export function UrgencySection({ tickets }: UrgencySectionProps) {
         </section>
       )}
 
-      {/* Fill empty grid slot if only one section exists */}
-      {breached.length === 0 && <div />}
-      {atRisk.length === 0 && breached.length > 0 && <div />}
     </div>
   )
 }

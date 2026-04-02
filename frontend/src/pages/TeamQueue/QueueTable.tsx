@@ -71,54 +71,58 @@ export function QueueTable({ tickets, emptyIcon = 'inbox', emptyTitle = 'Your qu
 
   return (
     <>
-      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-x-auto no-scrollbar">
-        <table className="w-full text-left border-separate border-spacing-0 min-w-[1100px]">
-          <thead className="bg-surface-container-low">
-            <tr className="text-[10px] font-black tracking-[0.1em] text-on-surface-variant uppercase">
-              <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" tabIndex={0} role="button" onClick={() => handleSort('ticketId')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSort('ticketId') } }}>
-                Ticket ID
+      <div className="bg-surface-container-low rounded-xl overflow-hidden shadow-sm">
+        <div className="p-6">
+          <h3 className="text-xl font-bold text-on-surface mb-1 font-headline">Queue Backlog</h3>
+          <p className="text-sm text-on-surface-variant">Showing {tickets.length} active operational tasks</p>
+        </div>
+        <div className="overflow-x-auto no-scrollbar">
+        <table className="w-full text-left border-collapse min-w-[1000px]">
+          <thead className="bg-surface-container-highest text-on-surface-variant font-label">
+            <tr className="h-[52px]">
+              <th className="px-6 py-4 text-[0.75rem] font-bold uppercase tracking-widest cursor-pointer hover:text-primary transition-colors" tabIndex={0} role="button" onClick={() => handleSort('ticketId')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSort('ticketId') } }}>
+                <div className="flex items-center gap-1">Ticket ID <span className="material-symbols-outlined text-sm">unfold_more</span></div>
               </th>
-              <th className="px-6 py-4">Product</th>
-              <th className="px-6 py-4">Task</th>
-              <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" tabIndex={0} role="button" onClick={() => handleSort('partnerName')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSort('partnerName') } }}>
-                Partner
+              <th className="px-6 py-4 text-[0.75rem] font-bold uppercase tracking-widest cursor-pointer hover:text-primary transition-colors">
+                <div className="flex items-center gap-1">Product <span className="material-symbols-outlined text-sm">unfold_more</span></div>
               </th>
-              <th className="px-6 py-4">Requester</th>
-              <th className="px-6 py-4">Stage</th>
-              <th className="px-6 py-4">SLA</th>
-              <th className="px-6 py-4 text-right cursor-pointer hover:text-primary transition-colors" tabIndex={0} role="button" onClick={() => handleSort('slaHoursRemaining')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSort('slaHoursRemaining') } }}>
+              <th className="px-6 py-4 text-[0.75rem] font-bold uppercase tracking-widest">Task</th>
+              <th className="px-6 py-4 text-[0.75rem] font-bold uppercase tracking-widest cursor-pointer hover:text-primary transition-colors" tabIndex={0} role="button" onClick={() => handleSort('partnerName')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSort('partnerName') } }}>
+                <div className="flex items-center gap-1">Partner <span className="material-symbols-outlined text-sm">unfold_more</span></div>
+              </th>
+              <th className="px-6 py-4 text-[0.75rem] font-bold uppercase tracking-widest">Requester</th>
+              <th className="px-6 py-4 text-[0.75rem] font-bold uppercase tracking-widest">Stage</th>
+              <th className="px-6 py-4 text-[0.75rem] font-bold uppercase tracking-widest">SLA</th>
+              <th className="px-6 py-4 text-[0.75rem] font-bold uppercase tracking-widest text-right cursor-pointer hover:text-primary transition-colors" tabIndex={0} role="button" onClick={() => handleSort('slaHoursRemaining')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSort('slaHoursRemaining') } }}>
                 Time
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-surface-container-low">
-            {sorted.map((ticket, i) => (
+          <tbody className="divide-y divide-surface-container-highest">
+            {sorted.map((ticket) => (
               <tr
                 key={ticket.id}
                 onClick={() => navigate(`/tickets/${ticket.id}`)}
                 onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/tickets/${ticket.id}`) }}
                 tabIndex={0}
                 role="button"
-                className={cn(
-                  'hover:bg-surface-hover transition-colors duration-200 cursor-pointer h-16 outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
-                  i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface',
-                )}
+                className="hover:bg-surface-container-highest/50 cursor-pointer transition-colors h-[64px] outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               >
-                <td className="px-6 py-4">
-                  <span className="font-semibold text-primary text-sm">{ticket.ticketId}</span>
+                <td className="px-6 py-2">
+                  <span className="font-mono text-xs text-primary font-bold">{ticket.ticketId}</span>
                 </td>
-                <td className="px-6 py-4">
-                  <span className="bg-secondary-container text-on-secondary-container text-[10px] font-black px-2 py-1 rounded tracking-widest">
+                <td className="px-6 py-2">
+                  <span className="bg-surface-container-highest text-on-surface px-2 py-1 rounded text-[10px] font-bold uppercase">
                     {PRODUCT_LABELS[ticket.productCode]?.toUpperCase() ?? ticket.productCode}
                   </span>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-2">
                   <span className="font-medium text-on-surface text-sm">{TASK_LABELS[ticket.taskType]}</span>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-2">
                   <span className="text-sm text-on-surface-variant break-words">{ticket.partnerName}</span>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-2">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] font-bold flex-shrink-0">
                       {getInitials(ticket.requesterName)}
@@ -126,23 +130,19 @@ export function QueueTable({ tickets, emptyIcon = 'inbox', emptyTitle = 'Your qu
                     <span className="text-sm text-on-surface break-words">{ticket.requesterName}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <span className="flex items-center gap-1.5 text-xs font-bold text-primary">
-                    <span className="material-symbols-outlined text-[16px] flex-shrink-0">{stageIcon[ticket.currentStage] ?? 'pending'}</span>
-                    <span className="break-words">{ticket.currentStage}</span>
+                <td className="px-6 py-2">
+                  <span className="text-xs bg-surface-container-highest text-on-surface px-2 py-1 rounded font-medium">
+                    {ticket.currentStage}
                   </span>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className={cn('w-2 h-2 rounded-full flex-shrink-0', slaDotColor[ticket.slaStatus])} />
-                    <span className="text-[10px] font-bold text-secondary uppercase">{SLA_LABELS[ticket.slaStatus]}</span>
-                  </div>
+                <td className="px-6 py-2">
+                  <span className="flex items-center gap-1.5 text-xs text-on-surface font-semibold">
+                    <span className={cn('w-2 h-2 rounded-full flex-shrink-0', slaDotColor[ticket.slaStatus])} />
+                    {SLA_LABELS[ticket.slaStatus]} {formatTime(ticket.slaHoursRemaining)}
+                  </span>
                 </td>
-                <td className="px-6 py-4 text-right">
-                  <span className={cn(
-                    'font-medium text-sm whitespace-nowrap',
-                    ticket.slaHoursRemaining < 0 ? 'text-error font-bold' : 'text-on-surface-variant',
-                  )}>
+                <td className="px-6 py-2 text-right">
+                  <span className="font-mono text-xs text-on-surface-variant">
                     {formatTime(ticket.slaHoursRemaining)}
                   </span>
                 </td>
@@ -150,18 +150,22 @@ export function QueueTable({ tickets, emptyIcon = 'inbox', emptyTitle = 'Your qu
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center mt-12 pb-12">
+      <div className="p-6 bg-surface-container-low rounded-b-xl flex flex-col sm:flex-row justify-between items-center gap-4 -mt-px">
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-on-surface-variant">Showing {tickets.length} items</span>
+        </div>
         <div className="flex items-center gap-2">
-          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors text-secondary">
+          <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">
             <span className="material-symbols-outlined">chevron_left</span>
           </button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full primary-gradient text-on-primary font-bold shadow-md">1</button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors font-medium text-secondary">2</button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors font-medium text-secondary">3</button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors text-secondary">
+          <button className="w-10 h-10 rounded-full primary-gradient text-white flex items-center justify-center font-bold">1</button>
+          <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">2</button>
+          <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">3</button>
+          <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
         </div>

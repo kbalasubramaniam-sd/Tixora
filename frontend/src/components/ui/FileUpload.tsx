@@ -59,66 +59,49 @@ export function FileUpload({
   return (
     <div className="flex flex-col gap-1">
       {file ? (
-        // Uploaded state
-        <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl group transition-all min-h-[80px]">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm shrink-0">
-              <span className="material-symbols-outlined">description</span>
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-on-surface">{label}</p>
-              <p className="text-xs text-primary font-medium truncate">
-                {file.name} ({formatFileSize(file.size)})
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleRemove}
-            title="Remove file"
-            className={cn(
-              'flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full',
-              'text-xs font-bold shrink-0 hover:bg-error/10 hover:text-error transition-colors',
-            )}
-          >
+        // Uploaded state — Stitch card style
+        <div className="bg-surface-container-lowest p-6 rounded-xl border-2 border-primary/20 min-h-[160px] flex flex-col">
+          <div className="mb-4 flex justify-between items-start">
+            <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>description</span>
             <span
-              className="material-symbols-outlined text-[16px]"
+              className="material-symbols-outlined text-primary text-sm"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               check_circle
             </span>
-            uploaded
+          </div>
+          <h3 className="font-bold mb-1 text-on-surface">{label}</h3>
+          <p className="text-xs text-primary font-medium truncate mb-6">{file.name} ({formatFileSize(file.size)})</p>
+          <button
+            type="button"
+            onClick={handleRemove}
+            title="Remove file"
+            className="w-full py-3 bg-error-container/20 text-error text-sm font-bold rounded-lg hover:bg-error-container/40 transition-colors flex items-center justify-center gap-2 mt-auto"
+          >
+            <span className="material-symbols-outlined text-sm">delete</span>
+            Remove
           </button>
         </div>
       ) : (
-        // Pending state
-        <div
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 gap-3 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-all cursor-pointer min-h-[80px]"
-          onClick={handleUploadClick}
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-outline shadow-sm shrink-0">
-              <span className="material-symbols-outlined">{icon}</span>
-            </div>
-            <div>
-              <p className="text-sm font-bold text-on-surface">{label}</p>
-              <p className={cn('text-xs font-medium', error ? 'text-error' : showError ? 'text-error' : 'text-outline-variant')}>
-                {error ?? (showError ? 'Missing required file' : 'Click to upload')}
-              </p>
-            </div>
+        // Pending state — Stitch card style
+        <div className="bg-surface-container-lowest p-6 rounded-xl group transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 cursor-pointer min-h-[160px] flex flex-col">
+          <div className="mb-6 flex justify-between items-start">
+            <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">{icon}</span>
+            <span className="material-symbols-outlined text-error text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>priority_high</span>
           </div>
+          <h3 className="font-bold mb-1 text-on-surface">{label}</h3>
+          <p className={cn('text-xs mb-6 leading-relaxed', error ? 'text-error' : showError ? 'text-error' : 'text-on-surface-variant')}>
+            {error ?? (showError ? 'Missing required file' : 'Click to upload file')}
+          </p>
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation()
               handleUploadClick()
             }}
-            className={cn(
-              'flex items-center gap-2 px-4 py-2 bg-white text-on-surface-variant rounded-lg',
-              'text-xs font-bold shadow-sm hover:text-primary transition-colors shrink-0',
-            )}
+            className="w-full py-3 bg-surface-container-low text-on-surface text-sm font-bold rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center gap-2 mt-auto"
           >
-            <span className="material-symbols-outlined text-[16px]">upload</span>
+            <span className="material-symbols-outlined text-sm">upload</span>
             Upload
           </button>
         </div>

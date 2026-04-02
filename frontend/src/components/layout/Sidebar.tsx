@@ -65,16 +65,16 @@ function NavItemLink({ item, collapsed }: { item: NavItem; collapsed: boolean })
           'flex items-center gap-3 px-4 py-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors relative',
           collapsed && 'justify-center px-2',
           isActive
-            ? 'text-primary-container bg-surface-container-lowest'
+            ? 'text-primary bg-white shadow-sm font-bold'
             : 'text-on-surface-variant hover:bg-surface-container-highest hover:translate-x-1 transition-transform',
-          item.isPrimary && !collapsed && 'text-primary-container',
+          item.isPrimary && !collapsed && 'text-primary',
         )
       }
     >
       {({ isActive }) => (
         <>
           {isActive && (
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-primary" />
           )}
           <span className="material-symbols-outlined text-xl flex-shrink-0">{item.icon}</span>
           {!collapsed && item.label}
@@ -177,7 +177,7 @@ export function Sidebar({ mode, isOverlayOpen, onClose, onToggleCollapse }: Side
         {/* Overlay sidebar */}
         <div className="fixed left-0 top-0 bottom-0 w-60 bg-surface-container-low z-50 flex flex-col py-4 px-3 overflow-y-auto shadow-2xl">
           <div className="flex items-center justify-between mb-4 pt-2">
-            <span className="text-lg font-bold text-primary-container">Tixora</span>
+            <span className="text-lg font-bold text-primary">Tixora</span>
             <button
               onClick={onClose}
               className="p-2 rounded-lg hover:bg-surface-container-high transition-colors"
@@ -217,16 +217,16 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
             cn(
               'flex items-center gap-3 px-4 py-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors relative',
               isActive
-                ? 'text-primary-container bg-surface-container-lowest'
+                ? 'text-primary bg-white shadow-sm font-bold'
                 : 'text-on-surface-variant hover:bg-surface-container-highest hover:translate-x-1 transition-transform',
-              item.isPrimary && !isActive && 'text-primary-container',
+              item.isPrimary && !isActive && 'text-primary',
             )
           }
         >
           {({ isActive }) => (
             <>
               {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-primary" />
               )}
               <span className="material-symbols-outlined text-xl">{item.icon}</span>
               {item.label}
@@ -251,7 +251,7 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
                 cn(
                   'flex items-center gap-3 px-4 py-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors relative',
                   isActive
-                    ? 'text-primary-container bg-surface-container-lowest'
+                    ? 'text-primary bg-white shadow-sm font-bold'
                     : 'text-on-surface-variant hover:bg-surface-container-highest hover:translate-x-1 transition-transform',
                 )
               }
@@ -259,7 +259,7 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
               {({ isActive }) => (
                 <>
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-primary" />
                   )}
                   <span className="material-symbols-outlined text-xl">{item.icon}</span>
                   {item.label}
@@ -280,7 +280,7 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
             cn(
               'flex items-center gap-3 px-4 py-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors relative',
               isActive
-                ? 'text-primary-container bg-surface-container-lowest'
+                ? 'text-primary bg-white shadow-sm font-bold'
                 : 'text-on-surface-variant hover:bg-surface-container-highest hover:translate-x-1 transition-transform',
             )
           }
@@ -288,7 +288,7 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
           {({ isActive }) => (
             <>
               {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary-container" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-primary" />
               )}
               <span className="material-symbols-outlined text-xl">{reportItem.icon}</span>
               {reportItem.label}

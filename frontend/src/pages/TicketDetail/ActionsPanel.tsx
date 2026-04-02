@@ -110,7 +110,7 @@ export function ActionsPanel({ ticket, onActionComplete }: ActionsPanelProps) {
   return (
     <>
       <div className="bg-surface-container-lowest p-6 rounded-xl custom-shadow space-y-4">
-        <h4 className="text-sm font-extrabold uppercase tracking-widest text-on-surface-variant">Actions</h4>
+        <h4 className="text-sm font-extrabold uppercase tracking-widest text-on-surface-variant">Review Actions</h4>
         {visibleActions.map((action) => {
           const config = actionConfig[action]
           return (

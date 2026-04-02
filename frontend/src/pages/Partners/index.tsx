@@ -61,11 +61,27 @@ export default function Partners() {
         <p className="text-on-surface-variant mt-2 text-lg">Manage and explore Tixora's global partner network.</p>
       </header>
 
+      {/* Search Bar */}
+      <section className="mb-8">
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+            <span className="material-symbols-outlined text-primary transition-transform group-focus-within:scale-110">search</span>
+          </div>
+          <input
+            type="text"
+            value={selectedPartnerId ? allPartners.find((p) => p.id === selectedPartnerId)?.name ?? '' : ''}
+            onChange={(e) => {
+              const match = allPartners.find((p) => p.name.toLowerCase().includes(e.target.value.toLowerCase()))
+              setSelectedPartnerId(match ? match.id : '')
+            }}
+            className="w-full bg-surface-container-low border-none rounded-full py-5 pl-16 pr-8 text-on-surface text-lg font-medium focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest shadow-sm transition-all duration-300 placeholder-slate-400"
+            placeholder="Search by partner name or account reference"
+          />
+        </div>
+      </section>
+
       {/* Filter Bar */}
       <FilterBar
-        partner={selectedPartnerId || 'All'}
-        onPartnerChange={(v) => setSelectedPartnerId(v === 'All' ? '' : v)}
-        partnerOptions={partnerOptions}
         product={product}
         onProductChange={setProduct}
         lifecycle={lifecycle}

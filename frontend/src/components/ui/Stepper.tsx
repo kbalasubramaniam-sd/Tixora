@@ -12,8 +12,9 @@ interface StepperProps {
 
 export function Stepper({ steps, currentStep, className }: StepperProps) {
   return (
-    <div className={cn('max-w-4xl mx-auto mb-12', className)}>
-      <div className="flex items-center justify-center">
+    <div className={cn('max-w-5xl mx-auto mb-12', className)}>
+      {/* Step labels */}
+      <div className="flex items-center justify-center mb-6">
         <div className="flex items-center">
           {steps.map((step, i) => {
             const isCompleted = i < currentStep
@@ -23,7 +24,6 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
 
             return (
               <div key={step.label} className="flex items-center">
-                {/* Step circle + label */}
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
@@ -54,7 +54,6 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
                   </span>
                 </div>
 
-                {/* Connecting line (not after last step) */}
                 {i < steps.length - 1 && (
                   <div
                     className={cn(
@@ -67,6 +66,19 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
             )
           })}
         </div>
+      </div>
+
+      {/* Progress bar strip */}
+      <div className="flex gap-2 h-1.5 w-full">
+        {steps.map((step, i) => (
+          <div
+            key={step.label}
+            className={cn(
+              'flex-1 rounded-full',
+              i <= currentStep ? 'bg-primary' : 'bg-surface-container-highest',
+            )}
+          />
+        ))}
       </div>
     </div>
   )

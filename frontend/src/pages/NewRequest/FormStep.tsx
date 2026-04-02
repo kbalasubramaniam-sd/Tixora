@@ -161,7 +161,7 @@ function FormField({
   if (field.type === 'toggle') return <ToggleField field={field} register={register} />
 
   const inputClass = cn(
-    'w-full bg-surface-container-lowest border-none rounded-lg h-12 px-4',
+    'w-full bg-surface-container-lowest border-none rounded-xl h-14 px-4',
     'text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 shadow-sm transition-all font-medium',
   )
 
@@ -648,21 +648,30 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
 
   return (
     <>
-      <div className="max-w-4xl mx-auto pb-36">
+      <div className="max-w-5xl mx-auto pb-36">
         {/* Page Header — Stitch V2 style */}
-        <div className="mb-10 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-on-surface mb-1">
-              New Request
-            </h1>
-            <p className="text-on-surface-variant font-medium">{taskCode}</p>
+        <div className="mb-12">
+          <div className="flex items-start justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-on-surface mb-1">
+                New Request
+              </h1>
+              <p className="text-on-surface-variant font-medium">{taskCode}</p>
+            </div>
+            <span className="px-3 py-1 bg-surface-container-highest rounded-xl text-xs font-bold tracking-widest text-on-surface-variant shrink-0 mt-1">
+              STEP 3 OF 4
+            </span>
           </div>
-          <span className="px-3 py-1 bg-surface-container-highest rounded-xl text-xs font-bold tracking-widest text-on-surface-variant shrink-0 mt-1">
-            STEP 3 OF 4
-          </span>
+          {/* Step indicator bar */}
+          <div className="flex gap-2 h-1.5 w-full">
+            <div className="flex-1 bg-primary rounded-full" />
+            <div className="flex-1 bg-primary rounded-full" />
+            <div className="flex-1 bg-primary rounded-full" />
+            <div className="flex-1 bg-surface-container-highest rounded-full" />
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit(onFormSubmit)} noValidate className="space-y-10">
+        <form onSubmit={handleSubmit(onFormSubmit)} noValidate className="space-y-12">
           {/* Form Sections */}
           {sections.map(({ sectionName, fields }) => {
             const meta = getSectionMeta(sectionName, schema.sectionMeta)
@@ -766,7 +775,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                   All uploads must be PDF or High-Res Image
                 </span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {schema.requiredDocuments.map((doc) => (
                   <FileUpload
                     key={doc.name}

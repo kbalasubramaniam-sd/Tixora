@@ -62,10 +62,10 @@ export default function TeamQueue() {
   return (
     <div>
       {/* Page Header */}
-      <div className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h1 className="text-[2rem] font-bold text-on-surface leading-tight tracking-tight mb-2">Team Queue</h1>
-          <p className="text-on-surface-variant max-w-2xl leading-relaxed">
+          <h1 className="text-4xl font-bold text-on-surface tracking-tight mb-2 font-headline">Team Queue</h1>
+          <p className="text-on-surface-variant max-w-2xl text-lg">
             Manage collaborative operational tasks and maintain service level agreements across the global product ecosystem.
           </p>
         </div>
@@ -79,7 +79,7 @@ export default function TeamQueue() {
           </button>
           <button
             onClick={() => navigate('/new-request')}
-            className="primary-gradient text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:opacity-90 transition-opacity"
+            className="primary-gradient text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-xl shadow-[#00696a20] transition-transform hover:scale-105"
           >
             <span className="material-symbols-outlined">add_circle</span>
             <span>Create Ticket</span>

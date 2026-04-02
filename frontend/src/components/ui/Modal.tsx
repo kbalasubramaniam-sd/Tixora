@@ -25,7 +25,7 @@ export function Modal({ open, onOpenChange, title, description, children, classN
             className,
           )}
         >
-          <Dialog.Title className="text-lg font-semibold text-on-surface">
+          <Dialog.Title className="text-lg font-extrabold text-on-surface">
             {title}
           </Dialog.Title>
           {description && (

@@ -19,14 +19,14 @@ export function WorkflowStepper({ stages }: WorkflowStepperProps) {
               {/* Circle */}
               <div
                 className={cn(
-                  'w-10 h-10 rounded-full flex items-center justify-center relative z-[1]',
+                  'w-10 h-10 rounded-full flex items-center justify-center relative z-10',
                   isCompleted && 'primary-gradient text-white',
                   isCurrent && 'primary-gradient text-white ring-8 ring-primary/30 pulse-active',
                   stage.status === 'future' && 'bg-surface-container-highest text-on-surface-variant',
                 )}
               >
                 <span
-                  className="material-symbols-outlined text-lg"
+                  className="material-symbols-outlined"
                   style={isCompleted || isCurrent ? { fontVariationSettings: "'FILL' 1" } : undefined}
                 >
                   {stage.icon}
@@ -47,8 +47,8 @@ export function WorkflowStepper({ stages }: WorkflowStepperProps) {
               {!isLast && (
                 <div
                   className={cn(
-                    'absolute top-5 left-[calc(50%+20px)] right-[calc(-50%+20px)] h-0.5',
-                    isCompleted ? 'bg-primary' : 'bg-surface-variant',
+                    'absolute top-5 left-1/2 w-full h-1',
+                    isCompleted ? 'bg-primary-container' : 'bg-surface-variant',
                   )}
                 />
               )}
