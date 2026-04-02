@@ -18,7 +18,8 @@ public class LocalFileStorage : IFileStorage
         var directory = Path.Combine(_basePath, datePath);
         Directory.CreateDirectory(directory);
 
-        var uniqueName = $"{Guid.CreateVersion7()}_{fileName}";
+        var safeName = Path.GetFileName(fileName); // strips path characters
+        var uniqueName = $"{Guid.CreateVersion7()}_{safeName}";
         var fullPath = Path.Combine(directory, uniqueName);
         var relativePath = Path.Combine(datePath, uniqueName).Replace('\\', '/');
 
@@ -30,7 +31,9 @@ public class LocalFileStorage : IFileStorage
 
     public Task<Stream> LoadAsync(string storagePath, CancellationToken ct = default)
     {
-        var fullPath = Path.Combine(_basePath, storagePath);
+        var fullPath = Path.GetFullPath(Path.Combine(_basePath, storagePath));
+        if (!fullPath.StartsWith(Path.GetFullPath(_basePath), StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException("Invalid storage path.");
         if (!File.Exists(fullPath))
             throw new FileNotFoundException($"File not found: {storagePath}");
 
@@ -40,7 +43,9 @@ public class LocalFileStorage : IFileStorage
 
     public Task DeleteAsync(string storagePath, CancellationToken ct = default)
     {
-        var fullPath = Path.Combine(_basePath, storagePath);
+        var fullPath = Path.GetFullPath(Path.Combine(_basePath, storagePath));
+        if (!fullPath.StartsWith(Path.GetFullPath(_basePath), StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedAccessException("Invalid storage path.");
         if (File.Exists(fullPath))
             File.Delete(fullPath);
         return Task.CompletedTask;
