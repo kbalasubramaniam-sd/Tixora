@@ -3,7 +3,9 @@ import { useForm, type FieldValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useFormSchema } from '@/api/hooks/useProducts'
+import { usePartners } from '@/api/hooks/usePartners'
 import { useAuth } from '@/contexts/AuthContext'
+import { TaskType } from '@/types/enums'
 import { cn } from '@/utils/cn'
 import { FileUpload } from '@/components/ui/FileUpload'
 import type { Product, TaskOption, FormFieldDefinition, FormSectionMeta } from '@/types/product'
@@ -51,14 +53,18 @@ function getSectionMeta(
 }
 
 // Readonly display field (Company Code)
-function ReadonlyField({ field }: { field: FormFieldDefinition }) {
+function ReadonlyField({ field, value }: { field: FormFieldDefinition; value?: string }) {
   return (
     <div className="space-y-2">
       <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant">
         {field.label}
       </label>
       <div className="w-full h-12 flex items-center px-4 bg-surface-container-high rounded-lg text-secondary font-mono text-sm">
-        <span className="opacity-50 italic">Auto-populated from selection</span>
+        {value ? (
+          <span>{value}</span>
+        ) : (
+          <span className="opacity-50 italic">Auto-populated from selection</span>
+        )}
         <span className="material-symbols-outlined ml-auto text-sm opacity-30">lock</span>
       </div>
       <p className="text-[11px] text-secondary italic ml-1">Auto-populated based on selection</p>
@@ -133,13 +139,17 @@ function FormField({
   field,
   register,
   error,
+  partnerOptions,
+  companyCode,
 }: {
   field: FormFieldDefinition
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: any
   error?: string
+  partnerOptions?: { id: string; name: string }[]
+  companyCode?: string | null
 }) {
-  if (field.type === 'readonly') return <ReadonlyField field={field} />
+  if (field.type === 'readonly') return <ReadonlyField field={field} value={companyCode ?? undefined} />
   if (field.type === 'radio-card') return <RadioCardField field={field} register={register} error={error} />
   if (field.type === 'toggle') return <ToggleField field={field} register={register} />
 
@@ -183,17 +193,17 @@ function FormField({
             expand_more
           </span>
         </div>
-      ) : field.type === 'select' ? (
-        // select without options (partner name — dynamic)
+      ) : field.type === 'select' && partnerOptions ? (
+        // Partner select — populated from API
         <div className="relative">
           <select
             {...register(field.name)}
             className={cn(inputClass, 'appearance-none cursor-pointer')}
           >
             <option value="">{field.placeholder ?? 'Select...'}</option>
-            <option value="partner_1">Global Logistics Corp</option>
-            <option value="partner_2">Apex Solutions Ltd</option>
-            <option value="partner_3">Summit Enterprise Group</option>
+            {partnerOptions.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
           </select>
           <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-sm">
             expand_more
@@ -218,9 +228,28 @@ function FormField({
   )
 }
 
+// Required lifecycle state for each task type
+const REQUIRED_LIFECYCLE: Record<string, string> = {
+  [TaskType.T01]: 'None',
+  [TaskType.T02]: 'Onboarded',
+  [TaskType.T03]: 'UatCompleted',
+  [TaskType.T04]: 'Live',
+}
+
 export function FormStep({ product, task, initialData, onSubmit, onBack }: FormStepProps) {
   const { data: schema, isLoading } = useFormSchema(product.code, task.type)
   const { user } = useAuth()
+  const { data: allPartners = [] } = usePartners()
+
+  // Filter partners: must have this product at the required lifecycle state
+  const eligiblePartners = useMemo(() => {
+    const requiredState = REQUIRED_LIFECYCLE[task.type]
+    return allPartners.filter((p) =>
+      p.productDetails.some(
+        (pd) => pd.productCode === product.code && pd.lifecycleState === requiredState,
+      ),
+    )
+  }, [allPartners, product.code, task.type])
 
   // File state: docName -> File | null
   const [files, setFiles] = useState<Record<string, File | null>>({})
@@ -233,6 +262,8 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
     reset,
   } = useForm<FieldValues>({
@@ -241,6 +272,23 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
     mode: 'onChange',
     defaultValues: initialData ?? {},
   })
+
+  // Watch partner selection to auto-fill company code
+  const selectedPartnerId = watch('partnerName')
+  const selectedPartner = useMemo(
+    () => eligiblePartners.find((p) => p.id === selectedPartnerId),
+    [eligiblePartners, selectedPartnerId],
+  )
+  const companyCode = useMemo(() => {
+    if (!selectedPartner) return null
+    const pd = selectedPartner.productDetails.find((d) => d.productCode === product.code)
+    return pd?.companyCode ?? null
+  }, [selectedPartner, product.code])
+
+  // Set companyCode in form when it changes
+  useEffect(() => {
+    setValue('companyCode', companyCode ?? '')
+  }, [companyCode, setValue])
 
   useEffect(() => {
     if (schema && initialData) reset(initialData)
@@ -344,6 +392,8 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                         field={field}
                         register={register}
                         error={errors[field.name]?.message as string | undefined}
+                        partnerOptions={field.name === 'partnerName' ? eligiblePartners.map((p) => ({ id: p.id, name: p.name })) : undefined}
+                        companyCode={field.name === 'companyCode' ? companyCode : undefined}
                       />
                     ))}
                   </div>

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button'
+import { usePartners } from '@/api/hooks/usePartners'
 import type { Product, TaskOption } from '@/types/product'
 
 interface ReviewStepProps {
@@ -10,8 +11,27 @@ interface ReviewStepProps {
   isSubmitting: boolean
 }
 
+// Format field keys for display: "partnerName" -> "Partner Name"
+function formatLabel(key: string): string {
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (c) => c.toUpperCase())
+    .trim()
+}
+
 export function ReviewStep({ product, task, formData, onSubmit, onBack, isSubmitting }: ReviewStepProps) {
+  const { data: partners = [] } = usePartners()
   const entries = Object.entries(formData).filter(([, v]) => v !== '' && v !== undefined)
+
+  // Resolve partner ID to name for display
+  function resolveValue(key: string, value: string | boolean): string {
+    if (key === 'partnerName') {
+      const partner = partners.find((p) => p.id === value)
+      return partner?.name ?? String(value)
+    }
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+    return String(value)
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -43,8 +63,8 @@ export function ReviewStep({ product, task, formData, onSubmit, onBack, isSubmit
         <div className="space-y-4">
           {entries.map(([key, value]) => (
             <div key={key} className="flex justify-between items-start border-b border-outline pb-4">
-              <span className="text-on-surface-variant capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-              <span className="text-on-surface font-medium text-right">{String(value)}</span>
+              <span className="text-on-surface-variant">{formatLabel(key)}</span>
+              <span className="text-on-surface font-medium text-right">{resolveValue(key, value)}</span>
             </div>
           ))}
         </div>

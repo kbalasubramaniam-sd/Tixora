@@ -1,11 +1,19 @@
 import { apiClient } from '@/api/client'
 import { ProductCode, LifecycleState } from '@/types/enums'
 
+export interface PartnerProductDetail {
+  productCode: ProductCode
+  productName: string
+  lifecycleState: LifecycleState
+  companyCode: string | null
+}
+
 export interface PartnerSummary {
   id: string
   name: string
   refId: string
   products: ProductCode[]
+  productDetails: PartnerProductDetail[]
   lifecycleState: LifecycleState
 }
 
@@ -15,6 +23,10 @@ const mockPartners: PartnerSummary[] = [
     name: 'Gulf Trading LLC',
     refId: 'REF-10001',
     products: [ProductCode.RBT, ProductCode.RHN],
+    productDetails: [
+      { productCode: ProductCode.RBT, productName: 'Rabet', lifecycleState: LifecycleState.Live, companyCode: 'GTL-RBT' },
+      { productCode: ProductCode.RHN, productName: 'Rhoon', lifecycleState: LifecycleState.Live, companyCode: 'GTL-RHN' },
+    ],
     lifecycleState: LifecycleState.Live,
   },
   {
@@ -22,6 +34,10 @@ const mockPartners: PartnerSummary[] = [
     name: 'Emirates Logistics Corp',
     refId: 'REF-10002',
     products: [ProductCode.RHN, ProductCode.WTQ],
+    productDetails: [
+      { productCode: ProductCode.RHN, productName: 'Rhoon', lifecycleState: LifecycleState.UatActive, companyCode: null },
+      { productCode: ProductCode.WTQ, productName: 'Wtheeq', lifecycleState: LifecycleState.UatActive, companyCode: null },
+    ],
     lifecycleState: LifecycleState.UatActive,
   },
   {
@@ -29,6 +45,10 @@ const mockPartners: PartnerSummary[] = [
     name: 'Digital Solutions FZE',
     refId: 'REF-10003',
     products: [ProductCode.WTQ, ProductCode.MLM],
+    productDetails: [
+      { productCode: ProductCode.WTQ, productName: 'Wtheeq', lifecycleState: LifecycleState.Onboarded, companyCode: null },
+      { productCode: ProductCode.MLM, productName: 'Mulem', lifecycleState: LifecycleState.Onboarded, companyCode: null },
+    ],
     lifecycleState: LifecycleState.Onboarded,
   },
   {
@@ -36,6 +56,9 @@ const mockPartners: PartnerSummary[] = [
     name: 'National Bank of Fujairah',
     refId: 'REF-10004',
     products: [ProductCode.MLM],
+    productDetails: [
+      { productCode: ProductCode.MLM, productName: 'Mulem', lifecycleState: LifecycleState.UatCompleted, companyCode: null },
+    ],
     lifecycleState: LifecycleState.UatCompleted,
   },
   {
@@ -43,6 +66,11 @@ const mockPartners: PartnerSummary[] = [
     name: 'Mashreq Global',
     refId: 'REF-10005',
     products: [ProductCode.RBT, ProductCode.RHN, ProductCode.WTQ],
+    productDetails: [
+      { productCode: ProductCode.RBT, productName: 'Rabet', lifecycleState: LifecycleState.Live, companyCode: 'MG-RBT' },
+      { productCode: ProductCode.RHN, productName: 'Rhoon', lifecycleState: LifecycleState.Live, companyCode: 'MG-RHN' },
+      { productCode: ProductCode.WTQ, productName: 'Wtheeq', lifecycleState: LifecycleState.Live, companyCode: 'MG-WTQ' },
+    ],
     lifecycleState: LifecycleState.Live,
   },
   {
@@ -50,6 +78,9 @@ const mockPartners: PartnerSummary[] = [
     name: 'Al Masah Capital',
     refId: 'REF-10006',
     products: [ProductCode.RBT],
+    productDetails: [
+      { productCode: ProductCode.RBT, productName: 'Rabet', lifecycleState: LifecycleState.UatActive, companyCode: null },
+    ],
     lifecycleState: LifecycleState.UatActive,
   },
 ]
@@ -78,6 +109,12 @@ const LIFECYCLE_ORDER: LifecycleState[] = [
 
 function mapBackendPartner(p: BackendPartner): PartnerSummary {
   const products = p.products.map((pp) => pp.productCode as ProductCode)
+  const productDetails: PartnerProductDetail[] = p.products.map((pp) => ({
+    productCode: pp.productCode as ProductCode,
+    productName: pp.productName,
+    lifecycleState: pp.lifecycleState as LifecycleState,
+    companyCode: pp.companyCode,
+  }))
   const states = p.products.map((pp) => pp.lifecycleState as LifecycleState)
   const highestState = states.reduce(
     (best, s) => (LIFECYCLE_ORDER.indexOf(s) > LIFECYCLE_ORDER.indexOf(best) ? s : best),
@@ -88,6 +125,7 @@ function mapBackendPartner(p: BackendPartner): PartnerSummary {
     name: p.name,
     refId: p.alias,
     products,
+    productDetails,
     lifecycleState: highestState,
   }
 }

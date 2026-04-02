@@ -1,6 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <None Remove="Properties\launchSettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Properties\launchSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Tixora.Domain\Tixora.Domain.csproj" />
     <ProjectReference Include="..\Tixora.Application\Tixora.Application.csproj" />
     <ProjectReference Include="..\Tixora.Infrastructure\Tixora.Infrastructure.csproj" />
