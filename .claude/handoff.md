@@ -94,5 +94,9 @@ All backend endpoints are live and tested. **64 tests passing** (26 unit + 38 in
   - `allowedActions` — string[] of actions the current user can perform (e.g., ["approve", "reject", "return"])
 - Frontend can use `allowedActions` to show/hide action buttons on the ticket detail page
 
+### Known FE-BE Gaps (TODO)
+- **T-02/T-03 dynamic user forms:** The product spec allows adding multiple users in T-02 (UAT Access) and T-03 (Production Account) forms. Example: requester can add 3 UAT users in one request, each with name/email/mobile/designation. The backend stores this as JSON in FormData so it supports any shape. But the frontend form schema is static — it only has fields for a single user. Need to add a "repeatable section" / "add another user" pattern to the form renderer for T-02 UAT User Details and T-03 Portal Admin User sections.
+- **SLA Panel:** Shows hardcoded "100% SLA Integrity" — should be hidden or show "Not Tracked" until E3 SLA engine is implemented.
+
 ## Next Steps
 - **E3: Operational Intelligence** — SLA tracking, notifications, comments, documents, audit trail
