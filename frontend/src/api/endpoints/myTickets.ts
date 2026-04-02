@@ -1,4 +1,4 @@
-import { apiClient } from '@/api/client'
+import { apiClient, type PagedResult } from '@/api/client'
 import type { TicketSummary } from '@/types/ticket'
 
 export interface MyTicketsFilters {
@@ -6,9 +6,11 @@ export interface MyTicketsFilters {
   task?: string
   slaStatus?: string
   status?: string
+  page?: number
+  pageSize?: number
 }
 
-export async function fetchMyTickets(filters?: MyTicketsFilters): Promise<TicketSummary[]> {
-  const res = await apiClient.get<TicketSummary[]>('/tickets/my', { params: filters })
+export async function fetchMyTickets(filters?: MyTicketsFilters): Promise<PagedResult<TicketSummary>> {
+  const res = await apiClient.get<PagedResult<TicketSummary>>('/tickets/my', { params: filters })
   return res.data
 }

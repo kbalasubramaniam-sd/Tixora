@@ -1,5 +1,14 @@
 import axios from 'axios'
 
+// Shared pagination type matching backend PagedResult<T>
+export interface PagedResult<T> {
+  items: T[]
+  totalCount: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL as string
 
 export const apiClient = axios.create({

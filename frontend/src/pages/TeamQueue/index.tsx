@@ -22,12 +22,14 @@ export default function TeamQueue() {
     requester: requester !== 'All' ? requester : undefined,
   }
 
-  const { data: tickets = [], isLoading, isError, refetch } = useTeamQueue(
+  const { data: result, isLoading, isError, refetch } = useTeamQueue(
     Object.values(filters).some(Boolean) ? filters : undefined,
   )
+  const tickets = result?.items ?? []
 
   // Build partner/requester options from all tickets (unfiltered)
-  const { data: allTickets = [] } = useTeamQueue()
+  const { data: allResult } = useTeamQueue()
+  const allTickets = allResult?.items ?? []
 
   const partnerOptions = useMemo(() => {
     const names = [...new Set(allTickets.map((t) => t.partnerName))].sort()

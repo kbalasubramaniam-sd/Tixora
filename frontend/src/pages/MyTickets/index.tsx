@@ -17,9 +17,10 @@ export default function MyTickets() {
     status: status !== 'All' ? status : undefined,
   }
 
-  const { data: tickets = [], isLoading, isError, refetch } = useMyTickets(
+  const { data: result, isLoading, isError, refetch } = useMyTickets(
     Object.values(filters).some(Boolean) ? filters : undefined,
   )
+  const tickets = result?.items ?? []
 
   const clearFilters = () => {
     setProduct('All')

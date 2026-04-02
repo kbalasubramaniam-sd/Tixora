@@ -30,7 +30,8 @@ function groupByTime(notifications: NotificationItem[]): { label: string; items:
 
 export default function Notifications() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
-  const { data: notifications = [], isLoading } = useNotifications(filter === 'unread')
+  const { data: result, isLoading } = useNotifications(filter === 'unread')
+  const notifications = result?.items ?? []
   const markRead = useMarkRead()
   const markAllRead = useMarkAllRead()
 
