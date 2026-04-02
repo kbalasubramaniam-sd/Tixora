@@ -47,6 +47,9 @@ public class CommentsController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Content))
             return BadRequest(new { message = "Comment content is required." });
 
+        if (request.Content.Length > 2000)
+            return BadRequest(new { message = "Comment content cannot exceed 2000 characters." });
+
         try
         {
             var comment = await _commentService.AddCommentAsync(ticketId, userId.Value, request.Content);
