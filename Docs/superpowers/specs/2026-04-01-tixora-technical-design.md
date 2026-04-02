@@ -39,6 +39,7 @@ Tixora/
 │   │   │   ├── StageLog.cs
 │   │   │   ├── AuditEntry.cs
 │   │   │   ├── SlaTracker.cs
+│   │   │   ├── SlaPause.cs
 │   │   │   ├── Document.cs
 │   │   │   ├── Comment.cs
 │   │   │   ├── Notification.cs
@@ -146,6 +147,7 @@ Tixora/
 │   │   │       ├── StageLogConfiguration.cs
 │   │   │       ├── AuditEntryConfiguration.cs
 │   │   │       ├── SlaTrackerConfiguration.cs
+│   │   │       ├── SlaPauseConfiguration.cs
 │   │   │       ├── DocumentConfiguration.cs
 │   │   │       ├── CommentConfiguration.cs
 │   │   │       ├── NotificationConfiguration.cs
@@ -165,8 +167,7 @@ Tixora/
 │   │   │   ├── NotificationRepository.cs
 │   │   │   └── SlaRepository.cs
 │   │   ├── Email/
-│   │   │   ├── SesEmailSender.cs
-│   │   │   └── EmailTemplates/
+│   │   │   └── NoOpEmailSender.cs
 │   │   ├── FileStorage/
 │   │   │   └── LocalFileStorage.cs
 │   │   └── Seed/
@@ -213,7 +214,7 @@ Tixora/
 ```csharp
 public enum ProductCode { RBT, RHN, WTQ, MLM }
 
-public enum TaskType { T01, T02, T03, T04, T05 }
+public enum TaskType { T01, T02, T03, T04 }
 
 public enum ProductAccessMode { Both, ApiOnly }
 // Both = transactional portal + API (Rabet, Rhoon)
@@ -238,7 +239,7 @@ public enum TicketStatus
     Cancelled
 }
 
-public enum LifecycleState { Agreed, UatActive, Onboarded, Live }
+public enum LifecycleState { None, Onboarded, UatActive, Live }
 
 public enum StageType { Review, Approval, Provisioning, PhaseGate }
 
@@ -334,6 +335,7 @@ public class PartnerProduct
     public Guid PartnerId { get; set; }
     public ProductCode ProductCode { get; set; }
     public LifecycleState LifecycleState { get; set; }
+    public string? CompanyCode { get; set; }           // assigned during T-02, null until then
     public DateTime StateChangedAt { get; set; }
     public DateTime CreatedAt { get; set; }
 
@@ -355,10 +357,10 @@ public class Ticket
     public TicketStatus Status { get; set; }
     public int CurrentStageOrder { get; set; }
     public ProvisioningPath? ProvisioningPath { get; set; }    // T-03 only
-    public IssueType? IssueType { get; set; }      // T-05 only
+    public IssueType? IssueType { get; set; }      // T-04 only
     public string FormData { get; set; }           // JSON — dynamic form submission
     public Guid CreatedByUserId { get; set; }
-    public Guid? AssignedToUserId { get; set; }
+    public Guid? AssignedToUserId { get; set; }    // null until a user claims from role queue
     public Guid? RejectedTicketRef { get; set; }   // if re-raised from a rejected ticket
     public string? CancellationReason { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -425,8 +427,6 @@ public class SlaTracker
     public double BusinessHoursElapsed { get; set; }
     public SlaStatus Status { get; set; }
     public DateTime StartedAt { get; set; }
-    public DateTime? PausedAt { get; set; }        // when returned for clarification
-    public DateTime? ResumedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     public bool IsBreach { get; set; }
     public int WarningThreshold75 { get; set; }    // hours
@@ -436,6 +436,18 @@ public class SlaTracker
     public bool BreachSent { get; set; }
 
     public Ticket Ticket { get; set; }
+    public ICollection<SlaPause> Pauses { get; set; }
+}
+
+public class SlaPause
+{
+    public Guid Id { get; set; }
+    public Guid SlaTrackerId { get; set; }
+    public DateTime PausedAt { get; set; }
+    public DateTime? ResumedAt { get; set; }
+    public double PausedBusinessHours { get; set; } // calculated on resume
+
+    public SlaTracker SlaTracker { get; set; }
 }
 ```
 
@@ -543,6 +555,8 @@ public class WorkflowDefinition
 
     public ICollection<StageDefinition> Stages { get; set; }
 }
+// Unique constraint: (ProductCode, TaskType, ProvisioningPath) WHERE IsActive = true
+// Enforced via filtered unique index in EF configuration.
 
 public class StageDefinition
 {
@@ -553,8 +567,6 @@ public class StageDefinition
     public StageType StageType { get; set; }
     public UserRole AssignedRole { get; set; }
     public int SlaBusinessHours { get; set; }
-    public bool IsParallel { get; set; }           // true for T-03 Portal+API parallel stages
-    public string? ParallelGroup { get; set; }     // groups parallel stages together
 
     public WorkflowDefinition WorkflowDefinition { get; set; }
 }
@@ -676,13 +688,11 @@ When a ticket completes, the engine checks if the PartnerProduct lifecycle shoul
 
 | Completed Task | Current State Required | New State |
 |---------------|----------------------|-----------|
-| T-01 | (any or new) | AGREED |
-| T-02 Phase 1 | AGREED | UAT_ACTIVE |
-| T-02 Phase 2 + T-03 both complete | UAT_ACTIVE | ONBOARDED |
-| T-04 | ONBOARDED | LIVE |
-| T-05 | ONBOARDED or LIVE | (no change) |
-
-ONBOARDED requires both T-02 Phase 2 closed AND T-03 completed. The engine checks both conditions before advancing.
+| T-01 | (any or new) | ONBOARDED |
+| T-02 Phase 1 | ONBOARDED | UAT_ACTIVE |
+| T-02 Phase 2 | UAT_ACTIVE | (no change — stays UAT_ACTIVE) |
+| T-03 | UAT_ACTIVE | LIVE |
+| T-04 | LIVE | (no change) |
 
 ### 4.3 T-02 Two-Phase Flow
 
@@ -704,7 +714,9 @@ Stage 4: Integration Team — Phase 2 (UAT Sign-off)
 
 Phase 1 and Phase 2 have independent SLA trackers.
 
-### 4.4 T-03 Product-Driven Access Path
+### 4.4 T-03 Product-Driven Access Path (Production Account Creation)
+
+T-03 handles both partner account and user setup in a single request. ProvisioningPath is resolved at submission based on the product's access mode:
 
 ```
 ProvisioningPath resolved at submission:
@@ -716,10 +728,10 @@ ProvisioningPath resolved at submission:
 Workflow routing:
     PortalOnly:  Partner Ops → Director → Provisioning Team → Complete
     ApiOnly:     Partner Ops → Director → Integration Team → Complete
-    PortalAndApi: Partner Ops → Director → [Provisioning + Integration parallel] → Both done → Complete
+    PortalAndApi: Partner Ops → Director → Provisioning → Integration → Complete (sequential, order configurable via seed data)
 ```
 
-For PortalAndApi: the engine creates two parallel stages (StageDefinition.IsParallel = true, same ParallelGroup). The ticket advances to Complete only when both parallel stages are resolved.
+For PortalAndApi: stages run sequentially. The stage order is defined in seed data and can be adjusted without code changes.
 
 ### 4.5 Lifecycle Prerequisite Enforcement
 
@@ -727,10 +739,9 @@ Enforced at ticket creation time (not just warning):
 
 | Task Being Created | Prerequisite Check | Block if not met |
 |-------------------|-------------------|-----------------|
-| T-02 | T-01 completed for same partner + product | Yes — blocked |
-| T-03 | T-02 Phase 2 completed for same partner + product | Yes — blocked |
-| T-04 | T-03 completed for same partner + product | Yes — blocked |
-| T-05 | Partner is ONBOARDED or LIVE on the product | Yes — blocked |
+| T-02 | Partner is ONBOARDED on the product (T-01 completed) | Yes — blocked |
+| T-03 | Partner is UAT_ACTIVE on the product (T-02 Ph1 completed) | Yes — blocked |
+| T-04 | Partner is LIVE on the product | Yes — blocked |
 
 The API returns a clear error message with a link to the partner's current lifecycle state and any in-progress prerequisite tickets.
 
@@ -776,14 +787,16 @@ For each active SlaTracker where CompletedAt == null:
 
 ### 5.3 SLA Pause/Resume
 
+Tracked via `SlaPause` child table. Supports multiple pause/resume cycles per stage.
+
 When a ticket is returned for clarification:
-- SlaTracker.PausedAt = now
+- Create new `SlaPause { SlaTrackerId, PausedAt = now }`
 - BusinessHoursElapsed is frozen at current value
 
 When the requester responds:
-- SlaTracker.ResumedAt = now
-- SlaTracker.PausedAt = null
-- Clock resumes from the frozen value
+- Set `SlaPause.ResumedAt = now`
+- Calculate `SlaPause.PausedBusinessHours` (business hours between PausedAt and ResumedAt)
+- Clock resumes — total paused time = sum of all `SlaPause.PausedBusinessHours` for this tracker
 
 ---
 
@@ -862,13 +875,17 @@ Full milestone → recipient mapping as defined in the product spec (US-012). Ea
 |--------|-------|---------|
 | GET | `/api/notifications` | User's notifications |
 | PUT | `/api/notifications/{id}/read` | Mark read |
+| PUT | `/api/notifications/read-all` | Mark all as read |
 | GET | `/api/notifications/unread-count` | Badge count |
 
 ### 7.6 Dashboard & Reports
 | Method | Route | Purpose |
 |--------|-------|---------|
-| GET | `/api/dashboard/my-tickets` | Requester dashboard |
-| GET | `/api/dashboard/team-queue` | Team queue |
+| GET | `/api/dashboard/stats` | Role-adaptive stat cards (counts, SLA %, etc.) |
+| GET | `/api/dashboard/action-required` | Tickets needing current user's action |
+| GET | `/api/dashboard/activity` | Recent activity timeline for current user |
+| GET | `/api/dashboard/my-tickets` | Requester's ticket list |
+| GET | `/api/dashboard/team-queue` | Role-based team queue, sorted by SLA urgency |
 | GET | `/api/reports/overview` | Aggregated metrics |
 | GET | `/api/reports/export` | CSV export |
 
@@ -952,19 +969,19 @@ Seeded with the default workflow matrix:
 | Both × T-03 PortalOnly | Partner Ops → Director → Provisioning |
 | Both × T-03 PortalAndApi | Partner Ops → Director → [Provisioning ∥ Integration] |
 | ApiOnly × T-03 ApiOnly | Partner Ops → Director → Integration |
-| Any × T-04 | Partner Ops → Provisioning |
-| Any × T-05 | Provisioning (Verify + Resolve) |
+| Any × T-04 | Provisioning (Verify + Resolve) |
 
 ### 9.3 SLA Defaults
 
 | Task | Total SLA (business hours) |
 |------|---------------------------|
 | T-01 | 48 (16 per stage) |
-| T-02 | 8 (Phase 1), 24 (Phase 2 — from UAT signal to sign-off; configurable by admin) |
+| T-02 | Product Review: 8, Integration Ph1: 8, UAT Signal: 0 (no SLA — external wait), Integration Ph2: 24 |
 | T-03 Portal | 24 |
 | T-03 API / Both | 48 |
-| T-04 | 8 |
-| T-05 | 2 |
+| T-04 | 2 |
+
+**Convention:** `SlaBusinessHours = 0` on a StageDefinition means no SLA tracking for that stage. The workflow engine skips SlaTracker creation. Used for external wait gates (e.g. awaiting partner UAT completion). The UatReminderService handles nudges for overdue waits.
 
 ### 9.4 Business Hours Default
 
@@ -976,9 +993,9 @@ Seeded with the default workflow matrix:
 ### 9.5 Sample Partners (for demo)
 
 Seed 3-4 sample partners at various lifecycle states to demonstrate the system:
-- Partner A: LIVE on Rabet (all tasks completed)
-- Partner B: UAT_ACTIVE on Rhoon (T-01 + T-02 Ph1 done)
-- Partner C: AGREED on Wtheeq (only T-01 done)
+- Partner A ("Alpha Insurance", alias "ALPHA"): LIVE on Rabet, CompanyCode = "RBT-ALPHA-001"
+- Partner B ("Beta Trading", alias "BETA"): UAT_ACTIVE on Rhoon, CompanyCode = "RHN-BETA-001"
+- Partner C ("Gamma Holdings", alias "GAMMA"): None on Wtheeq, CompanyCode = "WTQ-GAMMA-001"
 
 ---
 
@@ -1002,9 +1019,162 @@ Constraints enforced at the API layer:
 
 ---
 
-## 11. Background Services
+## 11. Form Schemas & Document Requirements
 
-### 11.1 SlaMonitoringService
+### 11.1 Form Schema Endpoint
+
+`GET /api/products/{code}/form-schema/{taskType}` returns the field definitions for the dynamic form. The response drives the frontend — fields, types, validation, required documents, and conditional logic.
+
+### 11.2 Partner Name & Company Code (All Task Forms)
+
+Partners are **seeded data** in MVP 1. Admin partner management (add/edit partners via UI) is deferred to MVP 2. Partners and their company codes are created via seed data at startup.
+
+All ticket forms use:
+- **Partner Name** — dropdown, populated from PartnerProducts on the selected product, filtered by lifecycle state
+- **Company Code** — read-only, auto-populated when partner is selected (from `PartnerProduct.CompanyCode`)
+
+| Task | Partner dropdown filter | Company Code |
+|------|------------------------|-------------|
+| T-01 | All partners on this product (any lifecycle) | Read-only |
+| T-02 | LifecycleState = Onboarded | Read-only |
+| T-03 | LifecycleState = UatActive | Read-only |
+| T-04 | LifecycleState = Live | Read-only |
+
+The ticket stores `PartnerProductId` (FK) — not the partner name or company code as form data.
+
+### 11.3 T-01: Agreement Validation & Sign-off
+
+**Fields:**
+| Field | Key | Type | Required | Notes |
+|-------|-----|------|----------|-------|
+| Partner Name | `partnerProductId` | dropdown | Yes | All partners on selected product |
+| Company Code | — | read-only | Auto | From PartnerProduct.CompanyCode |
+
+**Required Documents:**
+| Document | Key | Required |
+|----------|-----|----------|
+| Trade License | `tradeLicense` | Yes |
+| VAT Certificate | `vatCertificate` | Yes |
+| Power of Attorney | `powerOfAttorney` | Yes |
+| Duly Filled Agreement | `dulyFilledAgreement` | Yes |
+
+**FormData JSON example:**
+```json
+{}
+```
+
+Note: T-01 has no FormData fields — partner selection is stored as `Ticket.PartnerProductId`, documents are stored as Document entities.
+
+### 11.4 T-02: UAT Access Creation
+
+**Fields:**
+| Field | Key | Type | Required | Notes |
+|-------|-----|------|----------|-------|
+| Partner Name | `partnerProductId` | dropdown | Yes | Partners with LifecycleState = Onboarded |
+| Company Code | — | read-only | Auto | From PartnerProduct.CompanyCode |
+| UAT User Full Name | `uatUserFullName` | text | Yes | |
+| Email | `uatUserEmail` | email | Yes | |
+| Mobile | `uatUserMobile` | tel | Yes | Numeric only (digits, +, spaces, dashes) |
+| Designation | `uatUserDesignation` | text | Yes | |
+
+**Required Documents:** None
+
+**FormData JSON example:**
+```json
+{
+  "uatUserFullName": "Ahmed Ali",
+  "uatUserEmail": "ahmed@partner.com",
+  "uatUserMobile": "+971501234567",
+  "uatUserDesignation": "IT Manager"
+}
+```
+
+### 11.5 T-03: Production Account Creation
+
+**Fields:**
+| Field | Key | Type | Required | Notes |
+|-------|-----|------|----------|-------|
+| Partner Name | `partnerProductId` | dropdown | Yes | Partners with LifecycleState = UatActive |
+| Company Code | — | read-only | Auto | From PartnerProduct.CompanyCode |
+| API Opt-In | `apiOptIn` | toggle | No | Both products: user chooses. ApiOnly: always true (hidden). |
+| Portal Admin Full Name | `portalAdminFullName` | text | Yes | |
+| Portal Admin Email | `portalAdminEmail` | email | Yes | |
+| Portal Admin Mobile | `portalAdminMobile` | tel | Yes | Numeric only |
+| Portal Admin Designation | `portalAdminDesignation` | text | Yes | |
+| IP Addresses for Whitelisting | `ipAddresses` | textarea | No | One per line |
+| Invoicing Contacts | `invoicingContacts` | dynamic list (object) | Yes (min 1) | Each: { name, email, phone } |
+| First Level Contacts | `firstLevelContacts` | dynamic list (object) | Yes (min 1) | Each: { name, mobile, email } |
+| First Level Escalation | `firstLevelEscalation` | dynamic list (object) | Yes (min 1) | Each: { name, mobile, email } |
+| Second Level Escalation | `secondLevelEscalation` | dynamic list (object) | Yes (min 1) | Each: { name, mobile, email } |
+
+**Required Documents:** None
+
+**FormData JSON example:**
+```json
+{
+  "apiOptIn": true,
+  "portalAdminFullName": "Sara Khan",
+  "portalAdminEmail": "sara@partner.com",
+  "portalAdminMobile": "+971501234567",
+  "portalAdminDesignation": "Operations Lead",
+  "ipAddresses": "10.0.0.1\n10.0.0.2",
+  "invoicingContacts": [
+    { "name": "Ahmed Billing", "email": "billing@partner.com", "phone": "+97141234567" },
+    { "name": "Sara Finance", "email": "finance@partner.com", "phone": "+97149876543" }
+  ],
+  "firstLevelContacts": [
+    { "name": "Ali Hassan", "mobile": "+971501111111", "email": "ali@partner.com" },
+    { "name": "Fatima Omar", "mobile": "+971502222222", "email": "fatima@partner.com" }
+  ],
+  "firstLevelEscalation": [
+    { "name": "Omar Saeed", "mobile": "+971503333333", "email": "omar@partner.com" }
+  ],
+  "secondLevelEscalation": [
+    { "name": "Huda Al-Rashid", "mobile": "+971504444444", "email": "huda@partner.com" }
+  ]
+}
+```
+
+### 11.6 T-04: Access & Credential Support
+
+**Fields:**
+| Field | Key | Type | Required | Notes |
+|-------|-----|------|----------|-------|
+| Partner Name | `partnerProductId` | dropdown | Yes | Partners with LifecycleState = Live |
+| Company Code | — | read-only | Auto | From PartnerProduct.CompanyCode |
+| Issue Type | `issueType` | dropdown | Yes | Values depend on product access mode (see IssueType enum) |
+| Description | `description` | textarea | Yes | Free text, max 2000 chars |
+
+**Required Documents:** None
+
+**FormData JSON example:**
+```json
+{
+  "issueType": "PortalLoginIssue",
+  "description": "User unable to login after password reset. Account may be locked."
+}
+```
+
+### 11.7 Fulfilment Record Structure
+
+When a ticket is completed, the provisioning/integration team records structured completion data in `FulfilmentRecord.RecordData` (JSON).
+
+| Task | Fulfilment Fields |
+|------|-------------------|
+| T-01 | Agreement reference number, signed date, signatory confirmation |
+| T-02 | UAT environment URL, UAT credentials issued, access confirmation |
+| T-03 | Portal account ID, portal URL, API key (if opted in), API endpoint URL, user account IDs, login emails |
+| T-04 | Resolution summary, action taken (reset/regenerated/unlocked) |
+
+### 11.8 Phone Number Storage
+
+All phone/mobile fields are stored as strings in FormData JSON. The backend does not validate phone formats beyond ensuring the value is non-empty. Frontend enforces numeric-only input (digits, +, spaces, dashes). Phone numbers are stored as-entered (not stripped).
+
+---
+
+## 12. Background Services
+
+### 12.1 SlaMonitoringService
 
 - Runs every 5 minutes via `IHostedService`
 - Queries all active SLA trackers
@@ -1012,7 +1182,7 @@ Constraints enforced at the API layer:
 - Sends threshold notifications
 - Updates SLA status
 
-### 11.2 UatReminderService
+### 12.2 UatReminderService
 
 - Runs daily
 - Checks T-02 tickets in AwaitingUatSignal status
@@ -1021,7 +1191,7 @@ Constraints enforced at the API layer:
 
 ---
 
-## 12. MVP Scope Boundary
+## 13. MVP Scope Boundary
 
 ### MVP 1 (Hackathon)
 Everything described in this spec, including:
@@ -1042,6 +1212,7 @@ Everything described in this spec, including:
 - Cancel (pre-action only)
 
 ### MVP 2 (Post-Hackathon)
+- Admin partner management (add/edit partners and company codes via UI)
 - Draft management (auto-save, resume, delete)
 - Real SSO/auth integration (Azure AD / Entra ID)
 - Email notifications (choose provider: SES, Resend, SendGrid, or SMTP — wire up IEmailSender implementation)

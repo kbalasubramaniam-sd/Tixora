@@ -1,0 +1,473 @@
+// File: src/Tixora.Infrastructure/Services/TicketQueryService.cs
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using Tixora.Application.DTOs.Dashboard;
+using Tixora.Application.DTOs.Tickets;
+using Tixora.Application.Interfaces;
+using Tixora.Domain.Enums;
+
+namespace Tixora.Infrastructure.Services;
+
+public class TicketQueryService : ITicketQueryService
+{
+    private readonly ITixoraDbContext _db;
+
+    private static readonly TicketStatus[] TerminalStatuses =
+        [TicketStatus.Completed, TicketStatus.Rejected, TicketStatus.Cancelled];
+
+    public TicketQueryService(ITixoraDbContext db)
+    {
+        _db = db;
+    }
+
+    // ─── GetMyTicketsAsync ───────────────────────────────
+
+    public async Task<List<TicketSummaryResponse>> GetMyTicketsAsync(Guid userId)
+    {
+        return await _db.Tickets
+            .AsNoTracking()
+            .Where(t => t.CreatedByUserId == userId)
+            .OrderByDescending(t => t.CreatedAt)
+            .Select(t => new TicketSummaryResponse(
+                t.Id.ToString(),
+                t.TicketId,
+                t.ProductCode.ToString(),
+                t.TaskType.ToString(),
+                t.PartnerProduct.Partner.Name,
+                t.CreatedBy.FullName,
+                t.Status.ToString(),
+                TerminalStatuses.Contains(t.Status) ? "" :
+                    t.WorkflowDefinition.Stages
+                        .Where(s => s.StageOrder == t.CurrentStageOrder)
+                        .Select(s => s.StageName).FirstOrDefault() ?? "",
+                "OnTrack",
+                0,
+                t.CreatedAt,
+                t.UpdatedAt
+            ))
+            .ToListAsync();
+    }
+
+    // ─── GetTeamQueueAsync ───────────────────────────────
+
+    public async Task<List<TicketSummaryResponse>> GetTeamQueueAsync(
+        Guid userId, UserRole role, string? product, string? task, string? partner, string? requester)
+    {
+        var query = _db.Tickets
+            .AsNoTracking()
+            .Where(t => !TerminalStatuses.Contains(t.Status));
+
+        // Visibility by role
+        if (role == UserRole.PartnershipTeam)
+            query = query.Where(t => t.CreatedByUserId == userId);
+        else if (role != UserRole.SystemAdministrator)
+            query = query.Where(t => t.WorkflowDefinition.Stages.Any(s => s.AssignedRole == role));
+
+        // Optional filters
+        if (!string.IsNullOrEmpty(product) && product != "All" && Enum.TryParse<ProductCode>(product, out var pc))
+            query = query.Where(t => t.ProductCode == pc);
+        if (!string.IsNullOrEmpty(task) && task != "All" && Enum.TryParse<TaskType>(task, out var tt))
+            query = query.Where(t => t.TaskType == tt);
+        if (!string.IsNullOrEmpty(partner) && partner != "All")
+            query = query.Where(t => t.PartnerProduct.Partner.Name.Contains(partner));
+        if (!string.IsNullOrEmpty(requester) && requester != "All")
+            query = query.Where(t => t.CreatedBy.FullName.Contains(requester));
+
+        return await query
+            .OrderByDescending(t => t.UpdatedAt)
+            .Select(t => new TicketSummaryResponse(
+                t.Id.ToString(),
+                t.TicketId,
+                t.ProductCode.ToString(),
+                t.TaskType.ToString(),
+                t.PartnerProduct.Partner.Name,
+                t.CreatedBy.FullName,
+                t.Status.ToString(),
+                t.WorkflowDefinition.Stages
+                    .Where(s => s.StageOrder == t.CurrentStageOrder)
+                    .Select(s => s.StageName).FirstOrDefault() ?? "",
+                "OnTrack",
+                0,
+                t.CreatedAt,
+                t.UpdatedAt
+            ))
+            .ToListAsync();
+    }
+
+    // ─── GetActionRequiredAsync ──────────────────────────
+
+    public async Task<List<TicketSummaryResponse>> GetActionRequiredAsync(Guid userId, UserRole role)
+    {
+        var query = _db.Tickets
+            .AsNoTracking()
+            .Where(t => !TerminalStatuses.Contains(t.Status));
+
+        if (role == UserRole.PartnershipTeam)
+        {
+            query = query.Where(t =>
+                t.AssignedToUserId == userId ||
+                (t.Status == TicketStatus.PendingRequesterAction && t.CreatedByUserId == userId));
+        }
+        else
+        {
+            query = query.Where(t => t.AssignedToUserId == userId);
+        }
+
+        return await query
+            .OrderBy(t => t.CreatedAt)
+            .Take(20)
+            .Select(t => new TicketSummaryResponse(
+                t.Id.ToString(),
+                t.TicketId,
+                t.ProductCode.ToString(),
+                t.TaskType.ToString(),
+                t.PartnerProduct.Partner.Name,
+                t.CreatedBy.FullName,
+                t.Status.ToString(),
+                t.WorkflowDefinition.Stages
+                    .Where(s => s.StageOrder == t.CurrentStageOrder)
+                    .Select(s => s.StageName).FirstOrDefault() ?? "",
+                "OnTrack",
+                0,
+                t.CreatedAt,
+                t.UpdatedAt
+            ))
+            .ToListAsync();
+    }
+
+    // ─── GetDashboardStatsAsync ──────────────────────────
+
+    public async Task<DashboardStatsResponse> GetDashboardStatsAsync(Guid userId, UserRole role)
+    {
+        return role switch
+        {
+            UserRole.PartnershipTeam => await BuildPartnershipStats(userId),
+            UserRole.SystemAdministrator => await BuildAdminStats(),
+            _ => await BuildTeamMemberStats(userId, role)
+        };
+    }
+
+    private async Task<DashboardStatsResponse> BuildPartnershipStats(Guid userId)
+    {
+        var now = DateTime.UtcNow;
+        var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        var myOpenCount = await _db.Tickets.AsNoTracking()
+            .CountAsync(t => t.CreatedByUserId == userId && !TerminalStatuses.Contains(t.Status));
+
+        var pendingMyAction = await _db.Tickets.AsNoTracking()
+            .CountAsync(t => (t.AssignedToUserId == userId && !TerminalStatuses.Contains(t.Status)) ||
+                             (t.Status == TicketStatus.PendingRequesterAction && t.CreatedByUserId == userId));
+
+        var completedThisMonth = await _db.Tickets.AsNoTracking()
+            .CountAsync(t => t.CreatedByUserId == userId && t.Status == TicketStatus.Completed && t.UpdatedAt >= monthStart);
+
+        return new DashboardStatsResponse(
+            Stat1: new StatEntryResponse("My Open Requests", myOpenCount, "inbox", "bg-primary-container/10", "text-primary", "Active", "text-xs font-bold text-primary"),
+            Stat2: new StatEntryResponse("Pending My Action", pendingMyAction, "pending_actions", "bg-warning-container/20", "text-warning",
+                pendingMyAction > 0 ? "ACTION" : null,
+                pendingMyAction > 0 ? "bg-warning text-white px-2 py-0.5 rounded text-[10px] font-bold" : null,
+                pendingMyAction > 0 ? "text-warning" : null),
+            Stat3: new StatEntryResponse("Completed This Month", completedThisMonth, "task_alt", "bg-success-container/30", "text-success", "This Month"),
+            Stat4: new StatEntryResponse("Avg Resolution Time", "—", "schedule", "bg-secondary-container/30", "text-secondary", "Avg")
+        );
+    }
+
+    private async Task<DashboardStatsResponse> BuildAdminStats()
+    {
+        var today = DateTime.UtcNow.Date;
+
+        var totalOpen = await _db.Tickets.AsNoTracking()
+            .CountAsync(t => !TerminalStatuses.Contains(t.Status));
+
+        var createdToday = await _db.Tickets.AsNoTracking()
+            .CountAsync(t => t.CreatedAt >= today);
+
+        return new DashboardStatsResponse(
+            Stat1: new StatEntryResponse("Total Open Tickets", totalOpen, "inbox", "bg-primary-container/10", "text-primary"),
+            Stat2: new StatEntryResponse("SLA Breaches Today", 0, "warning", "bg-error-container/20", "text-error"),
+            Stat3: new StatEntryResponse("Tickets Created Today", createdToday, "bolt", "bg-secondary-container/30", "text-secondary", "Today", "text-xs font-bold text-on-surface-variant"),
+            Stat4: new StatEntryResponse("System Compliance", "—", "verified", "bg-primary-container/10", "text-primary", "Live", "text-xs font-bold text-on-surface-variant")
+        );
+    }
+
+    private async Task<DashboardStatsResponse> BuildTeamMemberStats(Guid userId, UserRole role)
+    {
+        var now = DateTime.UtcNow;
+        var weekStart = now.Date.AddDays(-(int)now.DayOfWeek);
+
+        var assignedToMe = await _db.Tickets.AsNoTracking()
+            .CountAsync(t => t.AssignedToUserId == userId && !TerminalStatuses.Contains(t.Status));
+
+        var completedThisWeek = await _db.StageLogs.AsNoTracking()
+            .CountAsync(sl => sl.ActorUserId == userId && sl.Action == StageAction.Approve && sl.Timestamp >= weekStart);
+
+        var isReviewer = role is UserRole.LegalTeam or UserRole.ProductTeam or UserRole.ExecutiveAuthority;
+
+        return new DashboardStatsResponse(
+            Stat1: new StatEntryResponse(isReviewer ? "In My Queue" : "Assigned to Me", assignedToMe, isReviewer ? "inbox" : "assignment",
+                "bg-primary-container/10", "text-primary", isReviewer ? "Queue" : "Active"),
+            Stat2: new StatEntryResponse(isReviewer ? "Near SLA Breach" : "SLA At Risk", 0, "warning", "bg-error-container/20", "text-error"),
+            Stat3: new StatEntryResponse(isReviewer ? "Processed Today" : "Completed This Week", completedThisWeek,
+                isReviewer ? "bolt" : "task_alt",
+                isReviewer ? "bg-secondary-container/30" : "bg-success-container/30",
+                isReviewer ? "text-secondary" : "text-success",
+                isReviewer ? "Today" : "This Week"),
+            Stat4: new StatEntryResponse(isReviewer ? "SLA Compliance Rate" : "Avg Completion Time", "—",
+                isReviewer ? "verified" : "schedule",
+                isReviewer ? "bg-primary-container/10" : "bg-secondary-container/30",
+                isReviewer ? "text-primary" : "text-secondary",
+                isReviewer ? "Live" : "Avg")
+        );
+    }
+
+    // ─── GetRecentActivityAsync ──────────────────────────
+
+    public async Task<List<ActivityEntryResponse>> GetRecentActivityAsync(Guid userId)
+    {
+        // Get ticket IDs the user is involved in
+        var involvedTicketIds = await _db.Tickets.AsNoTracking()
+            .Where(t => t.CreatedByUserId == userId || t.AssignedToUserId == userId)
+            .Select(t => t.Id)
+            .ToListAsync();
+
+        // Also include tickets where user was an actor in stage logs
+        var actedOnTicketIds = await _db.StageLogs.AsNoTracking()
+            .Where(sl => sl.ActorUserId == userId)
+            .Select(sl => sl.TicketId)
+            .Distinct()
+            .ToListAsync();
+
+        var allTicketIds = involvedTicketIds.Union(actedOnTicketIds).Distinct().ToList();
+
+        if (allTicketIds.Count == 0)
+            return [];
+
+        var entries = await _db.AuditEntries.AsNoTracking()
+            .Where(a => allTicketIds.Contains(a.TicketId))
+            .OrderByDescending(a => a.TimestampUtc)
+            .Take(10)
+            .Include(a => a.Actor)
+            .Include(a => a.Ticket)
+            .ToListAsync();
+
+        var now = DateTime.UtcNow;
+
+        return entries.Select(a =>
+        {
+            var (icon, iconBg, iconColor) = GetActivityIcon(a.ActionType);
+            return new ActivityEntryResponse(
+                Id: a.Id.ToString(),
+                Title: GetActivityTitle(a.ActionType, a.Actor.FullName),
+                Description: a.Details ?? $"Ticket {a.Ticket.TicketId}",
+                Timestamp: FormatRelativeTime(a.TimestampUtc, now),
+                Icon: icon,
+                IconBg: iconBg,
+                IconColor: iconColor
+            );
+        }).ToList();
+    }
+
+    private static (string icon, string iconBg, string iconColor) GetActivityIcon(string actionType) => actionType switch
+    {
+        "TicketCreated" => ("add_circle", "bg-primary-container", "text-on-primary-container"),
+        "StageApproved" => ("check_circle", "bg-success-container", "text-success"),
+        "StageRejected" => ("cancel", "bg-error-container", "text-error"),
+        "ReturnedForClarification" => ("help", "bg-warning-container", "text-warning"),
+        "ClarificationResponded" => ("reply", "bg-primary-container", "text-on-primary-container"),
+        "TicketCompleted" => ("task_alt", "bg-success-container", "text-success"),
+        "TicketCancelled" => ("block", "bg-error-container", "text-error"),
+        "Reassigned" => ("swap_horiz", "bg-secondary-container", "text-on-secondary-container"),
+        _ => ("info", "bg-secondary-container", "text-on-secondary-container")
+    };
+
+    private static string GetActivityTitle(string actionType, string actorName) => actionType switch
+    {
+        "TicketCreated" => $"Ticket Created by {actorName}",
+        "StageApproved" => $"Stage Approved by {actorName}",
+        "StageRejected" => $"Ticket Rejected by {actorName}",
+        "ReturnedForClarification" => $"Returned for Clarification by {actorName}",
+        "ClarificationResponded" => $"Clarification Response from {actorName}",
+        "TicketCompleted" => "Ticket Completed",
+        "TicketCancelled" => $"Ticket Cancelled by {actorName}",
+        "Reassigned" => $"Ticket Reassigned by {actorName}",
+        _ => $"{actionType} by {actorName}"
+    };
+
+    private static string FormatRelativeTime(DateTime utcTime, DateTime now)
+    {
+        var diff = now - utcTime;
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} mins ago";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} hours ago";
+        if (diff.TotalHours < 48) return $"Yesterday, {utcTime:HH:mm}";
+        if (diff.TotalDays < 7) return utcTime.ToString("ddd, HH:mm");
+        return utcTime.ToString("dd MMM, HH:mm");
+    }
+
+    public async Task<TicketDetailResponse?> GetTicketDetailAsync(Guid ticketId)
+    {
+        var ticket = await _db.Tickets
+            .AsNoTracking()
+            .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
+            .Include(t => t.CreatedBy)
+            .Include(t => t.AssignedTo)
+            .Include(t => t.WorkflowDefinition).ThenInclude(wd => wd.Stages)
+            .Include(t => t.StageLogs).ThenInclude(sl => sl.Actor)
+            .Include(t => t.AuditEntries).ThenInclude(ae => ae.Actor)
+            .FirstOrDefaultAsync(t => t.Id == ticketId);
+
+        if (ticket is null) return null;
+
+        var isTerminal = TerminalStatuses.Contains(ticket.Status);
+        var currentStageName = isTerminal ? "" :
+            ticket.WorkflowDefinition.Stages
+                .FirstOrDefault(s => s.StageOrder == ticket.CurrentStageOrder)?.StageName ?? "";
+
+        // Build workflow stages
+        var stages = ticket.WorkflowDefinition.Stages
+            .OrderBy(s => s.StageOrder)
+            .Select(sd =>
+            {
+                string status;
+                string? assignedTo = null;
+                DateTime? completedAt = null;
+
+                if (sd.StageOrder < ticket.CurrentStageOrder || (isTerminal && sd.StageOrder <= ticket.CurrentStageOrder))
+                {
+                    status = "completed";
+                    completedAt = ticket.StageLogs
+                        .Where(sl => sl.StageOrder == sd.StageOrder && sl.Action == StageAction.Approve)
+                        .Select(sl => (DateTime?)sl.Timestamp)
+                        .FirstOrDefault();
+                }
+                else if (sd.StageOrder == ticket.CurrentStageOrder && !isTerminal)
+                {
+                    status = "current";
+                    assignedTo = ticket.AssignedTo?.FullName;
+                }
+                else
+                {
+                    status = "future";
+                }
+
+                return new WorkflowStageResponse(
+                    Name: sd.StageName,
+                    Icon: GetStageIcon(sd.StageType),
+                    Status: status,
+                    AssignedTo: assignedTo,
+                    CompletedAt: completedAt
+                );
+            })
+            .ToList();
+
+        // Append "Complete" pseudo-stage
+        var ticketCompleted = ticket.Status == TicketStatus.Completed;
+        stages.Add(new WorkflowStageResponse(
+            Name: "Complete",
+            Icon: "check_circle",
+            Status: ticketCompleted ? "completed" : "future",
+            CompletedAt: ticketCompleted
+                ? ticket.AuditEntries.Where(a => a.ActionType == "TicketCompleted").Select(a => (DateTime?)a.TimestampUtc).FirstOrDefault()
+                : null
+        ));
+
+        // Build audit trail
+        var auditTrail = ticket.AuditEntries
+            .OrderBy(a => a.TimestampUtc)
+            .Select(a => new AuditEntryResponse(
+                Id: a.Id.ToString(),
+                Type: MapAuditType(a.ActionType),
+                Description: a.Details ?? $"{a.ActionType} by {a.Actor.FullName}",
+                Timestamp: a.TimestampUtc
+            ))
+            .ToArray();
+
+        // Build clarification (if PendingRequesterAction)
+        ClarificationResponse? clarification = null;
+        if (ticket.Status == TicketStatus.PendingRequesterAction)
+        {
+            var returnLog = ticket.StageLogs
+                .Where(sl => sl.Action == StageAction.ReturnForClarification)
+                .OrderByDescending(sl => sl.Timestamp)
+                .FirstOrDefault();
+
+            if (returnLog != null)
+            {
+                var responseLog = ticket.StageLogs
+                    .Where(sl => sl.Action == StageAction.RespondToClarification && sl.Timestamp > returnLog.Timestamp)
+                    .OrderBy(sl => sl.Timestamp)
+                    .FirstOrDefault();
+
+                clarification = new ClarificationResponse(
+                    RequestedBy: returnLog.Actor.FullName,
+                    RequestedAt: returnLog.Timestamp,
+                    Note: returnLog.Comments ?? "",
+                    Response: responseLog?.Comments,
+                    RespondedAt: responseLog?.Timestamp
+                );
+            }
+        }
+
+        // Parse FormData JSON
+        object formData;
+        try { formData = JsonSerializer.Deserialize<JsonElement>(ticket.FormData); }
+        catch { formData = new { }; }
+
+        // Map ProvisioningPath to accessPath string
+        string? accessPath = ticket.ProvisioningPath switch
+        {
+            ProvisioningPath.PortalOnly => "portal",
+            ProvisioningPath.ApiOnly => "api",
+            ProvisioningPath.PortalAndApi => "both",
+            _ => null
+        };
+
+        return new TicketDetailResponse(
+            Id: ticket.Id.ToString(),
+            TicketId: ticket.TicketId,
+            ProductCode: ticket.ProductCode.ToString(),
+            TaskType: ticket.TaskType.ToString(),
+            PartnerName: ticket.PartnerProduct.Partner.Name,
+            RequesterName: ticket.CreatedBy.FullName,
+            Status: ticket.Status.ToString(),
+            CurrentStage: currentStageName,
+            SlaStatus: "OnTrack",
+            SlaHoursRemaining: 0,
+            CreatedAt: ticket.CreatedAt,
+            UpdatedAt: ticket.UpdatedAt,
+            CompanyCode: ticket.PartnerProduct.CompanyCode ?? "",
+            FormData: formData,
+            Documents: [],
+            WorkflowStages: stages.ToArray(),
+            Comments: [],
+            AuditTrail: auditTrail,
+            Clarification: clarification,
+            AssignedTo: ticket.AssignedTo?.FullName,
+            CreatedBy: ticket.CreatedBy.FullName,
+            AccessPath: accessPath,
+            LifecycleState: ticket.PartnerProduct.LifecycleState.ToString()
+        );
+    }
+
+    private static string GetStageIcon(StageType stageType) => stageType switch
+    {
+        StageType.Review => "rate_review",
+        StageType.Approval => "verified",
+        StageType.Provisioning => "settings",
+        StageType.PhaseGate => "flag",
+        _ => "circle"
+    };
+
+    private static string MapAuditType(string actionType) => actionType switch
+    {
+        "TicketCreated" => "stage_transition",
+        "StageApproved" => "approval",
+        "StageRejected" => "rejection",
+        "ReturnedForClarification" => "return",
+        "ClarificationResponded" => "stage_transition",
+        "TicketCompleted" => "approval",
+        "TicketCancelled" => "rejection",
+        "Reassigned" => "stage_transition",
+        _ => "stage_transition"
+    };
+}

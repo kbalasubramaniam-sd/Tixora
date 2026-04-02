@@ -297,7 +297,7 @@ Also build shared domain components in `src/components/shared/`:
 - 4-step wizard with Stepper component.
 - **Step 1 — Product Selection**: 2x2 grid of product cards. Hover lift, selected teal accent. Auto-advance on click.
 - **Step 2 — Task Selection**: vertical task card list. Disabled cards for lifecycle prereqs not met (grayed + tooltip). Back button.
-- **Step 3 — Dynamic Form**: React Hook Form drives the form state. API form schema (`GET /api/products/{code}/form-schema/{taskType}`) is translated into Zod validation schemas at runtime. Conditional fields (T-03 API toggle for Both products, T-05 issue type) use RHF's `watch()` for show/hide. Document upload per required doc. `formState.errors` powers inline validation and mandatory field counter. Auto-save draft every 60s via `watch()` + debounced localStorage/API persist.
+- **Step 3 — Dynamic Form**: React Hook Form drives the form state. API form schema (`GET /api/products/{code}/form-schema/{taskType}`) is translated into Zod validation schemas at runtime. Conditional fields (T-03 API toggle for Both products, T-04 issue type) use RHF's `watch()` for show/hide. Document upload per required doc. `formState.errors` powers inline validation and mandatory field counter. Auto-save draft every 60s via `watch()` + debounced localStorage/API persist.
 - **Step 4 — Review & Submit**: read-only summary. Edit button returns to step 3. Submit posts to API.
 - **Step 5 — Confirmation**: centered card, ticket ID, routed-to stage, view/create-another buttons.
 - **APIs**: `GET /api/products`, `GET /api/products/{code}/tasks`, `GET /api/products/{code}/form-schema/{taskType}`, `POST /api/tickets`

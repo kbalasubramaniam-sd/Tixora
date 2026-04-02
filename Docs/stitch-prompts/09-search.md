@@ -81,7 +81,7 @@ Already defined in `00-shared-layout.md`. When the user types in the global sear
 - `surface-container-lowest` card, `0.5rem` radius
 - Filters arranged in a 2-column grid:
   - **Product:** dropdown (All / Rabet / Rhoon / Wtheeq / Mulem)
-  - **Task Type:** dropdown (All / T-01 through T-05)
+  - **Task Type:** dropdown (All / T-01 through T-04)
   - **Status:** dropdown (All / Submitted / In Review / Pending Requester Action / Completed / Rejected / Cancelled)
   - **SLA Status:** dropdown (All / On Track / At Risk / Breached)
   - **Lifecycle State:** dropdown (All / AGREED / UAT_ACTIVE / ONBOARDED / LIVE)

@@ -10,6 +10,8 @@ Four admin sub-pages accessible from the sidebar under "Admin" section:
 3. SLA Settings
 4. Business Hours
 
+> **MVP 2:** Partner Management (add/edit partners and company codes via UI). For MVP 1, partners are seeded data.
+
 ---
 
 ## Admin: Users
@@ -70,16 +72,12 @@ Four admin sub-pages accessible from the sidebar under "Admin" section:
 │  │ Stages: Product Review → Integration (Ph1 → Ph2) │   │
 │  │ [ Edit ]                                         │    │
 │  ├─────────────────────────────────────────────────┤    │
-│  │ T-03 · Partner Account Creation                  │    │
+│  │ T-03 · Production Account Creation                │    │
 │  │ Portal: Partner Ops → Director → Provisioning    │    │
 │  │ API: Partner Ops → Director → Integration        │    │
 │  │ [ Edit ]                                         │    │
 │  ├─────────────────────────────────────────────────┤    │
-│  │ T-04 · User Account Creation                     │    │
-│  │ Stages: Partner Ops → Provisioning               │    │
-│  │ [ Edit ]                                         │    │
-│  ├─────────────────────────────────────────────────┤    │
-│  │ T-05 · Access & Credential Support               │    │
+│  │ T-04 · Access & Credential Support               │    │
 │  │ Stages: Provisioning                             │    │
 │  │ [ Edit ]                                         │    │
 │  └─────────────────────────────────────────────────┘    │

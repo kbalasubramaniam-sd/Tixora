@@ -23,7 +23,7 @@
 
 **Contains:**
 - Entities: Product, Partner, PartnerProduct, Ticket, StageLog, AuditEntry, SlaTracker, Document, Comment, Notification, FulfilmentRecord, User, DelegateApprover, WorkflowDefinition, StageDefinition, BusinessHoursConfig, Holiday, SavedFilter
-- Enums: ProductCode (RBT, RHN, WTQ, MLM), TaskType (T01-T05), ProductAccessMode, ProvisioningPath, TicketStatus, LifecycleState, StageType, StageAction, SlaStatus, UserRole, NotificationType, IssueType
+- Enums: ProductCode (RBT, RHN, WTQ, MLM), TaskType (T01-T04), ProductAccessMode, ProvisioningPath, TicketStatus, LifecycleState, StageType, StageAction, SlaStatus, UserRole, NotificationType, IssueType
 - Value Objects: TicketId, BusinessHours
 - Repository Interfaces: ITicketRepository, IPartnerRepository, IUserRepository, IWorkflowRepository, IAuditRepository, INotificationRepository, ISlaRepository
 
@@ -97,7 +97,7 @@
 
 ## Data Flow
 
-### Ticket Creation (T-01 through T-05)
+### Ticket Creation (T-01 through T-04)
 
 1. **User Initiation:** Frontend renders NewRequest wizard (ProductStep → TaskStep → FormStep → ReviewStep → ConfirmationStep)
 2. **Form Schema Resolution:** Frontend fetches form schema from `GET /api/products/{code}/form-schema/{taskType}` (defines required fields, validation rules, document types)
@@ -199,7 +199,7 @@
 **Responsibility:**
 - Store agreement status (Agreed, UatActive, Onboarded, Live) per product
 - Updated by LifecycleService when task completes (T-01 → Agreed, T-02 Phase 1 → UatActive, T-03 → Onboarded/Live)
-- Gated checks: T-02 requires Agreed state, T-03/T-04 require Agreed, T-05 requires Onboarded/Live
+- Gated checks: T-02 requires Agreed state, T-03/T-04 require Agreed, T-04 requires Onboarded/Live
 
 ### FormSchema & Dynamic Field Rendering
 **Purpose:** Runtime-driven form generation from seeded schema definitions.
@@ -209,7 +209,7 @@
 **Pattern:** Schema-as-code (no UI builder); frontend interprets JSON schema at runtime
 
 **Responsibility:**
-- Seeded FormSchema entity defines required fields, field types, validation rules, conditional visibility rules (T-03 API toggle, T-05 issue type), and mandatory document types
+- Seeded FormSchema entity defines required fields, field types, validation rules, conditional visibility rules (T-03 API toggle, T-04 issue type), and mandatory document types
 - Frontend `GET /api/products/{code}/form-schema/{taskType}` retrieves schema
 - React Hook Form + Zod derives validation from schema at component mount
 - Conditional fields hidden/shown via RHF's `watch()` on dependent field values

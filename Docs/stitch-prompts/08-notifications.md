@@ -24,7 +24,7 @@ Full notification inbox. All milestone notifications the user has received.
 │  │    Take action to avoid breach                   │    │
 │  │    4 hours ago                                   │    │
 │  ├─────────────────────────────────────────────────┤    │
-│  │    Ticket SPM-WTQ-T05-... completed             │    │
+│  │    Ticket SPM-WTQ-T04-... completed             │    │
 │  │    Access issue resolved                         │    │
 │  │    Yesterday                                     │    │
 │  └─────────────────────────────────────────────────┘    │

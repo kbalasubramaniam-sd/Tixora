@@ -18,7 +18,7 @@
 |------|---------------|
 | `src/Tixora.Domain/Tixora.Domain.csproj` | Project file (no dependencies) |
 | `src/Tixora.Domain/Enums/ProductCode.cs` | RBT, RHN, WTQ, MLM |
-| `src/Tixora.Domain/Enums/TaskType.cs` | T01–T05 |
+| `src/Tixora.Domain/Enums/TaskType.cs` | T01–T04 |
 | `src/Tixora.Domain/Enums/ProductAccessMode.cs` | Both, ApiOnly |
 | `src/Tixora.Domain/Enums/ProvisioningPath.cs` | PortalOnly, PortalAndApi, ApiOnly |
 | `src/Tixora.Domain/Enums/TicketStatus.cs` | Submitted through Cancelled |
@@ -28,7 +28,7 @@
 | `src/Tixora.Domain/Enums/SlaStatus.cs` | OnTrack–Breached |
 | `src/Tixora.Domain/Enums/UserRole.cs` | 6 roles |
 | `src/Tixora.Domain/Enums/NotificationType.cs` | 19 notification types |
-| `src/Tixora.Domain/Enums/IssueType.cs` | 3 issue types for T-05 |
+| `src/Tixora.Domain/Enums/IssueType.cs` | 3 issue types for T-04 |
 | `src/Tixora.Domain/Entities/Product.cs` | Seeded, immutable product definition |
 | `src/Tixora.Domain/Entities/Partner.cs` | Partner with PartnerProducts collection |
 | `src/Tixora.Domain/Entities/PartnerProduct.cs` | Lifecycle state per product per partner |
@@ -274,7 +274,7 @@ public enum ProductCode { RBT, RHN, WTQ, MLM }
 ```csharp
 namespace Tixora.Domain.Enums;
 
-public enum TaskType { T01, T02, T03, T04, T05 }
+public enum TaskType { T01, T02, T03, T04, T04 }
 ```
 
 `src/Tixora.Domain/Enums/ProductAccessMode.cs`:
@@ -1310,7 +1310,7 @@ public class ProductService
             new() { TaskType = "T02", Name = "UAT Access Creation", Description = "Create UAT access and manage two-phase sign-off" },
             new() { TaskType = "T03", Name = "Partner Account Creation", Description = "Create partner account with product-driven access path" },
             new() { TaskType = "T04", Name = "User Account Creation", Description = "Create individual user account for partner" },
-            new() { TaskType = "T05", Name = "Access & Credential Support", Description = "Resolve access issues and credential support" },
+            new() { TaskType = "T04", Name = "Access & Credential Support", Description = "Resolve access issues and credential support" },
         };
         return tasks;
     }
@@ -2145,10 +2145,10 @@ public static class SeedWorkflows
             db.WorkflowDefinitions.Add(wf);
         }
 
-        // T-05: Access & Credential Support — same for all products
+        // T-04: Access & Credential Support — same for all products
         foreach (var pc in products)
         {
-            var wf = new WorkflowDefinition { Id = Guid.NewGuid(), ProductCode = pc, TaskType = TaskType.T05, Version = 1, IsActive = true, CreatedAt = now };
+            var wf = new WorkflowDefinition { Id = Guid.NewGuid(), ProductCode = pc, TaskType = TaskType.T04, Version = 1, IsActive = true, CreatedAt = now };
             wf.Stages = new List<StageDefinition>
             {
                 new() { Id = Guid.NewGuid(), WorkflowDefinitionId = wf.Id, StageOrder = 1, StageName = "Verify & Resolve", StageType = StageType.Provisioning, AssignedRole = UserRole.ProvisioningAgent, SlaBusinessHours = 2 },

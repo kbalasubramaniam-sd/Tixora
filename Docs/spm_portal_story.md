@@ -1,7 +1,7 @@
 # Tixora — Product Story & Workflow Specification
 **Tixora | Powering Every Request**
 *Strategic Partner Management | Internal Operations Portal*
-*Version 1.3 | April 2026*
+*Version 1.4 | April 2026*
 
 ---
 
@@ -102,7 +102,7 @@ Mulem is a unified data platform that enables insurers to digitally price, quote
 
 ## The Task Library
 
-Five task types are supported across all products. Each carries its own form schema, routing rules, SLA targets, document requirements, and notification triggers.
+Four task types are supported across all products. Each carries its own form schema, routing rules, SLA targets, document requirements, and notification triggers.
 
 ---
 
@@ -138,15 +138,15 @@ Five task types are supported across all products. Each carries its own form sch
 
 ---
 
-### T-03 · Partner Account Creation *(with API opt-in)*
+### T-03 · Production Account Creation *(with API opt-in)*
 
-**Purpose:** Create a partner account on the selected product. Every partner receives portal access by default. At submission, the requester declares whether the partner also requires API integration. When API is opted in, both portal and API provisioning paths execute in parallel after approval — ensuring complete access without sequential delays.
+**Purpose:** Create production accounts for the partner — including both the partner account and all required user accounts — on the selected product. Every partner receives portal access by default. At submission, the requester declares whether the partner also requires API integration. When API is opted in, both portal and API provisioning paths execute in parallel after approval — ensuring complete access without sequential delays.
 
 **Workflow split:**
 
 **Portal Journey (default):**
-- Collation of required account and user details
-- Access provisioning steps against the portal environment
+- Collation of required partner account details, admin user details (full name, designation, email address, access role, and any product-specific user parameters), and any additional user accounts to be created
+- Access provisioning steps against the portal environment, including partner account creation and all specified user accounts
 - Portal enablement confirmation and notification to requester and partner
 
 **API Journey (triggered by opt-in):**
@@ -163,25 +163,11 @@ Five task types are supported across all products. Each carries its own form sch
 
 **Routing path (Portal only):** Requester → Partner Ops Review → Partner Director Approval → Provisioning Team → Completed
 
-**Routing path (Portal + API):** Requester → Partner Ops Review → Partner Director Approval → Provisioning Team (Portal Setup) + Integration Team (IP Whitelisting + Credential Issuance) [parallel] → Both confirmed → Completed
+**Routing path (Portal + API):** Requester → Partner Ops Review → Partner Director Approval → Provisioning Team (Portal Setup + User Creation) + Integration Team (IP Whitelisting + Credential Issuance) [parallel] → Both confirmed → Completed
 
 ---
 
-### T-04 · User Account Creation
-
-**Purpose:** Create one or more admin user accounts for a partner or customer, linked to an existing, active partner account on the selected product.
-
-**Key workflow notes:**
-- Workflow begins with validation that the partner account exists and is in good standing before user creation proceeds
-- Captures: partner account reference, user full name, designation, email address, access role, and any product-specific user parameters
-- Provisioning team executes account creation against the relevant product environment
-- Completion confirmation is automatically sent back to the requester with user account details
-
-**Routing path:** Requester → Partner Ops Review → Provisioning Team → Completed
-
----
-
-### T-05 · Access & Credential Support
+### T-04 · Access & Credential Support
 
 **Purpose:** Resolve access and credential issues for a named partner user — covering portal login problems (password reset, account unlock) or API credential issues (key regeneration, certificate renewal) depending on the product's access type.
 
@@ -212,15 +198,13 @@ The combination of **Product × Task** determines the exact workflow path. SLA t
 │                                  │                         │                      │ Ph 1: Access Provisioned       │ TBD (Ph 2)│
 │                                  │                         │                      │ Ph 2: UAT Sign-off & Close     │           │
 ├──────────────────────────────────┼─────────────────────────┼──────────────────────┼────────────────────────────────┼───────────┤
-│ T-03 Partner Account Creation    │ Partner Ops             │ Partner Director     │ Provisioning Team (Portal)     │ 24        │
-│       — Portal path              │                         │                      │                                │           │
+│ T-03 Production Account Creation │ Partner Ops             │ Partner Director     │ Provisioning Team (Portal +    │ 24        │
+│       — Portal path              │                         │                      │ User Creation)                 │           │
 ├──────────────────────────────────┼─────────────────────────┼──────────────────────┼────────────────────────────────┼───────────┤
-│ T-03 Partner Account Creation    │ Partner Ops             │ Partner Director     │ Provisioning (Portal) +        │ 48        │
+│ T-03 Production Account Creation │ Partner Ops             │ Partner Director     │ Provisioning (Portal + Users) +│ 48        │
 │       — Portal + API path        │                         │                      │ Integration (API) [parallel]   │           │
 ├──────────────────────────────────┼─────────────────────────┼──────────────────────┼────────────────────────────────┼───────────┤
-│ T-04 User Account Creation       │ Partner Ops             │ —                    │ Provisioning Team              │ 8         │
-├──────────────────────────────────┼─────────────────────────┼──────────────────────┼────────────────────────────────┼───────────┤
-│ T-05 Access & Credential Support │ —                       │ —                    │ Provisioning Team              │ 2         │
+│ T-04 Access & Credential Support │ —                       │ —                    │ Provisioning Team              │ 2         │
 │                                  │                         │                      │ (Verify + Resolve + Confirm)   │           │
 └──────────────────────────────────┴─────────────────────────┴──────────────────────┴────────────────────────────────┴───────────┘
 ```
@@ -237,26 +221,26 @@ Every partner on a given product progresses through a defined lifecycle. Each st
 
 ```
 ┌─────────────────────┐      ┌─────────────────────┐      ┌─────────────────────┐      ┌─────────────────────┐
-│  T-01 · Agreement   │ ───▶ │  T-02 · UAT Access  │ ───▶ │  T-03 · Partner     │ ───▶ │  T-04 · User        │
-│  Validation &       │      │  Creation            │      │  Account Creation   │      │  Account Creation   │
+│  T-01 · Agreement   │ ───▶ │  T-02 · UAT Access  │ ───▶ │  T-03 · Production  │ ───▶ │       LIVE          │
+│  Validation &       │      │  Creation            │      │  Account Creation   │      │                     │
 │  Sign-off           │      │                      │      │                     │      │                     │
 │                     │      │                      │      │                     │      │                     │
-│  State: AGREED      │      │  State: UAT ACTIVE   │      │  State: ONBOARDED   │      │  State: LIVE        │
+│  State: ONBOARDED   │      │  State: UAT ACTIVE   │      │  State: LIVE        │      │                     │
 └─────────────────────┘      └─────────────────────┘      └─────────────────────┘      └─────────────────────┘
 ```
 
+**Lifecycle:** None → [T-01] → Onboarded → [T-02] → UatActive → [T-03] → Live
+
 | Lifecycle State | Entry Condition | Meaning |
 |---|---|---|
-| **AGREED** | T-01 completed and signed off | Partner has a valid, approved agreement on record. Eligible for UAT. |
+| **ONBOARDED** | T-01 completed and signed off | Partner has a valid, approved agreement on record. Agreement is signed off and partner is ready for UAT. |
 | **UAT ACTIVE** | T-02 Phase 1 completed (access provisioned) | Partner has UAT environment access and is actively testing. |
-| **ONBOARDED** | T-02 Phase 2 completed (UAT signed off) AND T-03 completed (account created) | Partner account is live on the product. Eligible for user provisioning. |
-| **LIVE** | T-04 completed (at least one user account created) | Partner has active users and is fully operational on the product. |
+| **LIVE** | T-03 completed (production accounts and users created) | Partner has production accounts and active users; fully operational on the product. |
 
 **Lifecycle rules:**
-- T-02 cannot be raised unless the partner is in **AGREED** state or later for the same product.
-- T-03 cannot be raised unless T-02 Phase 2 is completed (partner UAT is signed off).
-- T-04 cannot be raised unless T-03 is completed (partner account exists and is active).
-- T-05 (Access & Credential Support) is available at any lifecycle state from **ONBOARDED** onwards — it does not advance the lifecycle.
+- T-02 cannot be raised unless the partner is in **ONBOARDED** state or later for the same product.
+- T-03 cannot be raised unless the partner is in **UAT ACTIVE** state (T-02 Phase 2 signed off) for the same product.
+- T-04 (Access & Credential Support) is available at any lifecycle state from **LIVE** onwards — it does not advance the lifecycle.
 - A partner's lifecycle state is tracked per product. A partner onboarded to Rabet may be at a different lifecycle stage on Mulem.
 - Agreements are **auto-renewed** and do not expire. Each product carries its own independent agreement — a partner operating across multiple products holds a separate T-01 agreement record per product.
 
@@ -273,8 +257,8 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 | Example | Meaning |
 |---|---|
 | `SPM-RBT-T01-20260401-0001` | Rabet · Agreement Validation · 1 Apr 2026 · First ticket of the day |
-| `SPM-MLM-T03-20260401-0042` | Mulem · Partner Account Creation · 1 Apr 2026 · 42nd ticket of the day |
-| `SPM-WTQ-T05-20260401-0011` | Wtheeq · Access & Credential Support · 1 Apr 2026 · 11th ticket of the day |
+| `SPM-MLM-T03-20260401-0042` | Mulem · Production Account Creation · 1 Apr 2026 · 42nd ticket of the day |
+| `SPM-WTQ-T04-20260401-0011` | Wtheeq · Access & Credential Support · 1 Apr 2026 · 11th ticket of the day |
 
 ---
 
@@ -304,7 +288,7 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 
 **Acceptance Criteria:**
 - Each Task renders its own pre-configured field schema; no generic free-text submission is permitted.
-- Conditional fields appear or hide based on prior answers (e.g., API opt-in fields in T-03 on "Both" products, issue type in T-05 based on the product's access type).
+- Conditional fields appear or hide based on prior answers (e.g., API opt-in fields in T-03 on "Both" products, issue type in T-04 based on the product's access type).
 - Fields include contextual helper text explaining what is required and why.
 - Form state is auto-saved as a draft every 60 seconds.
 
@@ -323,9 +307,9 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 
 ---
 
-**US-004 · Product-Driven Access Path for Partner Account Creation (T-03)**
+**US-004 · Product-Driven Access Path for Production Account Creation (T-03)**
 
-> *As a Requester raising a Partner Account Creation request, I want the form and workflow to automatically adapt based on the selected product's access type so that the correct provisioning path is triggered without manual selection on API-only products.*
+> *As a Requester raising a Production Account Creation request, I want the form and workflow to automatically adapt based on the selected product's access type so that the correct provisioning path is triggered without manual selection on API-only products.*
 
 **Acceptance Criteria:**
 - The T-03 form adapts based on the selected product's access type:
@@ -371,10 +355,9 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 **Acceptance Criteria:**
 - When completing any provisioning or integration action, the stage owner is presented with a structured **Fulfilment Record** form relevant to the action:
   - **T-02 Phase 1:** UAT environment URL, credentials issued (username only — passwords sent securely out-of-band), access permissions granted.
-  - **T-03 Portal:** Partner account ID, portal URL, admin username created.
+  - **T-03 Portal:** Partner account ID, portal URL, admin username created, all user account IDs and login emails provisioned.
   - **T-03 API:** IP addresses whitelisted, API key reference (not the key itself), certificate thumbprint, environment provisioned.
-  - **T-04:** User account ID(s), role(s) assigned, login email(s).
-  - **T-05:** Confirmation of issue type (portal login / API credential), user affected, resolution action taken.
+  - **T-04:** Confirmation of issue type (portal login / API credential), user affected, resolution action taken.
 - Fulfilment details are permanently stored on the ticket and included in the audit trail.
 - Sensitive credentials (passwords, full API keys) are **never** stored in the ticket — only references and confirmation that delivery occurred via a secure channel.
 
@@ -441,7 +424,7 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 **Acceptance Criteria:**
 - On submission, the system evaluates the Product × Task matrix (and API opt-in status for T-03) and routes the ticket to the correct first-stage queue without manual intervention.
 - The assigned team receives an email and in-portal notification.
-- If a stage has no approval gate (T-02, T-04, T-05), routing skips directly to Provisioning or Integration.
+- If a stage has no approval gate (T-02, T-04), routing skips directly to Provisioning or Integration.
 
 ---
 
@@ -463,10 +446,9 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 > *As the system, I want to enforce lifecycle state prerequisites at submission time so that no request can be raised for a partner who has not completed the required prior stage.*
 
 **Acceptance Criteria:**
-- When a T-02 is raised, the system checks for a completed T-01 record for the same partner and product. If none exists, submission is **blocked** with a clear message: *"This partner does not have a completed agreement (T-01) on [Product]. An agreement must be signed off before UAT access can be requested."*
-- When a T-03 is raised, the system checks for a completed T-02 (Phase 2 signed off) for the same partner and product. If not met, submission is **blocked**.
-- When a T-04 is raised, the system checks for a completed T-03 for the same partner and product. If not met, submission is **blocked**.
-- T-05 requires the partner to be in **ONBOARDED** state or later; submission is blocked otherwise.
+- When a T-02 is raised, the system checks that the partner is in **ONBOARDED** state for the same product. If not, submission is **blocked** with a clear message: *"This partner does not have a completed agreement (T-01) on [Product]. An agreement must be signed off before UAT access can be requested."*
+- When a T-03 is raised, the system checks that the partner is in **UAT ACTIVE** state (T-02 Phase 2 signed off) for the same product. If not met, submission is **blocked**.
+- T-04 requires the partner to be in **LIVE** state; submission is blocked otherwise.
 - The blocking message includes a link to the partner's current lifecycle state and any in-progress prerequisite tickets.
 - Lifecycle checks are enforced at the system level and cannot be overridden by any user role.
 
@@ -560,7 +542,7 @@ SPM-[PRODUCT CODE]-[TASK CODE]-[YYYYMMDD]-[SEQUENCE]
 | T-02 UAT Completion Reminder (configurable window) | Requester |
 | T-03 Portal Account Provisioned | Requester, Partner Contact |
 | T-03 API Credentials Issued | Requester, Technical Contact |
-| T-05 Access Issue Resolved | Requester |
+| T-04 Access Issue Resolved | Requester |
 | Request Rejected | Requester |
 | Request Cancelled | Assigned Stage Owner(s) |
 | Ticket Reassigned | New Assignee, Requester |
@@ -658,7 +640,7 @@ All notifications include: ticket ID, product, task, current status, and a deep-
   - A chronological timeline of all tickets raised for this partner across all products and task types
   - Agreement status and effective date (T-01 records) — agreements are auto-renewed
   - UAT status per product (T-02 records)
-  - Active accounts and users per product (T-03 and T-04 records)
+  - Active accounts and users per product (T-03 records)
 - Each ticket entry in the timeline is clickable and links to the full ticket detail view.
 - The partner profile is read-only; no edits are permitted from this view.
 
@@ -756,5 +738,5 @@ All notifications include: ticket ID, product, task, current status, and a deep-
 
 ---
 
-*Document version 1.2 | SPM Portal*
+*Document version 1.4 | SPM Portal*
 *Owner: [Product Owner Name] | Last reviewed: April 2026*

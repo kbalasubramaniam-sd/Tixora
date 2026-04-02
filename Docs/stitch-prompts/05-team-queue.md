@@ -44,7 +44,7 @@ The work queue for Reviewers, Approvers, Integration Team, and Provisioning Agen
 - Horizontal bar, `surface-container-lowest` background, `0.5rem` radius, padding `spacing-3`
 - Inline filters (dropdown chips):
   - **Product:** All / Rabet / Rhoon / Wtheeq / Mulem
-  - **Task:** All / T-01 / T-02 / T-03 / T-04 / T-05
+  - **Task:** All / T-01 / T-02 / T-03 / T-04
   - **Stage:** All / [dynamic based on task]
   - **SLA Status:** All / On Track / At Risk / Breached
   - **Access Path (T-03):** All / Portal Only / Portal + API / API Only

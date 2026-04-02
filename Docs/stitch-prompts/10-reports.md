@@ -81,7 +81,7 @@ All charts use the teal palette for consistency:
 - Y-axis: count, X-axis: product names
 
 ### Chart 2: Requests by Task (bar chart)
-- Vertical bars, one per task type (T-01 through T-05)
+- Vertical bars, one per task type (T-01 through T-04)
 - Same teal bars
 
 ### Chart 3: Average Resolution Time by Task (horizontal bar)
