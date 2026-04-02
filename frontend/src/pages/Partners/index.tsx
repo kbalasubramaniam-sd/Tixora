@@ -1,25 +1,36 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { usePartners } from '@/api/hooks/usePartners'
 import { FilterBar } from '@/pages/TeamQueue/FilterBar'
+import { SearchableDropdown } from '@/components/ui/SearchableDropdown'
 import { PartnerRow } from './PartnerRow'
 
 export default function Partners() {
-  const [search, setSearch] = useState('')
+  const [selectedPartnerId, setSelectedPartnerId] = useState('')
   const [lifecycle, setLifecycle] = useState('All')
   const [product, setProduct] = useState('All')
 
   const filters = {
-    search: search || undefined,
     lifecycleState: lifecycle !== 'All' ? lifecycle : undefined,
     product: product !== 'All' ? product : undefined,
   }
 
-  const { data: partners = [], isLoading } = usePartners(
+  const { data: allFiltered = [], isLoading } = usePartners(
     Object.values(filters).some(Boolean) ? filters : undefined,
   )
 
+  // If a partner is selected from dropdown, show only that one; otherwise show all filtered
+  const partners = selectedPartnerId
+    ? allFiltered.filter((p) => p.id === selectedPartnerId)
+    : allFiltered
+
   // Total count (unfiltered) for "Showing X of Y"
   const { data: allPartners = [] } = usePartners()
+
+  // Build searchable dropdown options from all partners
+  const searchOptions = useMemo(
+    () => allPartners.map((p) => ({ label: p.name, value: p.id, sublabel: p.refId })),
+    [allPartners],
+  )
 
   const clearFilters = () => {
     setLifecycle('All')
@@ -42,20 +53,15 @@ export default function Partners() {
         <p className="text-on-surface-variant mt-2 text-lg">Manage and explore Tixora's global partner network.</p>
       </header>
 
-      {/* Search Bar */}
+      {/* Partner Search */}
       <section className="mb-6">
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-            <span className="material-symbols-outlined text-teal-600 transition-transform group-focus-within:scale-110">search</span>
-          </div>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-surface-container-low border-none rounded-full py-3.5 pl-16 pr-8 text-on-surface text-lg font-medium focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest shadow-sm transition-all duration-300 placeholder-slate-400"
-            placeholder="Search by partner name or account reference"
-          />
-        </div>
+        <SearchableDropdown
+          options={searchOptions}
+          value={selectedPartnerId}
+          onChange={setSelectedPartnerId}
+          placeholder="Search by partner name or account reference"
+          icon="search"
+        />
       </section>
 
       {/* Filter Bar */}
