@@ -54,3 +54,26 @@ export const UserRole = {
   SystemAdministrator: 'SystemAdministrator',
 } as const
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+export const NotificationType = {
+  RequestSubmitted: 'RequestSubmitted',
+  StageAdvanced: 'StageAdvanced',
+  ClarificationRequested: 'ClarificationRequested',
+  ClarificationResponded: 'ClarificationResponded',
+  UatPhase1Complete: 'UatPhase1Complete',
+  UatTestingSignalled: 'UatTestingSignalled',
+  UatPhase2Complete: 'UatPhase2Complete',
+  UatCompletionReminder: 'UatCompletionReminder',
+  PortalAccountProvisioned: 'PortalAccountProvisioned',
+  ApiCredentialsIssued: 'ApiCredentialsIssued',
+  AccessIssueResolved: 'AccessIssueResolved',
+  RequestRejected: 'RequestRejected',
+  RequestCancelled: 'RequestCancelled',
+  TicketReassigned: 'TicketReassigned',
+  DelegateApprovalTriggered: 'DelegateApprovalTriggered',
+  SlaWarning75: 'SlaWarning75',
+  SlaWarning90: 'SlaWarning90',
+  SlaBreach: 'SlaBreach',
+  RequestCompleted: 'RequestCompleted',
+} as const
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
