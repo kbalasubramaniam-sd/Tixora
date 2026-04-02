@@ -7,5 +7,6 @@ public record CreateTicketRequest(
     Guid PartnerId,
     string? ProvisioningPath,
     string? IssueType,
-    string FormData
+    string FormData,
+    Guid? RejectedTicketRef = null
 );

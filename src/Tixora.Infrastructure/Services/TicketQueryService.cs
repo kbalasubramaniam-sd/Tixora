@@ -4,6 +4,7 @@ using System.Text.Json;
 using Tixora.Application.DTOs.Dashboard;
 using Tixora.Application.DTOs.Tickets;
 using Tixora.Application.Interfaces;
+using Tixora.Domain.Entities;
 using Tixora.Domain.Enums;
 
 namespace Tixora.Infrastructure.Services;
@@ -304,7 +305,7 @@ public class TicketQueryService : ITicketQueryService
         return utcTime.ToString("dd MMM, HH:mm");
     }
 
-    public async Task<TicketDetailResponse?> GetTicketDetailAsync(Guid ticketId)
+    public async Task<TicketDetailResponse?> GetTicketDetailAsync(Guid ticketId, Guid actorUserId, UserRole actorRole)
     {
         var ticket = await _db.Tickets
             .AsNoTracking()
@@ -422,6 +423,19 @@ public class TicketQueryService : ITicketQueryService
             _ => null
         };
 
+        // Resolve re-raise reference display ID
+        string? rejectedTicketRef = null;
+        if (ticket.RejectedTicketRef.HasValue)
+        {
+            rejectedTicketRef = await _db.Tickets.AsNoTracking()
+                .Where(t => t.Id == ticket.RejectedTicketRef.Value)
+                .Select(t => t.TicketId)
+                .FirstOrDefaultAsync();
+        }
+
+        // Compute allowed actions for the current user
+        var allowedActions = ComputeAllowedActions(ticket, actorUserId, actorRole);
+
         return new TicketDetailResponse(
             Id: ticket.Id.ToString(),
             TicketId: ticket.TicketId,
@@ -445,8 +459,43 @@ public class TicketQueryService : ITicketQueryService
             AssignedTo: ticket.AssignedTo?.FullName,
             CreatedBy: ticket.CreatedBy.FullName,
             AccessPath: accessPath,
-            LifecycleState: ticket.PartnerProduct.LifecycleState.ToString()
+            LifecycleState: ticket.PartnerProduct.LifecycleState.ToString(),
+            AllowedActions: allowedActions,
+            RejectedTicketRef: rejectedTicketRef
         );
+    }
+
+    private static string[] ComputeAllowedActions(Ticket ticket, Guid actorUserId, UserRole actorRole)
+    {
+        var actions = new List<string>();
+
+        // Terminal tickets — no actions allowed
+        if (TerminalStatuses.Contains(ticket.Status))
+            return [];
+
+        // Assigned stage owner can approve, reject, return for clarification
+        if (ticket.AssignedToUserId == actorUserId)
+        {
+            actions.Add("approve");
+            actions.Add("reject");
+            actions.Add("return");
+        }
+
+        // Original requester actions
+        if (ticket.CreatedByUserId == actorUserId)
+        {
+            if (ticket.Status == TicketStatus.Submitted)
+                actions.Add("cancel");
+
+            if (ticket.Status == TicketStatus.PendingRequesterAction)
+                actions.Add("respond");
+        }
+
+        // System administrators can reassign
+        if (actorRole == UserRole.SystemAdministrator)
+            actions.Add("reassign");
+
+        return actions.ToArray();
     }
 
     private static string GetStageIcon(StageType stageType) => stageType switch
