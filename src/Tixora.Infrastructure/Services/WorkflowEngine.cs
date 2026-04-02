@@ -279,18 +279,19 @@ public class WorkflowEngine : IWorkflowEngine
             .FirstOrDefaultAsync(u => u.Role == stage1.AssignedRole && u.IsActive);
 
         // 9b. Validate re-raise reference (if provided)
+        Ticket? rejectedTicketEntity = null;
         if (request.RejectedTicketRef.HasValue)
         {
-            var rejectedTicket = await _db.Tickets
+            rejectedTicketEntity = await _db.Tickets
                 .FirstOrDefaultAsync(t => t.Id == request.RejectedTicketRef.Value);
 
-            if (rejectedTicket is null)
+            if (rejectedTicketEntity is null)
                 throw new InvalidOperationException("Referenced rejected ticket does not exist.");
 
-            if (rejectedTicket.Status != TicketStatus.Rejected)
+            if (rejectedTicketEntity.Status != TicketStatus.Rejected)
                 throw new InvalidOperationException("Referenced ticket is not rejected. Only rejected tickets can be re-raised.");
 
-            if (rejectedTicket.ProductCode != productCode || rejectedTicket.TaskType != taskType)
+            if (rejectedTicketEntity.ProductCode != productCode || rejectedTicketEntity.TaskType != taskType)
                 throw new InvalidOperationException("Re-raised ticket must have the same product and task type as the rejected ticket.");
         }
 
@@ -311,8 +312,8 @@ public class WorkflowEngine : IWorkflowEngine
             CreatedByUserId = createdByUserId,
             AssignedToUserId = assignedUser?.Id,
             WorkflowDefinitionId = workflow.Id,
-            SequenceNumber = sequenceNumber,
             RejectedTicketRef = request.RejectedTicketRef,
+            SequenceNumber = sequenceNumber,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -332,21 +333,16 @@ public class WorkflowEngine : IWorkflowEngine
 
         _db.AuditEntries.Add(audit);
 
-        // Re-raise audit entry
-        if (request.RejectedTicketRef.HasValue)
+        // 11b. Re-raise audit entry
+        if (rejectedTicketEntity is not null)
         {
-            var rejectedTicketId = await _db.Tickets
-                .Where(t => t.Id == request.RejectedTicketRef.Value)
-                .Select(t => t.TicketId)
-                .FirstOrDefaultAsync();
-
             _db.AuditEntries.Add(new AuditEntry
             {
                 Id = Guid.CreateVersion7(),
                 TicketId = ticket.Id,
                 ActorUserId = createdByUserId,
                 ActionType = "ReRaised",
-                Details = $"Re-raised from rejected ticket {rejectedTicketId}.",
+                Details = $"Re-raised from rejected ticket {rejectedTicketEntity.TicketId}.",
                 TimestampUtc = now
             });
         }
