@@ -445,7 +445,13 @@ public class TicketQueryService : ITicketQueryService
             AssignedTo: ticket.AssignedTo?.FullName,
             CreatedBy: ticket.CreatedBy.FullName,
             AccessPath: accessPath,
-            LifecycleState: ticket.PartnerProduct.LifecycleState.ToString()
+            LifecycleState: ticket.PartnerProduct.LifecycleState.ToString(),
+            RejectedTicketRef: ticket.RejectedTicketRef.HasValue
+                ? await _db.Tickets.AsNoTracking()
+                    .Where(t => t.Id == ticket.RejectedTicketRef.Value)
+                    .Select(t => t.TicketId)
+                    .FirstOrDefaultAsync()
+                : null
         );
     }
 

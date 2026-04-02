@@ -23,5 +23,6 @@ public record TicketDetailResponse(
     string? AssignedTo,
     string CreatedBy,
     string? AccessPath,
-    string LifecycleState
+    string LifecycleState,
+    string? RejectedTicketRef = null
 );
