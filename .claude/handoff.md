@@ -229,5 +229,168 @@ All E3 chunks merged to `frontend/foundation`. Summary:
 - **SLA Engine:** Real business hours tracking, pause/resume, background monitoring
 - **Notifications:** In-app with all 8 workflow action types wired
 
-## Next Steps
-- **E4: Surface & Admin** — starting now
+---
+
+## E4: Surface & Admin
+
+| # | Chunk | BE Status | FE Wirable | Endpoints |
+|---|-------|-----------|------------|-----------|
+| E4.1 | Dashboard Enhancement | DONE | YES | Enhanced GET /api/dashboard/* (SLA stats, urgency sort) |
+| E4.2 | Search | DONE | YES | GET /api/search?q=, POST /api/search/advanced |
+| E4.3 | Reports | DONE | YES | GET /api/reports/overview, GET /api/reports/export |
+| E4.4 | Admin Config | DONE | YES | 10 endpoints under /api/admin/* |
+| E4.5 | Pagination | DONE | YES | PagedResult<T> on my-tickets, team-queue, notifications |
+
+### E4.1 Dashboard Enhancement (BE DONE)
+
+**What changed (no new endpoints):**
+- `GET /api/dashboard/stats` — 4 stats now show: Open Tickets, SLA Breaches, SLA Compliance %, Avg Resolution (hours)
+- `GET /api/dashboard/team-queue` — Now sorted by SLA urgency (Breached > Critical > AtRisk > OnTrack). Added `status` filter param.
+- `GET /api/dashboard/action-required` — Now sorted by SLA urgency, limited to 5 results.
+
+### E4.2 Search (BE DONE — FE: NOT WIRED)
+
+**Endpoints:**
+- `GET /api/search?q={query}` — Global search (min 2 chars). Searches ticket IDs + partner names/aliases. Returns max 20.
+- `POST /api/search/advanced` — Filtered search with pagination.
+
+**Global search response (SearchResultResponse):**
+```json
+{
+  "type": "Ticket",
+  "id": "guid",
+  "displayId": "SPM-RBT-T01-20260403-001",
+  "title": "Al Ain Insurance — T01",
+  "subtitle": "InReview | Legal Review"
+}
+```
+
+**Advanced search request:**
+```json
+{
+  "productCode": "RBT",
+  "taskType": "T01",
+  "status": "InReview",
+  "slaStatus": "AtRisk",
+  "assignedTo": "guid",
+  "partnerId": "guid",
+  "dateFrom": "2026-04-01",
+  "dateTo": "2026-04-30",
+  "page": 1,
+  "pageSize": 20
+}
+```
+Returns `PagedResult<TicketSummaryResponse>`.
+
+### E4.3 Reports (BE DONE — FE: NOT WIRED)
+
+**Endpoints:**
+- `GET /api/reports/overview?dateFrom=&dateTo=` — Aggregated metrics
+- `GET /api/reports/export?dateFrom=&dateTo=&productCode=&taskType=&status=` — CSV download
+
+**Overview response:**
+```json
+{
+  "totalTickets": 50,
+  "openTickets": 30,
+  "completedTickets": 15,
+  "rejectedTickets": 3,
+  "cancelledTickets": 2,
+  "slaCompliancePercent": 85.0,
+  "slaBreachCount": 4,
+  "avgResolutionHours": 12.5,
+  "byProduct": [{"productCode": "RBT", "count": 20}],
+  "byTaskType": [{"taskType": "T01", "count": 15}],
+  "byStatus": [{"status": "InReview", "count": 10}]
+}
+```
+
+**Wiring notes:**
+- Wire overview into S-09 Reports (when built)
+- CSV export returns `text/csv` with `Content-Disposition: attachment`
+
+### E4.4 Admin Config (BE DONE — FE: NOT WIRED)
+
+All endpoints require **SystemAdministrator** role. Returns 403 for other roles.
+
+**SLA Config:**
+- `GET /api/admin/sla-config` — All workflow stages with SLA hours
+- `PUT /api/admin/sla-config` — Update SLA hours per stage. Body: `{ "stages": [{ "stageId": "guid", "slaBusinessHours": 24 }] }`
+
+**Business Hours:**
+- `GET /api/admin/business-hours` — 7 days with start/end times
+- `PUT /api/admin/business-hours` — Update. Body: `{ "days": [{ "id": "guid", "isWorkingDay": true, "startTime": "08:00", "endTime": "17:00" }] }`
+
+**Holidays:**
+- `GET /api/admin/holidays` — List all
+- `POST /api/admin/holidays` — Body: `{ "date": "2026-12-25", "name": "Christmas" }`
+- `DELETE /api/admin/holidays/{id}` — Remove
+
+**Delegates:**
+- `GET /api/admin/delegates` — List active delegates
+- `POST /api/admin/delegates` — Body: `{ "primaryUserId": "guid", "delegateUserId": "guid", "validFrom": null, "validTo": null }`
+- `DELETE /api/admin/delegates/{id}` — Soft deactivate
+
+**Workflow Config:**
+- `GET /api/admin/workflow-config` — Read-only: all active workflows with stages, roles, SLA hours
+
+**Wiring notes:**
+- Wire into S-11 Workflows, S-12 SLA Settings, S-13 Business Hours admin screens
+- All admin endpoints return proper 403 for non-admin users
+
+### E4.5 Pagination (BE DONE)
+
+**Changed endpoints (now return PagedResult<T>):**
+- `GET /api/tickets/my?page=1&pageSize=20` → `PagedResult<TicketSummaryResponse>`
+- `GET /api/dashboard/team-queue?page=1&pageSize=20&...` → `PagedResult<TicketSummaryResponse>`
+- `GET /api/notifications?page=1&pageSize=20&unreadOnly=false` → `PagedResult<NotificationResponse>`
+
+**PagedResult shape:**
+```json
+{
+  "items": [...],
+  "totalCount": 50,
+  "page": 1,
+  "pageSize": 20,
+  "totalPages": 3
+}
+```
+
+**FE wiring notes:**
+- Update all FE API calls that previously expected arrays to now expect `.items` array inside PagedResult
+- Use `totalCount`/`totalPages` for pagination UI
+- Default pageSize is 20, max 100
+
+---
+
+## E4 COMPLETE — 103 tests passing (36 infrastructure + 67 API)
+
+All E4 chunks merged to `frontend/foundation`. Summary:
+- **Dashboard:** Real SLA stats, urgency sorting, status filter
+- **Search:** Global text + advanced filtered with pagination
+- **Reports:** Overview metrics + CSV export
+- **Admin:** SLA config, business hours, holidays, delegates, workflow viewer (10 endpoints)
+- **Pagination:** PagedResult<T> on my-tickets, team-queue, notifications
+
+## Skipped (per CLAUDE.md — MVP 2)
+- **4.8 Saved Filters** — deferred
+- **4.11 User Management** — "users are seeded in MVP 1, admin CRUD deferred to MVP 2"
+
+---
+
+## FULL BACKEND STATUS — E1 + E2 + E3 + E4 COMPLETE
+
+**103 tests passing** (36 infrastructure + 67 API integration)
+
+**Total API endpoints: 35+**
+- Auth: 2 (login, me)
+- Products: 1
+- Partners: 1
+- Tickets: 8 (CRUD + actions + queries)
+- Dashboard: 4 (stats, action-required, activity, team-queue)
+- Comments: 2 (add, list)
+- Documents: 3 (upload, list, download)
+- Notifications: 4 (list, unread-count, mark-read, mark-all-read)
+- Search: 2 (global, advanced)
+- Reports: 2 (overview, CSV export)
+- Admin: 10 (SLA config, business hours, holidays, delegates, workflow config)
