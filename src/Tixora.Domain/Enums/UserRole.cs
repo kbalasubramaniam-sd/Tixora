@@ -5,21 +5,30 @@ namespace Tixora.Domain.Enums;
 /// </summary>
 public enum UserRole
 {
-    /// <summary>Creates tickets and responds to clarification requests.</summary>
+    /// <summary>Partnership Team — raises all ticket types on behalf of partners.</summary>
     Requester = 0,
 
-    /// <summary>Reviews submitted tickets (first-pass checks).</summary>
-    Reviewer = 1,
+    /// <summary>Reviews agreement details and compliance documentation (T-01).</summary>
+    LegalTeam = 1,
 
-    /// <summary>Approves or rejects tickets (sign-off authority).</summary>
-    Approver = 2,
+    /// <summary>Reviews product-related submissions (T-01, T-02) and signs off on production access (T-03).</summary>
+    ProductTeam = 2,
 
-    /// <summary>Handles API provisioning, UAT access, and credential management.</summary>
-    IntegrationTeam = 3,
+    /// <summary>Executive Authority from CEO office — final sign-off on agreements (T-01).</summary>
+    Approver = 3,
 
-    /// <summary>Handles portal account provisioning and user creation.</summary>
-    ProvisioningAgent = 4,
+    /// <summary>Manages UAT lifecycle, API provisioning, IP whitelisting, credentials (T-02, T-03). Can raise T-04.</summary>
+    IntegrationTeam = 4,
+
+    /// <summary>Handles dev provisioning (T-03), API credential creation (T-02), and technical support (T-04).</summary>
+    DevTeam = 5,
+
+    /// <summary>Handles business provisioning (T-03) and account-related support (T-04).</summary>
+    BusinessTeam = 6,
+
+    /// <summary>Separate Operations team — reviews T-03 requests before production sign-off (T-03 Stage 1).</summary>
+    PartnerOps = 7,
 
     /// <summary>Full system access — manages users, SLA config, business hours, delegates.</summary>
-    SystemAdministrator = 5
+    SystemAdministrator = 8
 }
