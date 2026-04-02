@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { useTeamQueue } from '@/api/hooks/useTeamQueue'
 import { FilterBar } from './FilterBar'
@@ -10,21 +10,40 @@ export default function TeamQueue() {
   const [product, setProduct] = useState('All')
   const [task, setTask] = useState('All')
   const [slaStatus, setSlaStatus] = useState('All')
+  const [partner, setPartner] = useState('All')
+  const [requester, setRequester] = useState('All')
 
   const filters = {
     product: product !== 'All' ? product : undefined,
     task: task !== 'All' ? task : undefined,
     slaStatus: slaStatus !== 'All' ? slaStatus : undefined,
+    partner: partner !== 'All' ? partner : undefined,
+    requester: requester !== 'All' ? requester : undefined,
   }
 
   const { data: tickets = [], isLoading } = useTeamQueue(
     Object.values(filters).some(Boolean) ? filters : undefined,
   )
 
+  // Build partner/requester options from all tickets (unfiltered)
+  const { data: allTickets = [] } = useTeamQueue()
+
+  const partnerOptions = useMemo(() => {
+    const names = [...new Set(allTickets.map((t) => t.partnerName))].sort()
+    return [{ label: 'All', value: 'All' }, ...names.map((n) => ({ label: n, value: n }))]
+  }, [allTickets])
+
+  const requesterOptions = useMemo(() => {
+    const names = [...new Set(allTickets.map((t) => t.requesterName))].sort()
+    return [{ label: 'All', value: 'All' }, ...names.map((n) => ({ label: n, value: n }))]
+  }, [allTickets])
+
   const clearFilters = () => {
     setProduct('All')
     setTask('All')
     setSlaStatus('All')
+    setPartner('All')
+    setRequester('All')
   }
 
   if (isLoading) {
@@ -45,16 +64,25 @@ export default function TeamQueue() {
             Manage collaborative operational tasks and maintain service level agreements across the global product ecosystem.
           </p>
         </div>
-        <button
-          onClick={() => navigate('/new-request')}
-          className="primary-gradient text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:opacity-90 transition-opacity"
-        >
-          <span className="material-symbols-outlined">add_circle</span>
-          <span>Create Ticket</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {/* TODO: export CSV */}}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-outline-variant text-secondary font-bold text-sm hover:bg-surface-container-low transition-colors"
+          >
+            <span className="material-symbols-outlined text-[18px]">download</span>
+            Export CSV
+          </button>
+          <button
+            onClick={() => navigate('/new-request')}
+            className="primary-gradient text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:opacity-90 transition-opacity"
+          >
+            <span className="material-symbols-outlined">add_circle</span>
+            <span>Create Ticket</span>
+          </button>
+        </div>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter Bar with partner/requester search */}
       <FilterBar
         product={product}
         task={task}
@@ -63,6 +91,12 @@ export default function TeamQueue() {
         onTaskChange={setTask}
         onSlaChange={setSlaStatus}
         onClear={clearFilters}
+        partner={partner}
+        onPartnerChange={setPartner}
+        partnerOptions={partnerOptions}
+        requester={requester}
+        onRequesterChange={setRequester}
+        requesterOptions={requesterOptions}
       />
 
       {/* Pinned Urgency Sections (bento grid) */}

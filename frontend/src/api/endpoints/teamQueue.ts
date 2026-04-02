@@ -154,6 +154,8 @@ export interface TeamQueueFilters {
   product?: string
   task?: string
   slaStatus?: string
+  partner?: string
+  requester?: string
 }
 
 export async function fetchTeamQueue(filters?: TeamQueueFilters): Promise<TicketSummary[]> {
@@ -171,6 +173,12 @@ export async function fetchTeamQueue(filters?: TeamQueueFilters): Promise<Ticket
     }
     if (filters?.slaStatus && filters.slaStatus !== 'All') {
       results = results.filter((t) => t.slaStatus === filters.slaStatus)
+    }
+    if (filters?.partner && filters.partner !== 'All') {
+      results = results.filter((t) => t.partnerName === filters.partner)
+    }
+    if (filters?.requester && filters.requester !== 'All') {
+      results = results.filter((t) => t.requesterName === filters.requester)
     }
 
     return results

@@ -20,6 +20,9 @@ interface FilterBarProps {
   partner?: string
   onPartnerChange?: (v: string) => void
   partnerOptions?: FilterOption[]
+  requester?: string
+  onRequesterChange?: (v: string) => void
+  requesterOptions?: FilterOption[]
   onClear: () => void
   children?: React.ReactNode
   hasExtraFilters?: boolean
@@ -211,7 +214,7 @@ function FilterChip({
 
 export { FilterChip }
 
-export function FilterBar({ product, onProductChange, task, onTaskChange, slaStatus, onSlaChange, status, onStatusChange, lifecycle, onLifecycleChange, partner, onPartnerChange, partnerOptions, onClear, children, hasExtraFilters }: FilterBarProps) {
+export function FilterBar({ product, onProductChange, task, onTaskChange, slaStatus, onSlaChange, status, onStatusChange, lifecycle, onLifecycleChange, partner, onPartnerChange, partnerOptions, requester, onRequesterChange, requesterOptions, onClear, children, hasExtraFilters }: FilterBarProps) {
   const hasFilters =
     (product !== undefined && product !== 'All') ||
     (task !== undefined && task !== 'All') ||
@@ -219,6 +222,7 @@ export function FilterBar({ product, onProductChange, task, onTaskChange, slaSta
     (status !== undefined && status !== 'All') ||
     (lifecycle !== undefined && lifecycle !== 'All') ||
     (partner !== undefined && partner !== 'All' && partner !== '') ||
+    (requester !== undefined && requester !== 'All' && requester !== '') ||
     !!hasExtraFilters
 
   return (
@@ -241,6 +245,9 @@ export function FilterBar({ product, onProductChange, task, onTaskChange, slaSta
         )}
         {partner !== undefined && onPartnerChange && partnerOptions && (
           <FilterChip label="Partner" value={partner} options={partnerOptions} onChange={onPartnerChange} searchable wide />
+        )}
+        {requester !== undefined && onRequesterChange && requesterOptions && (
+          <FilterChip label="Requester" value={requester} options={requesterOptions} onChange={onRequesterChange} searchable wide />
         )}
         {children}
       </div>
