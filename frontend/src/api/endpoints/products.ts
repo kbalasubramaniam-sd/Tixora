@@ -417,63 +417,30 @@ interface BackendProduct {
 // --- API calls with mock fallback ---
 
 export async function fetchProducts(): Promise<Product[]> {
-  try {
-    const res = await apiClient.get<BackendProduct[]>('/products')
-    return res.data.map((p) => ({
-      code: p.code as ProductCode,
-      name: p.name,
-      description: `${p.code} • ${p.description}`,
-      ...productUiMeta[p.code] ?? productUiMeta.RBT,
-    }))
-  } catch {
-    return mockProducts
-  }
+  const res = await apiClient.get<BackendProduct[]>('/products')
+  return res.data.map((p) => ({
+    code: p.code as ProductCode,
+    name: p.name,
+    description: `${p.code} • ${p.description}`,
+    ...productUiMeta[p.code] ?? productUiMeta.RBT,
+  }))
 }
 
 export async function fetchTasks(productCode: string): Promise<TaskOption[]> {
-  try {
-    const res = await apiClient.get<TaskOption[]>(`/products/${productCode}/tasks`)
-    return res.data
-  } catch {
-    return mockTasks[productCode] ?? mockTasks[ProductCode.RBT]
-  }
+  // TODO: wire to GET /products/:code/tasks when backend endpoint exists
+  return mockTasks[productCode] ?? mockTasks[ProductCode.RBT]
 }
 
 export async function fetchFormSchema(productCode: string, taskType: string): Promise<FormSchema> {
-  try {
-    const res = await apiClient.get<FormSchema>(`/products/${productCode}/form-schema/${taskType}`)
-    return res.data
-  } catch {
-    // Try product-specific key first, then task-level fallback, then default
-    return (
-      mockFormSchemas[`${productCode}-${taskType}`] ??
-      mockFormSchemas[taskType] ??
-      defaultFormSchema
-    )
-  }
+  // TODO: wire to GET /products/:code/form-schema/:task when backend endpoint exists
+  return (
+    mockFormSchemas[`${productCode}-${taskType}`] ??
+    mockFormSchemas[taskType] ??
+    defaultFormSchema
+  )
 }
 
 export async function submitTicket(request: TicketCreateRequest): Promise<TicketCreateResponse> {
-  try {
-    const res = await apiClient.post<TicketCreateResponse>('/tickets', request)
-    return res.data
-  } catch {
-    // Dev mock: generate fake ticket response
-    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-    const seq = String(Math.floor(Math.random() * 999)).padStart(3, '0')
-    return {
-      id: crypto.randomUUID(),
-      ticketId: `SPM-${request.productCode}-${request.taskType}-${date}-${seq}`,
-      productCode: request.productCode,
-      taskType: request.taskType,
-      status: 'Submitted',
-      currentStageOrder: 1,
-      currentStageName: 'Legal Review',
-      assignedToName: 'Sarah Ahmad',
-      partnerName: 'Mock Partner',
-      provisioningPath: request.provisioningPath ?? null,
-      issueType: request.issueType ?? null,
-      createdAt: new Date().toISOString(),
-    }
-  }
+  const res = await apiClient.post<TicketCreateResponse>('/tickets', request)
+  return res.data
 }

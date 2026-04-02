@@ -1,4 +1,5 @@
 import { useProducts } from '@/api/hooks/useProducts'
+import { ApiError } from '@/components/ui/ApiError'
 import type { Product } from '@/types/product'
 
 interface ProductStepProps {
@@ -6,7 +7,15 @@ interface ProductStepProps {
 }
 
 export function ProductStep({ onSelect }: ProductStepProps) {
-  const { data: products, isLoading } = useProducts()
+  const { data: products, isLoading, isError, refetch } = useProducts()
+
+  if (isError) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <ApiError title="Failed to load products" message="Could not fetch the product list from the server." onRetry={() => refetch()} />
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (

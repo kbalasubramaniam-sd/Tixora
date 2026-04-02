@@ -42,23 +42,30 @@ export default function NewRequest() {
     setStep(3)
   }
 
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
   async function handleFinalSubmit() {
     if (!product || !task) return
+    setSubmitError(null)
 
     // Extract top-level fields from formData, rest goes into JSON blob
     const { partnerName: partnerId, issueType, apiOptIn, ...rest } = formData
     const provisioningPath = apiOptIn ? 'PortalAndApi' : 'PortalOnly'
 
-    const res = await submitMutation.mutateAsync({
-      productCode: product.code,
-      taskType: task.type,
-      partnerId: partnerId as string,
-      provisioningPath: task.type === 'T03' ? provisioningPath : null,
-      issueType: task.type === 'T04' ? (issueType as string) : null,
-      formData: JSON.stringify(rest),
-    })
-    setResult({ ticketId: res.ticketId, currentStageName: res.currentStageName })
-    setStep(4)
+    try {
+      const res = await submitMutation.mutateAsync({
+        productCode: product.code,
+        taskType: task.type,
+        partnerId: partnerId as string,
+        provisioningPath: task.type === 'T03' ? provisioningPath : null,
+        issueType: task.type === 'T04' ? (issueType as string) : null,
+        formData: JSON.stringify(rest),
+      })
+      setResult({ ticketId: res.ticketId, currentStageName: res.currentStageName })
+      setStep(4)
+    } catch {
+      setSubmitError('Failed to submit ticket. Please check your connection and try again.')
+    }
   }
 
   // Confirmation is step 4 — no stepper shown
@@ -87,14 +94,22 @@ export default function NewRequest() {
       )}
 
       {step === 3 && product && task && (
-        <ReviewStep
-          product={product}
-          task={task}
-          formData={formData}
-          onSubmit={handleFinalSubmit}
-          onBack={() => setStep(2)}
-          isSubmitting={submitMutation.isPending}
-        />
+        <>
+          {submitError && (
+            <div className="max-w-4xl mx-auto mb-4 p-3 bg-error-surface rounded-lg flex items-center gap-2 text-sm text-error">
+              <span className="material-symbols-outlined text-lg">error</span>
+              {submitError}
+            </div>
+          )}
+          <ReviewStep
+            product={product}
+            task={task}
+            formData={formData}
+            onSubmit={handleFinalSubmit}
+            onBack={() => setStep(2)}
+            isSubmitting={submitMutation.isPending}
+          />
+        </>
       )}
     </div>
   )

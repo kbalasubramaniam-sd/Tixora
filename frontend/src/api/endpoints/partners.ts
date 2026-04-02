@@ -116,11 +116,7 @@ function applyFilters(partners: PartnerSummary[], filters?: PartnerFilters): Par
 }
 
 export async function fetchPartners(filters?: PartnerFilters): Promise<PartnerSummary[]> {
-  try {
-    const res = await apiClient.get<BackendPartner[]>('/partners')
-    const mapped = res.data.map(mapBackendPartner)
-    return applyFilters(mapped, filters)
-  } catch {
-    return applyFilters([...mockPartners], filters)
-  }
+  const res = await apiClient.get<BackendPartner[]>('/partners')
+  const mapped = res.data.map(mapBackendPartner)
+  return applyFilters(mapped, filters)
 }

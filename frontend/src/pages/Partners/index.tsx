@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { usePartners } from '@/api/hooks/usePartners'
+import { ApiError } from '@/components/ui/ApiError'
 import { FilterBar } from '@/pages/TeamQueue/FilterBar'
 import { PartnerRow } from './PartnerRow'
 
@@ -13,7 +14,7 @@ export default function Partners() {
     product: product !== 'All' ? product : undefined,
   }
 
-  const { data: allFiltered = [], isLoading } = usePartners(
+  const { data: allFiltered = [], isLoading, isError, refetch } = usePartners(
     Object.values(filters).some(Boolean) ? filters : undefined,
   )
 
@@ -38,6 +39,10 @@ export default function Partners() {
     setSelectedPartnerId('')
     setLifecycle('All')
     setProduct('All')
+  }
+
+  if (isError) {
+    return <ApiError title="Failed to load partners" message="Could not fetch partner data from the server." onRetry={() => refetch()} />
   }
 
   if (isLoading) {
