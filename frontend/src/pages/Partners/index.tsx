@@ -1,27 +1,30 @@
 import { useState } from 'react'
 import { usePartners } from '@/api/hooks/usePartners'
-import { LifecycleState } from '@/types/enums'
+import { FilterBar } from '@/pages/TeamQueue/FilterBar'
 import { PartnerRow } from './PartnerRow'
-
-const tabs = [
-  { label: 'All Partners', value: 'All' },
-  { label: 'Live Only', value: LifecycleState.Live },
-  { label: 'Onboarding', value: LifecycleState.Onboarded },
-  { label: 'Pending UAT', value: LifecycleState.UatActive },
-]
 
 export default function Partners() {
   const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState('All')
+  const [lifecycle, setLifecycle] = useState('All')
+  const [product, setProduct] = useState('All')
 
   const filters = {
     search: search || undefined,
-    lifecycleState: activeTab !== 'All' ? activeTab : undefined,
+    lifecycleState: lifecycle !== 'All' ? lifecycle : undefined,
+    product: product !== 'All' ? product : undefined,
   }
 
   const { data: partners = [], isLoading } = usePartners(
     Object.values(filters).some(Boolean) ? filters : undefined,
   )
+
+  // Total count (unfiltered) for "Showing X of Y"
+  const { data: allPartners = [] } = usePartners()
+
+  const clearFilters = () => {
+    setLifecycle('All')
+    setProduct('All')
+  }
 
   if (isLoading) {
     return (
@@ -40,7 +43,7 @@ export default function Partners() {
       </header>
 
       {/* Search Bar */}
-      <section className="mb-8">
+      <section className="mb-6">
         <div className="relative group">
           <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
             <span className="material-symbols-outlined text-teal-600 transition-transform group-focus-within:scale-110">search</span>
@@ -49,27 +52,25 @@ export default function Partners() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-surface-container-low border-none rounded-full py-5 pl-16 pr-8 text-on-surface text-lg font-medium focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest shadow-sm transition-all duration-300 placeholder-slate-400"
+            className="w-full bg-surface-container-low border-none rounded-full py-3.5 pl-16 pr-8 text-on-surface text-lg font-medium focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest shadow-sm transition-all duration-300 placeholder-slate-400"
             placeholder="Search by partner name or account reference"
           />
         </div>
       </section>
 
-      {/* Tab Filters */}
-      <div className="flex gap-4 mb-10 overflow-x-auto pb-2 no-scrollbar">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
-            className={`whitespace-nowrap px-6 py-2.5 rounded-full font-bold text-[11px] uppercase tracking-widest transition-colors ${
-              activeTab === tab.value
-                ? 'bg-surface-container-highest text-on-surface shadow-sm'
-                : 'bg-surface-container-low text-slate-500 hover:bg-secondary-container'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Filter Bar */}
+      <FilterBar
+        product={product}
+        onProductChange={setProduct}
+        lifecycle={lifecycle}
+        onLifecycleChange={setLifecycle}
+        onClear={clearFilters}
+      />
+
+      {/* Result Count */}
+      <div className="mb-4 text-sm text-on-surface-variant">
+        Showing <span className="font-bold text-on-surface">{partners.length}</span> of{' '}
+        <span className="font-bold text-on-surface">{allPartners.length}</span> partners
       </div>
 
       {/* Partner List */}
