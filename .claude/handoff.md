@@ -1,8 +1,14 @@
 # Session Handoff — 2026-04-02 (Updated)
 
-## E1 Backend — COMPLETE
+## E1 + E2 Backend — COMPLETE
 
-All backend endpoints are live and tested. **56 tests passing** (26 unit + 30 integration).
+All backend endpoints are live and tested. **61 tests passing** (26 unit + 35 integration).
+
+### E2 Changes (NEW)
+- **Re-raise after rejection:** `CreateTicketRequest` now accepts optional `RejectedTicketRef` (Guid). Creates a new ticket linked to the rejected one. Validation: referenced ticket must exist, be Rejected, and match product/task type.
+- **TicketDetailResponse** now includes `RejectedTicketRef` (string — the display TicketId of the rejected ticket, or null) and `AllowedActions` (string[] — computed per user/role: "approve", "reject", "return", "respond", "cancel", "reassign")
+- **Full lifecycle proven:** T-01 → T-02 → T-03 → T-04 walks a partner from None → Onboarded → UatActive → UatCompleted → Live
+- **T-02 mid-workflow:** Stage 2 completion advances lifecycle to UatActive (verified in tests)
 
 ### Available API Endpoints
 
@@ -78,5 +84,12 @@ All backend endpoints are live and tested. **56 tests passing** (26 unit + 30 in
 - Dashboard stats include Tailwind classes — render directly, no mapping needed
 - Team queue filters: pass `product=RBT`, `task=T01`, `partner=Al Ain`, `requester=Sarah` as query params
 
+### FE Wiring Notes for E2
+- `POST /api/tickets` body now accepts optional `rejectedTicketRef` (Guid) — pass when re-raising a rejected ticket
+- `GET /api/tickets/{id}` response now includes:
+  - `rejectedTicketRef` — string (display TicketId like "SPM-RBT-T01-...") or null
+  - `allowedActions` — string[] of actions the current user can perform (e.g., ["approve", "reject", "return"])
+- Frontend can use `allowedActions` to show/hide action buttons on the ticket detail page
+
 ## Next Steps
-- **E2: Full Ticket Lifecycle** — all 4 task types e2e, T-02 two-phase, T-03 paths, re-raise
+- **E3: Operational Intelligence** — SLA tracking, notifications, comments, documents, audit trail
