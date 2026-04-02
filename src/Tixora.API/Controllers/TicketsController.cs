@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Tixora.Application.DTOs.Common;
 using Tixora.Application.DTOs.Tickets;
 using Tixora.Application.Interfaces;
 using Tixora.Domain.Enums;
@@ -51,16 +52,16 @@ public class TicketsController : ControllerBase
     /// </summary>
     [HttpGet("my")]
     [Authorize]
-    [ProducesResponseType(typeof(List<TicketSummaryResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<TicketSummaryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetMyTickets()
+    public async Task<IActionResult> GetMyTickets([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         var userId = GetCurrentUserId();
         if (userId is null)
             return Unauthorized(new { message = "Invalid token: missing sub claim." });
 
-        var tickets = await _queryService.GetMyTicketsAsync(userId.Value);
-        return Ok(tickets);
+        var result = await _queryService.GetMyTicketsAsync(userId.Value, page, pageSize);
+        return Ok(result);
     }
 
     /// <summary>

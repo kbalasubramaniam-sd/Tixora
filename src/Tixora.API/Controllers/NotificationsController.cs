@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Tixora.Application.DTOs.Common;
 using Tixora.Application.DTOs.Notifications;
 using Tixora.Application.Interfaces;
 
@@ -31,15 +32,15 @@ public class NotificationsController : ControllerBase
     /// Get notifications for the current user.
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(List<NotificationResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetNotifications([FromQuery] bool unreadOnly = false)
+    [ProducesResponseType(typeof(PagedResult<NotificationResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetNotifications([FromQuery] bool unreadOnly = false, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         var userId = GetCurrentUserId();
         if (userId is null)
             return Unauthorized(new { message = "Invalid token." });
 
-        var notifications = await _notificationService.GetNotificationsAsync(userId.Value, unreadOnly);
-        return Ok(notifications);
+        var result = await _notificationService.GetNotificationsAsync(userId.Value, unreadOnly, page, pageSize);
+        return Ok(result);
     }
 
     /// <summary>

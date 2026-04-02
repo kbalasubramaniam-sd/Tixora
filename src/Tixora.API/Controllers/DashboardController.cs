@@ -90,14 +90,16 @@ public class DashboardController : ControllerBase
         [FromQuery] string? slaStatus,
         [FromQuery] string? partner,
         [FromQuery] string? requester,
-        [FromQuery] string? status)
+        [FromQuery] string? status,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
     {
         var userId = GetCurrentUserId();
         var role = GetCurrentUserRole();
         if (userId is null || role is null)
             return Unauthorized(new { message = "Invalid token." });
 
-        var tickets = await _queryService.GetTeamQueueAsync(userId.Value, role.Value, product, task, partner, requester, status);
-        return Ok(tickets);
+        var result = await _queryService.GetTeamQueueAsync(userId.Value, role.Value, product, task, partner, requester, status, page, pageSize);
+        return Ok(result);
     }
 }

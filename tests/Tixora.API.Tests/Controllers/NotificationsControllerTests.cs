@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using Tixora.Application.DTOs.Common;
 using Tixora.Application.DTOs.Notifications;
 using Tixora.Application.DTOs.Tickets;
 
@@ -51,9 +52,9 @@ public class NotificationsControllerTests : IClassFixture<CustomWebApplicationFa
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var notifications = await response.Content.ReadFromJsonAsync<List<NotificationResponse>>();
-        Assert.NotNull(notifications);
-        Assert.Contains(notifications, n => n.Type == "RequestSubmitted");
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<NotificationResponse>>();
+        Assert.NotNull(result);
+        Assert.Contains(result.Items, n => n.Type == "RequestSubmitted");
     }
 
     [Fact]
@@ -71,10 +72,10 @@ public class NotificationsControllerTests : IClassFixture<CustomWebApplicationFa
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var notifications = await response.Content.ReadFromJsonAsync<List<NotificationResponse>>();
-        Assert.NotNull(notifications);
-        Assert.NotEmpty(notifications);
-        Assert.All(notifications, n =>
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<NotificationResponse>>();
+        Assert.NotNull(result);
+        Assert.NotEmpty(result.Items);
+        Assert.All(result.Items, n =>
         {
             Assert.False(string.IsNullOrWhiteSpace(n.Title));
             Assert.False(string.IsNullOrWhiteSpace(n.Message));
@@ -92,11 +93,11 @@ public class NotificationsControllerTests : IClassFixture<CustomWebApplicationFa
         TestHelpers.SetAuthToken(client, token);
 
         var getResponse = await client.GetAsync("/api/notifications");
-        var notifications = await getResponse.Content.ReadFromJsonAsync<List<NotificationResponse>>();
-        Assert.NotNull(notifications);
-        Assert.NotEmpty(notifications);
+        var result = await getResponse.Content.ReadFromJsonAsync<PagedResult<NotificationResponse>>();
+        Assert.NotNull(result);
+        Assert.NotEmpty(result.Items);
 
-        var notificationId = notifications[0].Id;
+        var notificationId = result.Items[0].Id;
 
         // Act — mark as read
         var markResponse = await client.PutAsync($"/api/notifications/{notificationId}/read", null);
@@ -106,8 +107,8 @@ public class NotificationsControllerTests : IClassFixture<CustomWebApplicationFa
 
         // Verify it's now read
         var getResponse2 = await client.GetAsync("/api/notifications");
-        var notifications2 = await getResponse2.Content.ReadFromJsonAsync<List<NotificationResponse>>();
-        var updated = notifications2!.FirstOrDefault(n => n.Id == notificationId);
+        var result2 = await getResponse2.Content.ReadFromJsonAsync<PagedResult<NotificationResponse>>();
+        var updated = result2!.Items.FirstOrDefault(n => n.Id == notificationId);
         Assert.NotNull(updated);
         Assert.True(updated.IsRead);
     }
