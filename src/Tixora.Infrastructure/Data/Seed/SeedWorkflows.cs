@@ -351,31 +351,27 @@ public static class SeedWorkflows
 
     private static void SeedT01Stages(ModelBuilder modelBuilder)
     {
-        // T-01: Legal Review → Product Review → EA Sign-off → Stakeholder Notification
+        // T-01: Legal Review → Product Review → EA Sign-off → Completed
         modelBuilder.Entity<StageDefinition>().HasData(
             // ── RBT ──
             new StageDefinition { Id = S_T01_RBT_1, WorkflowDefinitionId = T01_RBT, StageOrder = 1, StageName = "Legal Review", StageType = StageType.Review, AssignedRole = UserRole.LegalTeam, SlaBusinessHours = 24 },
             new StageDefinition { Id = S_T01_RBT_2, WorkflowDefinitionId = T01_RBT, StageOrder = 2, StageName = "Product Review", StageType = StageType.Review, AssignedRole = UserRole.ProductTeam, SlaBusinessHours = 16 },
             new StageDefinition { Id = S_T01_RBT_3, WorkflowDefinitionId = T01_RBT, StageOrder = 3, StageName = "EA Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.ExecutiveAuthority, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T01_RBT_4, WorkflowDefinitionId = T01_RBT, StageOrder = 4, StageName = "Stakeholder Notification", StageType = StageType.Review, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
 
             // ── RHN ──
             new StageDefinition { Id = S_T01_RHN_1, WorkflowDefinitionId = T01_RHN, StageOrder = 1, StageName = "Legal Review", StageType = StageType.Review, AssignedRole = UserRole.LegalTeam, SlaBusinessHours = 24 },
             new StageDefinition { Id = S_T01_RHN_2, WorkflowDefinitionId = T01_RHN, StageOrder = 2, StageName = "Product Review", StageType = StageType.Review, AssignedRole = UserRole.ProductTeam, SlaBusinessHours = 16 },
             new StageDefinition { Id = S_T01_RHN_3, WorkflowDefinitionId = T01_RHN, StageOrder = 3, StageName = "EA Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.ExecutiveAuthority, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T01_RHN_4, WorkflowDefinitionId = T01_RHN, StageOrder = 4, StageName = "Stakeholder Notification", StageType = StageType.Review, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
 
             // ── WTQ ──
             new StageDefinition { Id = S_T01_WTQ_1, WorkflowDefinitionId = T01_WTQ, StageOrder = 1, StageName = "Legal Review", StageType = StageType.Review, AssignedRole = UserRole.LegalTeam, SlaBusinessHours = 24 },
             new StageDefinition { Id = S_T01_WTQ_2, WorkflowDefinitionId = T01_WTQ, StageOrder = 2, StageName = "Product Review", StageType = StageType.Review, AssignedRole = UserRole.ProductTeam, SlaBusinessHours = 16 },
             new StageDefinition { Id = S_T01_WTQ_3, WorkflowDefinitionId = T01_WTQ, StageOrder = 3, StageName = "EA Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.ExecutiveAuthority, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T01_WTQ_4, WorkflowDefinitionId = T01_WTQ, StageOrder = 4, StageName = "Stakeholder Notification", StageType = StageType.Review, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
 
             // ── MLM ──
             new StageDefinition { Id = S_T01_MLM_1, WorkflowDefinitionId = T01_MLM, StageOrder = 1, StageName = "Legal Review", StageType = StageType.Review, AssignedRole = UserRole.LegalTeam, SlaBusinessHours = 24 },
             new StageDefinition { Id = S_T01_MLM_2, WorkflowDefinitionId = T01_MLM, StageOrder = 2, StageName = "Product Review", StageType = StageType.Review, AssignedRole = UserRole.ProductTeam, SlaBusinessHours = 16 },
-            new StageDefinition { Id = S_T01_MLM_3, WorkflowDefinitionId = T01_MLM, StageOrder = 3, StageName = "EA Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.ExecutiveAuthority, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T01_MLM_4, WorkflowDefinitionId = T01_MLM, StageOrder = 4, StageName = "Stakeholder Notification", StageType = StageType.Review, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 }
+            new StageDefinition { Id = S_T01_MLM_3, WorkflowDefinitionId = T01_MLM, StageOrder = 3, StageName = "EA Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.ExecutiveAuthority, SlaBusinessHours = 8 }
         );
     }
 

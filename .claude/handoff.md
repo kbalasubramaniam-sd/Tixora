@@ -2,7 +2,7 @@
 
 ## E1 + E2 Backend — COMPLETE
 
-All backend endpoints are live and tested. **61 tests passing** (26 unit + 35 integration).
+All backend endpoints are live and tested. **64 tests passing** (26 unit + 38 integration).
 
 ### E2 Changes (NEW)
 - **Re-raise after rejection:** `CreateTicketRequest` now accepts optional `RejectedTicketRef` (Guid). Creates a new ticket linked to the rejected one. Validation: referenced ticket must exist, be Rejected, and match product/task type.
@@ -80,7 +80,10 @@ All backend endpoints are live and tested. **61 tests passing** (26 unit + 35 in
 - `slaStatus` always returns `"OnTrack"` and `slaHoursRemaining` always `0` (SLA is E3)
 - `documents` and `comments` return empty arrays (E3)
 - Status enum values from backend: `Submitted`, `InReview`, `PendingRequesterAction`, `InProvisioning`, `Phase1Complete`, `AwaitingUatSignal`, `Phase2InReview`, `Completed`, `Rejected`, `Cancelled`
-- Frontend has `Draft`, `Approved`, `SlaBreached` which backend doesn't return — handle gracefully
+- Frontend enums synced: `Draft`, `Approved`, `SlaBreached` removed; T-02 statuses added
+
+### Workflow Changes
+- **T-01:** Removed "Stakeholder Notification" stage 4. Flow is now: Legal Review → Product Review → EA Sign-off → Completed (3 stages, not 4)
 - Dashboard stats include Tailwind classes — render directly, no mapping needed
 - Team queue filters: pass `product=RBT`, `task=T01`, `partner=Al Ain`, `requester=Sarah` as query params
 

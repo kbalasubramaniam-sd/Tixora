@@ -79,14 +79,9 @@ public class FullLifecycleTests : IClassFixture<CustomWebApplicationFactory>
         Assert.Equal(3, t01s2.CurrentStageOrder);
         Assert.Equal("InReview", t01s2.Status);
 
-        // Stage 3: EA Sign-off (fatima — ExecutiveAuthority)
+        // Stage 3: EA Sign-off (fatima — ExecutiveAuthority) — last stage, completes ticket
         var t01s3 = await ApproveAs("fatima.noor@tixora.ae", t01.Id);
-        Assert.Equal(4, t01s3.CurrentStageOrder);
-        Assert.Equal("InReview", t01s3.Status);
-
-        // Stage 4: Stakeholder Notification (sarah — PartnershipTeam)
-        var t01s4 = await ApproveAs("sarah.ahmad@tixora.ae", t01.Id);
-        Assert.Equal("Completed", t01s4.Status);
+        Assert.Equal("Completed", t01s3.Status);
 
         // Verify lifecycle advanced to Onboarded
         var t01Detail = await GetDetail(t01.Id);

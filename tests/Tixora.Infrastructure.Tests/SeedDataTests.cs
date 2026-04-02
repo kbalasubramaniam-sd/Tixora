@@ -98,10 +98,10 @@ public class SeedDataTests : IDisposable
 
         Assert.Equal(18, workflows.Count);
 
-        // T-01: 4 workflows × 4 stages each
+        // T-01: 4 workflows × 3 stages each (Legal Review → Product Review → EA Sign-off)
         var t01 = workflows.Where(w => w.TaskType == TaskType.T01).ToList();
         Assert.Equal(4, t01.Count);
-        Assert.All(t01, w => Assert.Equal(4, w.Stages.Count));
+        Assert.All(t01, w => Assert.Equal(3, w.Stages.Count));
         Assert.All(t01, w => Assert.Null(w.ProvisioningPath));
 
         // T-02: 4 workflows × 5 stages each
@@ -137,8 +137,8 @@ public class SeedDataTests : IDisposable
     {
         var stages = await _db.StageDefinitions.ToListAsync();
 
-        // Total: T01(16) + T02(20) + T03_PO(8) + T03_PA(10) + T03_AO(6) + T04(4) = 64
-        Assert.Equal(64, stages.Count);
+        // Total: T01(12) + T02(20) + T03_PO(8) + T03_PA(10) + T03_AO(6) + T04(4) = 60
+        Assert.Equal(60, stages.Count);
 
         // All stages have valid roles (not negative)
         Assert.All(stages, s => Assert.True(Enum.IsDefined(typeof(UserRole), s.AssignedRole)));

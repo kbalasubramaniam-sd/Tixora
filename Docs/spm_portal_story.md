@@ -191,8 +191,8 @@ The combination of **Product × Task** determines the exact workflow path. SLA t
 ┌──────────────────────────────────┬─────────────────────────┬──────────────────────┬────────────────────────────────┬───────────┐
 │ Task                             │ Review Stage(s)         │ Approval Stage       │ Provisioning / Closure         │ SLA (hrs) │
 ├──────────────────────────────────┼─────────────────────────┼──────────────────────┼────────────────────────────────┼───────────┤
-│ T-01 Agreement Validation        │ Legal Team →            │ Legal + Product      │ EA Sign-off →                  │ 48        │
-│       & Sign-off                 │ Product Team            │ Team                 │ Stakeholder Notification       │           │
+│ T-01 Agreement Validation        │ Legal Team →            │ Legal + Product      │ EA Sign-off → Completed        │ 48        │
+│       & Sign-off                 │ Product Team            │ Team                 │                                │           │
 ├──────────────────────────────────┼─────────────────────────┼──────────────────────┼────────────────────────────────┼───────────┤
 │ T-02 UAT Access Creation         │ Product Team            │ —                    │ Integration Team               │ 8 (Ph 1)  │
 │                                  │                         │                      │ Ph 1: Access Provisioned       │ TBD (Ph 2)│
