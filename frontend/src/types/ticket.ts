@@ -85,6 +85,8 @@ export interface ClarificationExchange {
   respondedAt?: string
 }
 
+export type TicketAction = 'approve' | 'reject' | 'return' | 'cancel' | 'respond' | 'reassign'
+
 export interface TicketDetail extends TicketSummary {
   companyCode: string
   formData: Record<string, unknown>
@@ -98,4 +100,5 @@ export interface TicketDetail extends TicketSummary {
   createdBy: string
   accessPath?: 'portal' | 'api' | 'both'
   lifecycleState: LifecycleState
+  allowedActions: TicketAction[]
 }
