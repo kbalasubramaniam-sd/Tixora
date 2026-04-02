@@ -98,5 +98,41 @@ All backend endpoints are live and tested. **64 tests passing** (26 unit + 38 in
 - **T-02/T-03 dynamic user forms:** The product spec allows adding multiple users in T-02 (UAT Access) and T-03 (Production Account) forms. Example: requester can add 3 UAT users in one request, each with name/email/mobile/designation. The backend stores this as JSON in FormData so it supports any shape. But the frontend form schema is static — it only has fields for a single user. Need to add a "repeatable section" / "add another user" pattern to the form renderer for T-02 UAT User Details and T-03 Portal Admin User sections.
 - **SLA Panel:** Shows hardcoded "100% SLA Integrity" — should be hidden or show "Not Tracked" until E3 SLA engine is implemented.
 
+---
+
+## E3: Operational Intelligence
+
+| # | Chunk | BE Status | FE Wirable | Endpoints |
+|---|-------|-----------|------------|-----------|
+| E3.1 | Comments | DONE | YES | POST/GET /api/tickets/{id}/comments |
+| E3.2 | Documents | IN PROGRESS | NO | POST/GET /api/tickets/{id}/documents, GET /api/documents/{id} |
+| E3.3 | Audit Trail | — | YES (already in E2) | GET /api/tickets/{id} → auditTrail[] |
+| E3.4 | SLA Engine | — | NO | SLA fields in ticket responses |
+| E3.5 | Notifications | — | NO | GET/PUT /api/notifications |
+
+### E3.1 Comments (BE DONE — FE: NOT WIRED)
+
+**Endpoints:**
+- `POST /api/tickets/{ticketId}/comments` — Add comment. Body: `{ "content": "string" }`. Returns 201.
+- `GET /api/tickets/{ticketId}/comments` — List comments for ticket, ordered by createdAt asc.
+
+**Response shape (CommentResponse):**
+```json
+{
+  "id": "guid-string",
+  "authorName": "Sarah Ahmad",
+  "authorRole": "PartnershipTeam",
+  "content": "This is a comment.",
+  "createdAt": "2026-04-03T10:00:00Z"
+}
+```
+
+**Wiring notes:**
+- Auth required (Bearer token)
+- Content max 2000 chars, cannot be empty
+- Comments are append-only (no edit/delete in MVP 1)
+- Wire into S-03 Ticket Detail Comments tab
+
 ## Next Steps
-- **E3: Operational Intelligence** — SLA tracking, notifications, comments, documents, audit trail
+- **E3.2: Documents** — in progress
+- **E3.3-E3.5** — pending
