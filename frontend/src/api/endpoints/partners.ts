@@ -57,6 +57,7 @@ const mockPartners: PartnerSummary[] = [
 export interface PartnerFilters {
   search?: string
   lifecycleState?: string
+  product?: string
 }
 
 export async function fetchPartners(filters?: PartnerFilters): Promise<PartnerSummary[]> {
@@ -74,6 +75,9 @@ export async function fetchPartners(filters?: PartnerFilters): Promise<PartnerSu
     }
     if (filters?.lifecycleState && filters.lifecycleState !== 'All') {
       results = results.filter((p) => p.lifecycleState === filters.lifecycleState)
+    }
+    if (filters?.product && filters.product !== 'All') {
+      results = results.filter((p) => p.products.includes(filters.product as ProductCode))
     }
 
     return results
