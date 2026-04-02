@@ -25,6 +25,7 @@ public static class DependencyInjection
             Path.Combine(Directory.GetCurrentDirectory(), "uploads")));
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<ISlaService, SlaService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         return services;
     }

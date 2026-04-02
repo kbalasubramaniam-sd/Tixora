@@ -11,11 +11,13 @@ public class WorkflowEngine : IWorkflowEngine
 {
     private readonly ITixoraDbContext _db;
     private readonly ISlaService _slaService;
+    private readonly INotificationService _notificationService;
 
-    public WorkflowEngine(ITixoraDbContext db, ISlaService slaService)
+    public WorkflowEngine(ITixoraDbContext db, ISlaService slaService, INotificationService notificationService)
     {
         _db = db;
         _slaService = slaService;
+        _notificationService = notificationService;
     }
 
     // ─────────────────────────────────────────────────────
@@ -355,6 +357,21 @@ public class WorkflowEngine : IWorkflowEngine
         // 12b. Start SLA tracking for stage 1
         await _slaService.StartTrackingAsync(ticket.Id, 1, stage1.SlaBusinessHours);
 
+        // 12c. Notify assigned stage owner
+        if (ticket.AssignedToUserId.HasValue)
+        {
+            try
+            {
+                await _notificationService.SendAsync(
+                    ticket.AssignedToUserId.Value,
+                    NotificationType.RequestSubmitted,
+                    "New request assigned to you",
+                    $"Ticket {ticket.TicketId} has been submitted and assigned to you for {stage1.StageName}.",
+                    ticket.Id);
+            }
+            catch { /* notification failure must not break workflow */ }
+        }
+
         // 13. Return TicketResponse
         return new TicketResponse(
             Id: ticket.Id,
@@ -494,6 +511,31 @@ public class WorkflowEngine : IWorkflowEngine
             await _slaService.StartTrackingAsync(ticket.Id, nextStageForSla.StageOrder, nextStageForSla.SlaBusinessHours);
         }
 
+        // Notifications
+        try
+        {
+            if (isLastStage)
+            {
+                await _notificationService.SendAsync(
+                    ticket.CreatedByUserId,
+                    NotificationType.RequestCompleted,
+                    "Your request is complete",
+                    $"Ticket {ticket.TicketId} has been completed.",
+                    ticket.Id);
+            }
+            else if (ticket.AssignedToUserId.HasValue)
+            {
+                var nextStageForNotif = stages.First(s => s.StageOrder > currentStage.StageOrder);
+                await _notificationService.SendAsync(
+                    ticket.AssignedToUserId.Value,
+                    NotificationType.StageAdvanced,
+                    "Ticket advanced to your stage",
+                    $"Ticket {ticket.TicketId} is now at {nextStageForNotif.StageName} and assigned to you.",
+                    ticket.Id);
+            }
+        }
+        catch { /* notification failure must not break workflow */ }
+
         return BuildResponseFromTicket(ticket);
     }
 
@@ -536,6 +578,18 @@ public class WorkflowEngine : IWorkflowEngine
         });
 
         await _db.SaveChangesAsync();
+
+        try
+        {
+            await _notificationService.SendAsync(
+                ticket.CreatedByUserId,
+                NotificationType.RequestRejected,
+                "Your request was rejected",
+                $"Ticket {ticket.TicketId} has been rejected.",
+                ticket.Id);
+        }
+        catch { /* notification failure must not break workflow */ }
+
         return BuildResponseFromTicket(ticket);
     }
 
@@ -586,6 +640,17 @@ public class WorkflowEngine : IWorkflowEngine
 
         // SLA: pause tracking while awaiting clarification
         await _slaService.PauseAsync(ticket.Id, ticket.CurrentStageOrder);
+
+        try
+        {
+            await _notificationService.SendAsync(
+                ticket.CreatedByUserId,
+                NotificationType.ClarificationRequested,
+                "Clarification requested",
+                $"Ticket {ticket.TicketId} has been returned for clarification.",
+                ticket.Id);
+        }
+        catch { /* notification failure must not break workflow */ }
 
         return BuildResponseFromTicket(ticket);
     }
@@ -640,6 +705,20 @@ public class WorkflowEngine : IWorkflowEngine
         // SLA: resume tracking after clarification response
         await _slaService.ResumeAsync(ticket.Id, ticket.CurrentStageOrder);
 
+        if (ticket.AssignedToUserId.HasValue)
+        {
+            try
+            {
+                await _notificationService.SendAsync(
+                    ticket.AssignedToUserId.Value,
+                    NotificationType.ClarificationResponded,
+                    "Clarification received",
+                    $"The requester has responded to the clarification request on ticket {ticket.TicketId}.",
+                    ticket.Id);
+            }
+            catch { /* notification failure must not break workflow */ }
+        }
+
         return BuildResponseFromTicket(ticket);
     }
 
@@ -689,6 +768,21 @@ public class WorkflowEngine : IWorkflowEngine
         });
 
         await _db.SaveChangesAsync();
+
+        if (ticket.AssignedToUserId.HasValue)
+        {
+            try
+            {
+                await _notificationService.SendAsync(
+                    ticket.AssignedToUserId.Value,
+                    NotificationType.RequestCancelled,
+                    "Request cancelled",
+                    $"Ticket {ticket.TicketId} has been cancelled by the requester.",
+                    ticket.Id);
+            }
+            catch { /* notification failure must not break workflow */ }
+        }
+
         return BuildResponseFromTicket(ticket);
     }
 
@@ -746,6 +840,18 @@ public class WorkflowEngine : IWorkflowEngine
         });
 
         await _db.SaveChangesAsync();
+
+        try
+        {
+            await _notificationService.SendAsync(
+                newAssigneeUserId,
+                NotificationType.TicketReassigned,
+                "Ticket reassigned to you",
+                $"Ticket {ticket.TicketId} has been reassigned to you.",
+                ticket.Id);
+        }
+        catch { /* notification failure must not break workflow */ }
+
         return BuildResponseFromTicket(ticket);
     }
 }

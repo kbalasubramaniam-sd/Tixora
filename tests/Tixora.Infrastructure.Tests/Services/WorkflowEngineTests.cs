@@ -29,7 +29,8 @@ public class WorkflowEngineTests : IDisposable
 
         _db = new TixoraDbContext(options);
         var slaService = new SlaService(_db);
-        _engine = new WorkflowEngine(_db, slaService);
+        var notificationService = new NotificationService(_db);
+        _engine = new WorkflowEngine(_db, slaService, notificationService);
 
         SeedTestData();
     }
