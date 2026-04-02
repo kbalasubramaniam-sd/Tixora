@@ -9,14 +9,17 @@ function getMode(width: number): SidebarMode {
 }
 
 export function useSidebar() {
-  const [mode, setMode] = useState<SidebarMode>(() => getMode(window.innerWidth))
+  const [autoMode, setAutoMode] = useState<SidebarMode>(() => getMode(window.innerWidth))
+  const [manualOverride, setManualOverride] = useState<'full' | 'collapsed' | null>(null)
   const [isOverlayOpen, setOverlayOpen] = useState(false)
 
   useEffect(() => {
     function handleResize() {
       const newMode = getMode(window.innerWidth)
-      setMode(newMode)
+      setAutoMode(newMode)
       if (newMode !== 'mobile') setOverlayOpen(false)
+      // Clear manual override when switching to/from mobile
+      if (newMode === 'mobile') setManualOverride(null)
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
@@ -26,5 +29,17 @@ export function useSidebar() {
     setOverlayOpen((prev) => !prev)
   }, [])
 
-  return { mode, isOverlayOpen, setOverlayOpen, toggleOverlay }
+  const toggleCollapse = useCallback(() => {
+    setManualOverride((prev) => {
+      if (prev === 'collapsed') return 'full'
+      if (prev === 'full') return 'collapsed'
+      // No override yet — toggle from current auto mode
+      return autoMode === 'full' ? 'collapsed' : 'full'
+    })
+  }, [autoMode])
+
+  // Mobile always uses mobile mode; otherwise respect manual override
+  const mode: SidebarMode = autoMode === 'mobile' ? 'mobile' : (manualOverride ?? autoMode)
+
+  return { mode, isOverlayOpen, setOverlayOpen, toggleOverlay, toggleCollapse }
 }

@@ -15,6 +15,7 @@ interface SidebarProps {
   mode: 'full' | 'collapsed' | 'mobile'
   isOverlayOpen?: boolean
   onClose?: () => void
+  onToggleCollapse?: () => void
 }
 
 const navItems: NavItem[] = [
@@ -25,14 +26,14 @@ const navItems: NavItem[] = [
     label: 'New Request',
     icon: 'add_circle',
     to: '/new-request',
-    roles: [UserRole.Requester, UserRole.SystemAdministrator],
+    roles: [UserRole.PartnershipTeam, UserRole.SystemAdministrator],
     isPrimary: true,
   },
   {
     label: 'Team Queue',
     icon: 'inbox',
     to: '/team-queue',
-    roles: [UserRole.Reviewer, UserRole.Approver, UserRole.IntegrationTeam, UserRole.ProvisioningAgent, UserRole.SystemAdministrator],
+    roles: [UserRole.LegalTeam, UserRole.ProductTeam, UserRole.ExecutiveAuthority, UserRole.IntegrationTeam, UserRole.DevTeam, UserRole.BusinessTeam, UserRole.PartnerOps, UserRole.SystemAdministrator],
   },
   { label: 'Partners', icon: 'business', to: '/partners' },
   { label: 'Search', icon: 'search', to: '/search' },
@@ -49,7 +50,7 @@ const reportItem: NavItem = {
   label: 'Reports',
   icon: 'bar_chart',
   to: '/reports',
-  roles: [UserRole.Reviewer, UserRole.Approver, UserRole.SystemAdministrator],
+  roles: [UserRole.ProductTeam, UserRole.ExecutiveAuthority, UserRole.SystemAdministrator],
 }
 
 function NavItemLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
@@ -83,7 +84,7 @@ function NavItemLink({ item, collapsed }: { item: NavItem; collapsed: boolean })
   )
 }
 
-function SidebarContent({ collapsed, onClose, showClose }: { collapsed: boolean; onClose?: () => void; showClose?: boolean }) {
+function SidebarContent({ collapsed, onClose, showClose, onToggleCollapse }: { collapsed: boolean; onClose?: () => void; showClose?: boolean; onToggleCollapse?: () => void }) {
   const { user } = useAuth()
   const role = user?.role
 
@@ -139,11 +140,24 @@ function SidebarContent({ collapsed, onClose, showClose }: { collapsed: boolean;
           <NavItemLink item={reportItem} collapsed={collapsed} />
         )}
       </nav>
+
+      {/* Collapse toggle */}
+      {onToggleCollapse && (
+        <button
+          onClick={onToggleCollapse}
+          className="mt-2 mx-auto flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container-highest text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <span className="material-symbols-outlined text-[18px]">
+            {collapsed ? 'chevron_right' : 'chevron_left'}
+          </span>
+        </button>
+      )}
     </aside>
   )
 }
 
-export function Sidebar({ mode, isOverlayOpen, onClose }: SidebarProps) {
+export function Sidebar({ mode, isOverlayOpen, onClose, onToggleCollapse }: SidebarProps) {
   if (mode === 'mobile') {
     if (!isOverlayOpen) return null
     return (
@@ -172,7 +186,7 @@ export function Sidebar({ mode, isOverlayOpen, onClose }: SidebarProps) {
     )
   }
 
-  return <SidebarContent collapsed={mode === 'collapsed'} />
+  return <SidebarContent collapsed={mode === 'collapsed'} onToggleCollapse={onToggleCollapse} />
 }
 
 function SidebarInner({ onClose }: { onClose?: () => void }) {

@@ -6,7 +6,7 @@ import { useSidebar } from '@/hooks/useSidebar'
 import { cn } from '@/utils/cn'
 
 export function AppShell() {
-  const { mode, isOverlayOpen, toggleOverlay, setOverlayOpen } = useSidebar()
+  const { mode, isOverlayOpen, toggleOverlay, setOverlayOpen, toggleCollapse } = useSidebar()
   const location = useLocation()
 
   const mainMargin =
@@ -22,6 +22,7 @@ export function AppShell() {
         mode={mode}
         isOverlayOpen={isOverlayOpen}
         onClose={() => setOverlayOpen(false)}
+        onToggleCollapse={toggleCollapse}
       />
       <main className={cn('pt-16 min-h-svh transition-all duration-200', mainMargin)}>
         <div className="p-8">
