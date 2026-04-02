@@ -1,4 +1,13 @@
+import { useState, useMemo } from 'react'
+import { useSlaConfig, useUpdateSlaConfig } from '@/api/hooks/useAdmin'
+import type { SlaStageConfig } from '@/api/endpoints/admin'
+
 export default function SlaSettings() {
+  const { data: slaConfig, isLoading, error } = useSlaConfig()
+  const updateSla = useUpdateSlaConfig()
+  const [editingStageId, setEditingStageId] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState('')
+
   const products = [
     { name: "Rabet", subtitle: "Logistics & Supply Chain", icon: "rocket_launch" },
     { name: "Rhoon", subtitle: "Financial Settlements", icon: "payments" },
@@ -6,15 +15,56 @@ export default function SlaSettings() {
     { name: "Mulem", subtitle: "Infrastructure Mesh", icon: "hub" },
   ];
 
-  const slaTargets = [
-    { taskId: "T-01", stage: "Legal Review", category: "Agreement", hours: "8.0", trigger: 75, barColor: "bg-primary" },
-    { taskId: "T-01", stage: "EA Sign-off", category: "Approval", hours: "4.0", trigger: 90, barColor: "bg-primary" },
-    { taskId: "T-02", stage: "UAT Access Creation", category: "Provisioning", hours: "16.0", trigger: 50, barColor: "bg-tertiary" },
-    { taskId: "T-03", stage: "Integration Review", category: "Technical", hours: "8.0", trigger: 80, barColor: "bg-primary" },
-    { taskId: "T-03", stage: "Account Provisioning", category: "Production", hours: "24.0", trigger: 75, barColor: "bg-primary" },
-    { taskId: "T-04", stage: "Support Triage", category: "Closure", hours: "4.0", trigger: 95, barColor: "bg-primary" },
-    { taskId: "T-04", stage: "Access Provisioning", category: "Credential", hours: "16.0", trigger: 90, barColor: "bg-primary" },
-  ];
+  // Map API stages to table rows
+  const slaTargets = useMemo(() => {
+    if (!slaConfig?.stages) return []
+    return slaConfig.stages.map((s: SlaStageConfig) => ({
+      stageId: s.stageId,
+      taskId: s.taskTypeCode,
+      stage: s.stageName,
+      category: s.productCode,
+      hours: s.slaBusinessHours.toFixed(1),
+      slaBusinessHours: s.slaBusinessHours,
+      trigger: s.slaBusinessHours > 0 ? Math.min(95, Math.round((1 / s.slaBusinessHours) * 800)) : 0,
+      barColor: 'bg-primary',
+    }))
+  }, [slaConfig])
+
+  const handleSave = (stageId: string) => {
+    const hours = parseFloat(editValue)
+    if (isNaN(hours) || hours < 0) return
+    updateSla.mutate(
+      { stages: [{ stageId, slaBusinessHours: hours }] },
+      { onSuccess: () => setEditingStageId(null) },
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <main className="max-w-7xl mx-auto">
+        <div className="animate-pulse space-y-6">
+          <div className="h-10 bg-surface-container-low rounded w-1/3" />
+          <div className="grid grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 bg-surface-container-low rounded-xl" />
+            ))}
+          </div>
+          <div className="h-96 bg-surface-container-low rounded-xl" />
+        </div>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="max-w-7xl mx-auto">
+        <div className="bg-error-container text-on-error-container p-6 rounded-xl">
+          <p className="font-bold">Failed to load SLA configuration</p>
+          <p className="text-sm mt-1">Please try refreshing the page.</p>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="max-w-7xl mx-auto">
@@ -93,7 +143,9 @@ export default function SlaSettings() {
         <div className="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-none flex flex-col justify-between">
           <div>
             <p className="text-xs font-label uppercase tracking-widest text-secondary mb-1">Active SLAs</p>
-            <h3 className="text-3xl font-headline font-bold text-primary">3,892</h3>
+            <h3 className="text-3xl font-headline font-bold text-primary">
+              {slaTargets.length > 0 ? slaTargets.length : '—'}
+            </h3>
           </div>
           <div className="mt-4 flex items-center gap-2 text-on-surface-variant">
             <span className="material-symbols-outlined text-sm">bolt</span>
@@ -166,8 +218,8 @@ export default function SlaSettings() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-container">
-                  {slaTargets.map((row, idx) => (
-                    <tr key={idx} className="group hover:bg-surface-container-low transition-colors">
+                  {slaTargets.map((row) => (
+                    <tr key={row.stageId} className="group hover:bg-surface-container-low transition-colors">
                       <td className="py-5">
                         <span className="px-2 py-1 bg-surface-container rounded font-mono text-xs font-bold text-on-surface">
                           {row.taskId}
@@ -178,12 +230,40 @@ export default function SlaSettings() {
                         <p className="text-[10px] text-on-surface-variant uppercase">{row.category}</p>
                       </td>
                       <td className="py-5">
-                        <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-sm text-on-surface-variant">schedule</span>
-                          <span className="text-sm font-bold">
-                            {row.hours} <span className="font-normal text-on-surface-variant">hrs</span>
-                          </span>
-                        </div>
+                        {editingStageId === row.stageId ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.5"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              className="w-20 px-2 py-1 rounded border border-primary/30 text-sm font-bold focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                              autoFocus
+                            />
+                            <span className="text-sm text-on-surface-variant">hrs</span>
+                            <button
+                              onClick={() => handleSave(row.stageId)}
+                              disabled={updateSla.isPending}
+                              className="text-primary hover:text-primary/80 disabled:opacity-50"
+                            >
+                              <span className="material-symbols-outlined text-sm">check</span>
+                            </button>
+                            <button
+                              onClick={() => setEditingStageId(null)}
+                              className="text-on-surface-variant hover:text-error"
+                            >
+                              <span className="material-symbols-outlined text-sm">close</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-sm text-on-surface-variant">schedule</span>
+                            <span className="text-sm font-bold">
+                              {row.hours} <span className="font-normal text-on-surface-variant">hrs</span>
+                            </span>
+                          </div>
+                        )}
                       </td>
                       <td className="py-5">
                         <div className="flex items-center gap-3">
@@ -194,8 +274,14 @@ export default function SlaSettings() {
                         </div>
                       </td>
                       <td className="py-5 text-right">
-                        <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">
-                          more_vert
+                        <button
+                          onClick={() => {
+                            setEditingStageId(row.stageId)
+                            setEditValue(row.slaBusinessHours.toString())
+                          }}
+                          className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+                        >
+                          edit
                         </button>
                       </td>
                     </tr>

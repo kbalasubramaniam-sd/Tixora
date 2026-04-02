@@ -1,64 +1,159 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  useBusinessHours,
+  useUpdateBusinessHours,
+  useHolidays,
+  useCreateHoliday,
+  useDeleteHoliday,
+  useDelegates,
+  useCreateDelegate,
+  useDeleteDelegate,
+} from '@/api/hooks/useAdmin';
+import type { BusinessHourDay, Holiday, Delegate } from '@/api/endpoints/admin';
 
-const DAYS = [
-  { label: 'Sun', defaultChecked: true },
-  { label: 'Mon', defaultChecked: true },
-  { label: 'Tue', defaultChecked: true },
-  { label: 'Wed', defaultChecked: true },
-  { label: 'Thu', defaultChecked: true },
-  { label: 'Fri', defaultChecked: false },
-  { label: 'Sat', defaultChecked: false },
-];
-
-const HOLIDAYS = [
-  { month: 'Jan', day: '01', name: "New Year's Day", type: 'Global Observance' },
-  { month: 'Apr', day: '10', name: 'Eid Al Fitr', type: 'Regional Holiday' },
-  { month: 'Jun', day: '16', name: 'Eid Al Adha', type: 'Regional Holiday' },
-  { month: 'Jul', day: '07', name: 'Islamic New Year', type: 'Regional Holiday' },
-  { month: 'Dec', day: '02', name: 'National Day', type: 'National Holiday' },
-  { month: 'Dec', day: '03', name: 'National Day', type: 'National Holiday' },
-];
-
-const DELEGATES = [
-  {
-    primaryInitials: 'SM',
-    primaryName: 'Sarah Miller',
-    primaryBg: 'bg-primary-fixed',
-    primaryText: 'text-on-primary-fixed-variant',
-    delegateInitials: 'JR',
-    delegateName: 'James Ross',
-    delegateBg: 'bg-secondary-fixed',
-    delegateText: 'text-on-secondary-fixed-variant',
-    scopeLabel: 'L2 Infrastructure',
-    scopeClass: 'bg-primary-container/20 text-on-primary-container',
-    period: '15 Mar — 20 Mar, 2024',
-    rowBg: 'bg-white/40',
-    rowHover: 'hover:bg-white/60',
-  },
-  {
-    primaryInitials: 'AK',
-    primaryName: 'Ahmed Khan',
-    primaryBg: 'bg-tertiary-fixed',
-    primaryText: 'text-on-tertiary-fixed-variant',
-    delegateInitials: 'LC',
-    delegateName: 'Linda Chen',
-    delegateBg: 'bg-secondary-fixed',
-    delegateText: 'text-on-secondary-fixed-variant',
-    scopeLabel: 'HR Operations',
-    scopeClass: 'bg-tertiary-container/20 text-on-tertiary-container',
-    period: '01 Apr — 05 Apr, 2024',
-    rowBg: 'bg-white/20',
-    rowHover: 'hover:bg-white/40',
-  },
-];
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function BusinessHours() {
+  // --- Data fetching ---
+  const { data: businessHoursData, isLoading: bhLoading } = useBusinessHours();
+  const updateBusinessHours = useUpdateBusinessHours();
+  const { data: holidays, isLoading: holLoading } = useHolidays();
+  const createHoliday = useCreateHoliday();
+  const removeHoliday = useDeleteHoliday();
+  const { data: delegates, isLoading: delLoading } = useDelegates();
+  const createDelegate = useCreateDelegate();
+  const removeDelegate = useDeleteDelegate();
+
+  // --- Local state for business hours form ---
   const [activeDays, setActiveDays] = useState<Record<string, boolean>>(
-    Object.fromEntries(DAYS.map((d) => [d.label, d.defaultChecked]))
+    Object.fromEntries(DAY_LABELS.map((d) => [d, false]))
   );
+  const [startTime, setStartTime] = useState('08:00');
+  const [endTime, setEndTime] = useState('17:00');
+
+  // Sync API data into local state
+  useEffect(() => {
+    if (businessHoursData?.days) {
+      const dayMap: Record<string, boolean> = {};
+      let start = '08:00';
+      let end = '17:00';
+      businessHoursData.days.forEach((d: BusinessHourDay) => {
+        const label = DAY_LABELS[d.dayOfWeek];
+        if (label) dayMap[label] = d.isWorkingDay;
+        if (d.isWorkingDay && d.startTime) start = d.startTime;
+        if (d.isWorkingDay && d.endTime) end = d.endTime;
+      });
+      setActiveDays(dayMap);
+      setStartTime(start);
+      setEndTime(end);
+    }
+  }, [businessHoursData]);
 
   const toggleDay = (label: string) => {
     setActiveDays((prev) => ({ ...prev, [label]: !prev[label] }));
+  };
+
+  const handleSaveBusinessHours = useCallback(() => {
+    if (!businessHoursData?.days) return;
+    const payload = {
+      days: businessHoursData.days.map((d: BusinessHourDay) => ({
+        id: d.id,
+        isWorkingDay: activeDays[DAY_LABELS[d.dayOfWeek]] ?? false,
+        startTime,
+        endTime,
+      })),
+    };
+    updateBusinessHours.mutate(payload);
+  }, [businessHoursData, activeDays, startTime, endTime, updateBusinessHours]);
+
+  // --- Holiday form state ---
+  const [showHolidayForm, setShowHolidayForm] = useState(false);
+  const [newHolidayDate, setNewHolidayDate] = useState('');
+  const [newHolidayName, setNewHolidayName] = useState('');
+
+  const handleAddHoliday = () => {
+    if (!newHolidayDate || !newHolidayName.trim()) return;
+    createHoliday.mutate(
+      { date: newHolidayDate, name: newHolidayName.trim() },
+      {
+        onSuccess: () => {
+          setNewHolidayDate('');
+          setNewHolidayName('');
+          setShowHolidayForm(false);
+        },
+      },
+    );
+  };
+
+  // --- Delegate form state ---
+  const [showDelegateForm, setShowDelegateForm] = useState(false);
+  const [newPrimaryUserId, setNewPrimaryUserId] = useState('');
+  const [newDelegateUserId, setNewDelegateUserId] = useState('');
+  const [newValidFrom, setNewValidFrom] = useState('');
+  const [newValidTo, setNewValidTo] = useState('');
+
+  const handleAddDelegate = () => {
+    if (!newPrimaryUserId || !newDelegateUserId) return;
+    createDelegate.mutate(
+      {
+        primaryUserId: newPrimaryUserId,
+        delegateUserId: newDelegateUserId,
+        validFrom: newValidFrom || null,
+        validTo: newValidTo || null,
+      },
+      {
+        onSuccess: () => {
+          setNewPrimaryUserId('');
+          setNewDelegateUserId('');
+          setNewValidFrom('');
+          setNewValidTo('');
+          setShowDelegateForm(false);
+        },
+      },
+    );
+  };
+
+  const isLoading = bhLoading || holLoading || delLoading;
+
+  if (isLoading) {
+    return (
+      <main className="flex-grow max-w-7xl mx-auto">
+        <div className="animate-pulse space-y-6">
+          <div className="h-10 bg-surface-container-low rounded w-1/3" />
+          <div className="grid grid-cols-2 gap-8">
+            <div className="h-96 bg-surface-container-low rounded-xl" />
+            <div className="h-96 bg-surface-container-low rounded-xl" />
+          </div>
+          <div className="h-48 bg-surface-container-low rounded-xl" />
+        </div>
+      </main>
+    );
+  }
+
+  // Format holiday for display
+  const formatHoliday = (h: Holiday) => {
+    const d = new Date(h.date);
+    return {
+      month: d.toLocaleString('en-US', { month: 'short' }),
+      day: String(d.getDate()).padStart(2, '0'),
+    };
+  };
+
+  // Format delegate initials
+  const getInitials = (name: string) =>
+    name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+
+  // Format delegate period
+  const formatPeriod = (from: string | null, to: string | null) => {
+    if (!from && !to) return 'Open-ended';
+    const f = from ? new Date(from).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '—';
+    const t = to ? new Date(to).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Ongoing';
+    return `${f} — ${t}`;
   };
 
   return (
@@ -101,18 +196,18 @@ export default function BusinessHours() {
                 Active Working Days
               </label>
               <div className="flex flex-wrap gap-2">
-                {DAYS.map((day) => (
-                  <label key={day.label} className="group cursor-pointer">
+                {DAY_LABELS.map((day) => (
+                  <label key={day} className="group cursor-pointer">
                     <input
                       type="checkbox"
                       className="hidden peer"
-                      checked={activeDays[day.label]}
-                      onChange={() => toggleDay(day.label)}
+                      checked={activeDays[day] ?? false}
+                      onChange={() => toggleDay(day)}
                     />
                     <div
-                      className={`px-4 py-2 rounded-lg bg-surface-container-low text-secondary peer-checked:bg-primary peer-checked:text-white transition-all duration-200 font-bold text-sm${!day.defaultChecked && !activeDays[day.label] ? ' opacity-50' : ''}`}
+                      className={`px-4 py-2 rounded-lg bg-surface-container-low text-secondary peer-checked:bg-primary peer-checked:text-white transition-all duration-200 font-bold text-sm${!activeDays[day] ? ' opacity-50' : ''}`}
                     >
-                      {day.label}
+                      {day}
                     </div>
                   </label>
                 ))}
@@ -129,7 +224,8 @@ export default function BusinessHours() {
                   <span className="material-symbols-outlined text-outline mr-3">schedule</span>
                   <input
                     type="text"
-                    defaultValue="08:00"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
                     className="bg-transparent border-none focus:ring-0 w-full font-bold text-lg"
                   />
                 </div>
@@ -142,7 +238,8 @@ export default function BusinessHours() {
                   <span className="material-symbols-outlined text-outline mr-3">history</span>
                   <input
                     type="text"
-                    defaultValue="17:00"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
                     className="bg-transparent border-none focus:ring-0 w-full font-bold text-lg"
                   />
                 </div>
@@ -151,8 +248,12 @@ export default function BusinessHours() {
 
             {/* Save button */}
             <div className="pt-6">
-              <button className="bg-primary-gradient text-white font-bold py-4 px-8 rounded-lg w-full shadow-lg active:scale-[0.98] transition-transform">
-                Save Operational Hours
+              <button
+                onClick={handleSaveBusinessHours}
+                disabled={updateBusinessHours.isPending}
+                className="bg-primary-gradient text-white font-bold py-4 px-8 rounded-lg w-full shadow-lg active:scale-[0.98] transition-transform disabled:opacity-50"
+              >
+                {updateBusinessHours.isPending ? 'Saving...' : 'Save Operational Hours'}
               </button>
             </div>
           </div>
@@ -165,45 +266,93 @@ export default function BusinessHours() {
               <span className="material-symbols-outlined text-tertiary-container text-3xl">event</span>
               <h2 className="text-xl font-bold text-on-surface">Holiday Calendar</h2>
             </div>
-            <div className="bg-surface-container-highest px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-white transition-colors">
-              <span className="text-sm font-bold">2024</span>
-              <span className="material-symbols-outlined text-sm">expand_more</span>
+            <div className="bg-surface-container-highest px-4 py-2 rounded-lg flex items-center gap-2">
+              <span className="text-sm font-bold">{new Date().getFullYear()}</span>
             </div>
           </div>
 
           {/* Holiday list */}
           <div className="space-y-3 mb-8 max-h-[280px] overflow-y-auto pr-2">
-            {HOLIDAYS.map((holiday, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between bg-surface-container-lowest p-4 rounded-lg group hover:translate-x-1 transition-transform"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 text-center bg-tertiary-fixed rounded-lg p-2">
-                    <p className="text-[10px] uppercase font-black text-on-tertiary-fixed-variant">
-                      {holiday.month}
-                    </p>
-                    <p className="text-lg font-bold text-on-tertiary-fixed leading-tight">
-                      {holiday.day}
-                    </p>
+            {holidays && holidays.length > 0 ? (
+              holidays.map((holiday: Holiday) => {
+                const fmt = formatHoliday(holiday);
+                return (
+                  <div
+                    key={holiday.id}
+                    className="flex items-center justify-between bg-surface-container-lowest p-4 rounded-lg group hover:translate-x-1 transition-transform"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 text-center bg-tertiary-fixed rounded-lg p-2">
+                        <p className="text-[10px] uppercase font-black text-on-tertiary-fixed-variant">
+                          {fmt.month}
+                        </p>
+                        <p className="text-lg font-bold text-on-tertiary-fixed leading-tight">
+                          {fmt.day}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-on-surface">{holiday.name}</p>
+                        <p className="text-xs text-secondary">{holiday.date}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => removeHoliday.mutate(holiday.id)}
+                      disabled={removeHoliday.isPending}
+                      className="text-outline opacity-0 group-hover:opacity-100 transition-opacity hover:text-error disabled:opacity-50"
+                    >
+                      <span className="material-symbols-outlined">delete</span>
+                    </button>
                   </div>
-                  <div>
-                    <p className="font-bold text-on-surface">{holiday.name}</p>
-                    <p className="text-xs text-secondary">{holiday.type}</p>
-                  </div>
-                </div>
-                <button className="text-outline opacity-0 group-hover:opacity-100 transition-opacity hover:text-error">
-                  <span className="material-symbols-outlined">delete</span>
-                </button>
+                );
+              })
+            ) : (
+              <div className="text-center text-on-surface-variant text-sm py-8">
+                No holidays configured.
               </div>
-            ))}
+            )}
           </div>
 
-          {/* Add holiday button */}
-          <button className="flex items-center justify-center gap-2 w-full py-4 rounded-lg border-2 border-dashed border-outline-variant text-secondary font-bold hover:bg-surface-container-highest transition-colors">
-            <span className="material-symbols-outlined">add_circle</span>
-            Add New Holiday
-          </button>
+          {/* Add holiday form / button */}
+          {showHolidayForm ? (
+            <div className="space-y-3 p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/20">
+              <input
+                type="text"
+                placeholder="Holiday name"
+                value={newHolidayName}
+                onChange={(e) => setNewHolidayName(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-surface-container-low border-none text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              />
+              <input
+                type="date"
+                value={newHolidayDate}
+                onChange={(e) => setNewHolidayDate(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-surface-container-low border-none text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAddHoliday}
+                  disabled={createHoliday.isPending}
+                  className="flex-1 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-50"
+                >
+                  {createHoliday.isPending ? 'Adding...' : 'Add'}
+                </button>
+                <button
+                  onClick={() => setShowHolidayForm(false)}
+                  className="flex-1 py-2 rounded-lg border border-outline-variant font-bold text-sm text-on-surface-variant"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowHolidayForm(true)}
+              className="flex items-center justify-center gap-2 w-full py-4 rounded-lg border-2 border-dashed border-outline-variant text-secondary font-bold hover:bg-surface-container-highest transition-colors"
+            >
+              <span className="material-symbols-outlined">add_circle</span>
+              Add New Holiday
+            </button>
+          )}
         </section>
       </div>
 
@@ -216,11 +365,67 @@ export default function BusinessHours() {
               Manage temporary approval delegation for out-of-office scenarios.
             </p>
           </div>
-          <button className="bg-surface-container-lowest px-6 py-2.5 rounded-lg font-bold text-primary shadow-sm hover:bg-primary hover:text-white transition-all active:scale-95 flex items-center gap-2">
+          <button
+            onClick={() => setShowDelegateForm(true)}
+            className="bg-surface-container-lowest px-6 py-2.5 rounded-lg font-bold text-primary shadow-sm hover:bg-primary hover:text-white transition-all active:scale-95 flex items-center gap-2"
+          >
             <span className="material-symbols-outlined text-sm">person_add</span>
             New Delegate
           </button>
         </div>
+
+        {/* Delegate creation form */}
+        {showDelegateForm && (
+          <div className="px-8 pb-4">
+            <div className="p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/20 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="Primary User ID"
+                  value={newPrimaryUserId}
+                  onChange={(e) => setNewPrimaryUserId(e.target.value)}
+                  className="px-3 py-2 rounded-lg bg-surface-container-low border-none text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder="Delegate User ID"
+                  value={newDelegateUserId}
+                  onChange={(e) => setNewDelegateUserId(e.target.value)}
+                  className="px-3 py-2 rounded-lg bg-surface-container-low border-none text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                />
+                <input
+                  type="date"
+                  placeholder="Valid From"
+                  value={newValidFrom}
+                  onChange={(e) => setNewValidFrom(e.target.value)}
+                  className="px-3 py-2 rounded-lg bg-surface-container-low border-none text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                />
+                <input
+                  type="date"
+                  placeholder="Valid To"
+                  value={newValidTo}
+                  onChange={(e) => setNewValidTo(e.target.value)}
+                  className="px-3 py-2 rounded-lg bg-surface-container-low border-none text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAddDelegate}
+                  disabled={createDelegate.isPending}
+                  className="px-6 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-50"
+                >
+                  {createDelegate.isPending ? 'Adding...' : 'Add Delegate'}
+                </button>
+                <button
+                  onClick={() => setShowDelegateForm(false)}
+                  className="px-6 py-2 rounded-lg border border-outline-variant font-bold text-sm text-on-surface-variant"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="overflow-x-auto p-4">
           <table className="w-full text-left">
@@ -228,49 +433,53 @@ export default function BusinessHours() {
               <tr className="text-[10px] uppercase font-black tracking-[0.2em] text-secondary">
                 <th className="px-6 py-4">Primary Approver</th>
                 <th className="px-6 py-4">Delegate</th>
-                <th className="px-6 py-4">Scope</th>
                 <th className="px-6 py-4">Period</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/20">
-              {DELEGATES.map((row, i) => (
-                <tr key={i} className={`${row.rowBg} ${row.rowHover} transition-colors`}>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-8 h-8 rounded-full ${row.primaryBg} flex items-center justify-center ${row.primaryText} font-bold text-xs`}
-                      >
-                        {row.primaryInitials}
+              {delegates && delegates.length > 0 ? (
+                delegates.map((row: Delegate) => (
+                  <tr key={row.id} className="bg-white/40 hover:bg-white/60 transition-colors">
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant font-bold text-xs">
+                          {getInitials(row.primaryUserName)}
+                        </div>
+                        <span className="font-bold">{row.primaryUserName}</span>
                       </div>
-                      <span className="font-bold">{row.primaryName}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-8 h-8 rounded-full ${row.delegateBg} flex items-center justify-center ${row.delegateText} font-bold text-xs`}
-                      >
-                        {row.delegateInitials}
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed-variant font-bold text-xs">
+                          {getInitials(row.delegateUserName)}
+                        </div>
+                        <span className="font-bold text-on-surface-variant">{row.delegateUserName}</span>
                       </div>
-                      <span className="font-bold text-on-surface-variant">{row.delegateName}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className={`${row.scopeClass} px-3 py-1 rounded-full text-xs font-bold`}>
-                      {row.scopeLabel}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="text-sm font-medium text-on-surface-variant">{row.period}</span>
-                  </td>
-                  <td className="px-6 py-5 text-right">
-                    <button className="p-2 hover:bg-error-container hover:text-error rounded-lg transition-colors">
-                      <span className="material-symbols-outlined">delete</span>
-                    </button>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="text-sm font-medium text-on-surface-variant">
+                        {formatPeriod(row.validFrom, row.validTo)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5 text-right">
+                      <button
+                        onClick={() => removeDelegate.mutate(row.id)}
+                        disabled={removeDelegate.isPending}
+                        className="p-2 hover:bg-error-container hover:text-error rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        <span className="material-symbols-outlined">delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-on-surface-variant text-sm">
+                    No active delegates.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
