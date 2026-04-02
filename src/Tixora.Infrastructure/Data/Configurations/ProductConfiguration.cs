@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Tixora.Domain.Entities;
-using Tixora.Domain.Enums;
-
 namespace Tixora.Infrastructure.Data.Configurations;
 
 public class ProductConfiguration : IEntityTypeConfiguration<Product>

@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tixora.Application.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tixora.API.Tests", "..\tests\Tixora.API.Tests\Tixora.API.Tests.csproj", "{26334E33-9B1C-405A-B433-AE7170DAAB3B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tixora.Infrastructure.Tests", "..\tests\Tixora.Infrastructure.Tests\Tixora.Infrastructure.Tests.csproj", "{7CBEF504-D4E4-4084-A4FC-4E2103996532}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,18 @@ Global
 		{26334E33-9B1C-405A-B433-AE7170DAAB3B}.Release|x64.Build.0 = Release|Any CPU
 		{26334E33-9B1C-405A-B433-AE7170DAAB3B}.Release|x86.ActiveCfg = Release|Any CPU
 		{26334E33-9B1C-405A-B433-AE7170DAAB3B}.Release|x86.Build.0 = Release|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Debug|x64.Build.0 = Debug|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Debug|x86.Build.0 = Debug|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Release|x64.ActiveCfg = Release|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Release|x64.Build.0 = Release|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Release|x86.ActiveCfg = Release|Any CPU
+		{7CBEF504-D4E4-4084-A4FC-4E2103996532}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
