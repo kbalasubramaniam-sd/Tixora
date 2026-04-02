@@ -2,14 +2,7 @@ import { apiClient } from '@/api/client'
 import { ProductCode, TaskType } from '@/types/enums'
 import type { Product, TaskOption, FormSchema, TicketCreateRequest, TicketCreateResponse } from '@/types/product'
 
-// --- Mock data ---
-
-const mockProducts: Product[] = [
-  { code: ProductCode.RBT, name: 'Rabet', description: 'RBT • Central Gateway Authority', accessType: 'Portal + API', icon: 'hub', bgIcon: 'lan', iconBg: 'bg-primary-container/10', iconColor: 'text-primary' },
-  { code: ProductCode.RHN, name: 'Rhoon', description: 'RHN • Identity Compliance', accessType: 'Portal + API', icon: 'account_balance', bgIcon: 'cloud_sync', iconBg: 'bg-tertiary-container/10', iconColor: 'text-tertiary' },
-  { code: ProductCode.WTQ, name: 'Wtheeq', description: 'WTQ • Digital Signature Hub', accessType: 'API', icon: 'encrypted', bgIcon: 'code', iconBg: 'bg-slate-200', iconColor: 'text-on-surface' },
-  { code: ProductCode.MLM, name: 'Mulem', description: 'MLM • Intelligence Analytics', accessType: 'API', icon: 'psychology', bgIcon: 'directions_car', iconBg: 'bg-primary/10', iconColor: 'text-primary' },
-]
+// --- Local data (no backend endpoint yet) ---
 
 const mockTasks: Record<string, TaskOption[]> = {
   [ProductCode.RBT]: [

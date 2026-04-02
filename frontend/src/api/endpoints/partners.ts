@@ -17,74 +17,6 @@ export interface PartnerSummary {
   lifecycleState: LifecycleState
 }
 
-const mockPartners: PartnerSummary[] = [
-  {
-    id: 'p-1',
-    name: 'Gulf Trading LLC',
-    refId: 'REF-10001',
-    products: [ProductCode.RBT, ProductCode.RHN],
-    productDetails: [
-      { productCode: ProductCode.RBT, productName: 'Rabet', lifecycleState: LifecycleState.Live, companyCode: 'GTL-RBT' },
-      { productCode: ProductCode.RHN, productName: 'Rhoon', lifecycleState: LifecycleState.Live, companyCode: 'GTL-RHN' },
-    ],
-    lifecycleState: LifecycleState.Live,
-  },
-  {
-    id: 'p-2',
-    name: 'Emirates Logistics Corp',
-    refId: 'REF-10002',
-    products: [ProductCode.RHN, ProductCode.WTQ],
-    productDetails: [
-      { productCode: ProductCode.RHN, productName: 'Rhoon', lifecycleState: LifecycleState.UatActive, companyCode: null },
-      { productCode: ProductCode.WTQ, productName: 'Wtheeq', lifecycleState: LifecycleState.UatActive, companyCode: null },
-    ],
-    lifecycleState: LifecycleState.UatActive,
-  },
-  {
-    id: 'p-3',
-    name: 'Digital Solutions FZE',
-    refId: 'REF-10003',
-    products: [ProductCode.WTQ, ProductCode.MLM],
-    productDetails: [
-      { productCode: ProductCode.WTQ, productName: 'Wtheeq', lifecycleState: LifecycleState.Onboarded, companyCode: null },
-      { productCode: ProductCode.MLM, productName: 'Mulem', lifecycleState: LifecycleState.Onboarded, companyCode: null },
-    ],
-    lifecycleState: LifecycleState.Onboarded,
-  },
-  {
-    id: 'p-4',
-    name: 'National Bank of Fujairah',
-    refId: 'REF-10004',
-    products: [ProductCode.MLM],
-    productDetails: [
-      { productCode: ProductCode.MLM, productName: 'Mulem', lifecycleState: LifecycleState.UatCompleted, companyCode: null },
-    ],
-    lifecycleState: LifecycleState.UatCompleted,
-  },
-  {
-    id: 'p-5',
-    name: 'Mashreq Global',
-    refId: 'REF-10005',
-    products: [ProductCode.RBT, ProductCode.RHN, ProductCode.WTQ],
-    productDetails: [
-      { productCode: ProductCode.RBT, productName: 'Rabet', lifecycleState: LifecycleState.Live, companyCode: 'MG-RBT' },
-      { productCode: ProductCode.RHN, productName: 'Rhoon', lifecycleState: LifecycleState.Live, companyCode: 'MG-RHN' },
-      { productCode: ProductCode.WTQ, productName: 'Wtheeq', lifecycleState: LifecycleState.Live, companyCode: 'MG-WTQ' },
-    ],
-    lifecycleState: LifecycleState.Live,
-  },
-  {
-    id: 'p-6',
-    name: 'Al Masah Capital',
-    refId: 'REF-10006',
-    products: [ProductCode.RBT],
-    productDetails: [
-      { productCode: ProductCode.RBT, productName: 'Rabet', lifecycleState: LifecycleState.UatActive, companyCode: null },
-    ],
-    lifecycleState: LifecycleState.UatActive,
-  },
-]
-
 // Backend response shape
 interface BackendPartner {
   id: string
@@ -113,7 +45,7 @@ function mapBackendPartner(p: BackendPartner): PartnerSummary {
     productCode: pp.productCode as ProductCode,
     productName: pp.productName,
     lifecycleState: pp.lifecycleState as LifecycleState,
-    companyCode: pp.companyCode,
+    companyCode: pp.companyCode ?? '',
   }))
   const states = p.products.map((pp) => pp.lifecycleState as LifecycleState)
   const highestState = states.reduce(
