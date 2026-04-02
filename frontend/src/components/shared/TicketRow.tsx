@@ -2,23 +2,10 @@ import { useNavigate } from 'react-router'
 import type { TicketSummary } from '@/types/ticket'
 import { SlaStatus } from '@/types/enums'
 import { cn } from '@/utils/cn'
+import { PRODUCT_LABELS, TASK_LABELS_SHORT } from '@/utils/labels'
 
 interface TicketRowProps {
   ticket: TicketSummary
-}
-
-const taskLabel: Record<string, string> = {
-  T01: 'Agreement',
-  T02: 'UAT Access',
-  T03: 'Partner Account',
-  T04: 'Access Support',
-}
-
-const productLabel: Record<string, string> = {
-  RBT: 'Rabet',
-  RHN: 'Rhoon',
-  WTQ: 'Wtheeq',
-  MLM: 'Mulem',
 }
 
 const slaBarColor: Record<string, string> = {
@@ -70,7 +57,7 @@ export function TicketRow({ ticket }: TicketRowProps) {
             <span className="text-xs font-medium text-on-surface-variant">{ticket.partnerName}</span>
             <span className="w-1 h-1 rounded-full bg-outline-variant" />
             <span className="bg-secondary-container/40 px-2 py-0.5 rounded text-[10px] font-bold text-on-secondary-container uppercase tracking-tight">
-              {productLabel[ticket.productCode] ?? ticket.productCode}
+              {PRODUCT_LABELS[ticket.productCode] ?? ticket.productCode}
             </span>
           </div>
         </div>
@@ -78,7 +65,7 @@ export function TicketRow({ ticket }: TicketRowProps) {
       <div className="flex items-center gap-6 text-right">
         <div>
           <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Task Type</p>
-          <p className="text-xs font-bold text-on-surface">{taskLabel[ticket.taskType] ?? ticket.taskType}</p>
+          <p className="text-xs font-bold text-on-surface">{TASK_LABELS_SHORT[ticket.taskType] ?? ticket.taskType}</p>
         </div>
         <div className="relative w-8 h-8 flex items-center justify-center">
           <span className={cn('absolute inset-0 border-2 rounded-full', slaBorderColor[ticket.slaStatus])} />

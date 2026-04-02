@@ -11,7 +11,7 @@ export function GlobalFallback() {
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="gradient-primary text-on-primary font-semibold text-sm px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
+          className="primary-gradient text-on-primary font-semibold text-sm px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
         >
           Refresh Page
         </button>

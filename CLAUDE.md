@@ -69,7 +69,7 @@ None → [T-01] → Onboarded → [T-02] → UatActive → [T-03] → Live
 
 The dotnet-claude-kit plugin is installed. These project-specific rules OVERRIDE plugin defaults:
 
-- **USE repository pattern** — this project uses ITicketRepository, IPartnerRepository, etc. Do NOT use DbContext directly in services. The plugin says "no repositories" — ignore that for this project.
+- **USE ITixoraDbContext** — services inject `ITixoraDbContext` (in Application/Interfaces) for all data access. No repository pattern.
 - **USE Swashbuckle** — the plugin prefers built-in OpenAPI. We use Swashbuckle for Swagger UI.
 - **Controllers, not minimal APIs** — this project uses controller-based endpoints, not minimal APIs.
 

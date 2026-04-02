@@ -16,12 +16,15 @@ public class Ticket
     public string FormData { get; set; } = "{}";
     public Guid CreatedByUserId { get; set; }
     public Guid? AssignedToUserId { get; set; }
+    public Guid WorkflowDefinitionId { get; set; }
     public Guid? RejectedTicketRef { get; set; }
     public string? CancellationReason { get; set; }
+    public int SequenceNumber { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
     public PartnerProduct PartnerProduct { get; set; } = null!;
+    public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
     public User CreatedBy { get; set; } = null!;
     public User? AssignedTo { get; set; }
     public ICollection<StageLog> StageLogs { get; set; } = new List<StageLog>();

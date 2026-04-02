@@ -16,4 +16,5 @@ public class StageLog
 
     public Ticket Ticket { get; set; } = null!;
     public User Actor { get; set; } = null!;
+    public User? ReassignedTo { get; set; }
 }

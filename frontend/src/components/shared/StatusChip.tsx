@@ -1,5 +1,6 @@
 import { Chip, type ChipVariant } from '@/components/ui/Chip'
 import { TicketStatus } from '@/types/enums'
+import { STATUS_LABELS } from '@/utils/labels'
 
 const statusVariant: Record<TicketStatus, ChipVariant> = {
   [TicketStatus.Draft]: 'default',
@@ -14,19 +15,6 @@ const statusVariant: Record<TicketStatus, ChipVariant> = {
   [TicketStatus.SlaBreached]: 'error',
 }
 
-const statusLabel: Record<TicketStatus, string> = {
-  [TicketStatus.Draft]: 'Draft',
-  [TicketStatus.Submitted]: 'Submitted',
-  [TicketStatus.InReview]: 'In Review',
-  [TicketStatus.PendingRequesterAction]: 'Pending Action',
-  [TicketStatus.Approved]: 'Approved',
-  [TicketStatus.InProvisioning]: 'In Provisioning',
-  [TicketStatus.Completed]: 'Completed',
-  [TicketStatus.Rejected]: 'Rejected',
-  [TicketStatus.Cancelled]: 'Cancelled',
-  [TicketStatus.SlaBreached]: 'SLA Breached',
-}
-
 interface StatusChipProps {
   status: TicketStatus
   className?: string
@@ -35,7 +23,7 @@ interface StatusChipProps {
 export function StatusChip({ status, className }: StatusChipProps) {
   return (
     <Chip variant={statusVariant[status]} className={className}>
-      {statusLabel[status]}
+      {STATUS_LABELS[status]}
     </Chip>
   )
 }
