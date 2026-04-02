@@ -21,6 +21,9 @@ public static class DependencyInjection
         services.AddScoped<IWorkflowEngine, WorkflowEngine>();
         services.AddScoped<ITicketQueryService, TicketQueryService>();
         services.AddScoped<ICommentService, CommentService>();
+        services.AddSingleton<IFileStorage>(new LocalFileStorage(
+            Path.Combine(Directory.GetCurrentDirectory(), "uploads")));
+        services.AddScoped<IDocumentService, DocumentService>();
 
         return services;
     }

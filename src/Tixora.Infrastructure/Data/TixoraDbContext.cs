@@ -19,6 +19,7 @@ public class TixoraDbContext : DbContext, ITixoraDbContext
     public DbSet<StageLog> StageLogs => Set<StageLog>();
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
     public DbSet<Comment> Comments => Set<Comment>();
+    public DbSet<Document> Documents => Set<Document>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
