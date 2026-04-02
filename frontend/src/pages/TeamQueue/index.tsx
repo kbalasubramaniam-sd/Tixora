@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { useTeamQueue } from '@/api/hooks/useTeamQueue'
+import { useExportCsv } from '@/api/hooks/useReports'
 import { ApiError } from '@/components/ui/ApiError'
 import { FilterBar } from './FilterBar'
 import { UrgencySection } from './UrgencySection'
@@ -13,6 +14,8 @@ export default function TeamQueue() {
   const [slaStatus, setSlaStatus] = useState('All')
   const [partner, setPartner] = useState('All')
   const [requester, setRequester] = useState('All')
+
+  const exportCsv = useExportCsv()
 
   const filters = {
     product: product !== 'All' ? product : undefined,
@@ -73,7 +76,12 @@ export default function TeamQueue() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => {/* TODO: export CSV */}}
+            onClick={() => exportCsv.mutate({
+              productCode: product !== 'All' ? product : undefined,
+              taskType: task !== 'All' ? task : undefined,
+              status: slaStatus !== 'All' ? slaStatus : undefined,
+            })}
+            disabled={exportCsv.isPending}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-outline-variant text-secondary font-bold text-sm hover:bg-surface-container-low transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">download</span>

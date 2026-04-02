@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUnreadCount } from '@/api/hooks/useNotifications'
+import { useGlobalSearch } from '@/api/hooks/useSearch'
 import { Chip } from '@/components/ui/Chip'
 
 interface TopBarProps {
@@ -14,6 +15,36 @@ export function TopBar({ onMenuToggle, showMenuButton }: TopBarProps) {
   const navigate = useNavigate()
   const [showUserMenu, setShowUserMenu] = useState(false)
   const { data: unreadCount = 0 } = useUnreadCount()
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [showResults, setShowResults] = useState(false)
+  const searchRef = useRef<HTMLDivElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
+
+  const { data: searchResults = [], isFetching } = useGlobalSearch(debouncedQuery)
+
+  // Debounce search input by 300ms
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      setDebouncedQuery(searchQuery)
+    }, 300)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [searchQuery])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowResults(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const initials = user
     ? user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
@@ -42,16 +73,54 @@ export function TopBar({ onMenuToggle, showMenuButton }: TopBarProps) {
 
       {/* Global Search */}
       <div className="flex-1 flex justify-center">
-        <div className="relative w-full max-w-[480px]">
+        <div ref={searchRef} className="relative w-full max-w-[480px]">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
             search
           </span>
           <input
             type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              setShowResults(true)
+            }}
+            onFocus={() => { if (searchQuery.length >= 2) setShowResults(true) }}
             placeholder="Search tickets, partners, users..."
             aria-label="Global search"
             className="w-full h-10 pl-10 pr-4 rounded-full bg-surface-container-low text-sm text-on-surface placeholder:text-on-surface-variant/50 outline-none focus-glow transition-shadow"
           />
+
+          {/* Search results dropdown */}
+          {showResults && debouncedQuery.length >= 2 && (
+            <div className="absolute top-12 left-0 right-0 glass rounded-xl shadow-ambient z-50 max-h-80 overflow-y-auto">
+              {isFetching ? (
+                <div className="flex items-center justify-center p-4">
+                  <span className="material-symbols-outlined animate-spin text-primary text-xl">progress_activity</span>
+                </div>
+              ) : searchResults.length === 0 ? (
+                <div className="p-4 text-sm text-on-surface-variant text-center">
+                  No results found
+                </div>
+              ) : (
+                searchResults.map((result) => (
+                  <button
+                    key={result.id}
+                    onClick={() => {
+                      setShowResults(false)
+                      setSearchQuery('')
+                      setDebouncedQuery('')
+                      navigate(`/tickets/${result.id}`)
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-surface-container-low transition-colors flex flex-col gap-0.5 border-b border-outline-variant/10 last:border-b-0"
+                  >
+                    <span className="text-sm font-semibold text-on-surface">{result.displayId}</span>
+                    <span className="text-sm text-on-surface-variant">{result.title}</span>
+                    <span className="text-xs text-on-surface-variant/70">{result.subtitle}</span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 
