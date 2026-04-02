@@ -27,5 +27,6 @@ public class TixoraDbContext : DbContext, ITixoraDbContext
         // Seed reference data
         Seed.SeedProducts.Seed(modelBuilder);
         Seed.SeedUsers.Seed(modelBuilder);
+        Seed.SeedPartners.Seed(modelBuilder);
     }
 }
