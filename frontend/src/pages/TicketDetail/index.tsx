@@ -115,7 +115,7 @@ export default function TicketDetail() {
 
         {/* Right Panel (sticky) */}
         <aside className="w-full lg:w-[35%] lg:sticky lg:top-6 space-y-6">
-          <ActionsPanel ticket={ticket} />
+          <ActionsPanel ticket={ticket} onActionComplete={() => refetch()} />
           <SlaPanel ticket={ticket} />
           <PartnerPanel ticket={ticket} />
         </aside>

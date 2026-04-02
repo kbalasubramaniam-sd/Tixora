@@ -6,6 +6,7 @@ import type { TicketDetail, TicketAction } from '@/types/ticket'
 
 interface ActionsPanelProps {
   ticket: TicketDetail
+  onActionComplete?: () => void
 }
 
 const actionConfig: Record<string, { title: string; icon: string; placeholder: string; style: string }> = {
@@ -62,7 +63,7 @@ const actionEndpoint: Record<string, string> = {
   respond: 'respond',
 }
 
-export function ActionsPanel({ ticket }: ActionsPanelProps) {
+export function ActionsPanel({ ticket, onActionComplete }: ActionsPanelProps) {
   const queryClient = useQueryClient()
   const [activeAction, setActiveAction] = useState<TicketAction | null>(null)
   const [comment, setComment] = useState('')
@@ -86,11 +87,9 @@ export function ActionsPanel({ ticket }: ActionsPanelProps) {
 
       await apiClient.post(`/tickets/${ticket.id}/${endpoint}`, body)
 
-      // Invalidate ticket detail + all lists
-      await queryClient.invalidateQueries({ queryKey: ['ticket', ticket.id] })
-      await queryClient.invalidateQueries({ queryKey: ['my-tickets'] })
-      await queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      await queryClient.invalidateQueries({ queryKey: ['team-queue'] })
+      // Invalidate all ticket-related queries
+      await queryClient.invalidateQueries()
+      onActionComplete?.()
 
       setActiveAction(null)
       setComment('')
