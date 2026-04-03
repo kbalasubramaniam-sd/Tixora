@@ -1,10 +1,47 @@
 import { test, expect, type Page, type Browser, request as playwrightRequest } from '@playwright/test'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
 import { loginViaApi, USERS } from './helpers/auth'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const API_BASE = 'https://localhost:7255/api'
 const APP_BASE = 'http://localhost:5173'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+/** Create a minimal dummy PDF file for upload tests. */
+function createDummyPdf(): string {
+  const dir = path.join(__dirname, '..', 'test-results')
+  fs.mkdirSync(dir, { recursive: true })
+  const filePath = path.join(dir, 'dummy.pdf')
+  // Minimal valid PDF
+  fs.writeFileSync(filePath, '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[]/Count 0>>endobj\nxref\n0 3\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \ntrailer<</Size 3/Root 1 0 R>>\nstartxref\n109\n%%EOF')
+  return filePath
+}
+
+/** Upload a dummy file to all required document upload cards on the form. */
+async function uploadRequiredDocuments(page: Page) {
+  const dummyPdf = createDummyPdf()
+  // The form uses a single hidden <input type="file"> + React ref (activeDocRef).
+  // Clicking an "Upload" button sets activeDocRef then calls input.click().
+  // After each upload, the card switches from "Upload" to "Remove" state,
+  // so always click the first remaining Upload button.
+  const fileInput = page.locator('input[type="file"]')
+  const uploadButtons = page.getByRole('button', { name: /upload Upload/i })
+  let remaining = await uploadButtons.count()
+  while (remaining > 0) {
+    // Click the first Upload button — sets activeDocRef for that doc slot.
+    // Use force:true because fixed footer/aside can intercept pointer events.
+    await uploadButtons.first().click({ force: true })
+    // Set the file on the hidden input — triggers onChange → handleFileInputChange
+    await fileInput.setInputFiles(dummyPdf)
+    await page.waitForTimeout(300)
+    remaining = await uploadButtons.count()
+  }
+}
 
 /**
  * Approve the current stage using a fresh browser context per user.
@@ -60,9 +97,16 @@ function extractTicketGuid(page: Page): string {
 /** Common: select product and task on the new-request wizard. */
 async function selectProductAndTask(page: Page, productName: string, taskText: string) {
   await page.goto('/new-request')
-  await page.getByText(productName, { exact: true }).click({ timeout: 10_000 })
-  await page.getByText(taskText, { exact: false }).first().click({ timeout: 10_000 })
-  await expect(page.getByText(/Partner Information/i)).toBeVisible({ timeout: 10_000 })
+  // Wait for product cards to load, then click the target product
+  const productButton = page.getByRole('button', { name: new RegExp(productName) })
+  await expect(productButton).toBeVisible({ timeout: 10_000 })
+  await productButton.click()
+  // Wait for task step and click the target task
+  const taskButton = page.getByRole('button', { name: new RegExp(taskText) })
+  await expect(taskButton).toBeVisible({ timeout: 10_000 })
+  await taskButton.click()
+  // Wait for the form step to load
+  await expect(page.getByRole('heading', { name: /Partner Information/i })).toBeVisible({ timeout: 10_000 })
 }
 
 /** Common: wait for partner dropdown to load and select a partner by label. */
@@ -73,13 +117,14 @@ async function selectPartner(page: Page, partnerLabel: string) {
 }
 
 /** Common: click Review, verify partner name, then Submit and capture ticket info. */
-async function reviewAndSubmit(page: Page, partnerLabel: string, ticketIdPattern: RegExp) {
-  // Review
-  await page.getByRole('button', { name: /Review/i }).click()
-  await expect(page.getByText(partnerLabel)).toBeVisible({ timeout: 5_000 })
+async function reviewAndSubmit(page: Page, _partnerLabel: string, ticketIdPattern: RegExp) {
+  // Click "Review & Submit Request" footer button (fixed footer may overlap — use force)
+  await page.getByRole('button', { name: /Review & Submit/i }).click({ force: true })
+  // Wait for the review step to load — look for the "Submit Request" button
+  await expect(page.getByRole('button', { name: /^Submit Request$/i })).toBeVisible({ timeout: 10_000 })
 
   // Submit
-  await page.getByRole('button', { name: /Submit Request/i }).click()
+  await page.getByRole('button', { name: /^Submit Request$/i }).click()
 
   // Confirmation
   await expect(page.getByText('Request Submitted')).toBeVisible({ timeout: 15_000 })
@@ -127,6 +172,9 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
     await loginViaApi(page, 'parankush')
     await selectProductAndTask(page, 'Rabet', 'Agreement Validation')
     await selectPartner(page, 'Al Ain Insurance')
+
+    // T-01 requires document uploads (Trade License, VAT Certificate, Duly Filled Agreement)
+    await uploadRequiredDocuments(page)
 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T01-/)
 

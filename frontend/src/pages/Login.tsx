@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext'
 import { apiClient } from '@/api/client'
 import type { User } from '@/types/user'
 import type { UserRole } from '@/types/enums'
-import { TixoraLogo } from '@/components/ui/TixoraLogo'
 
 /** Map PascalCase role strings to readable labels */
 const roleLabels: Record<string, string> = {

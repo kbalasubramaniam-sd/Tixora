@@ -7,12 +7,12 @@ test.describe('Dashboard', () => {
   })
 
   test('shows greeting with user name', async ({ page }) => {
-    await expect(page.getByText('Sarah')).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('Parankush')).toBeVisible({ timeout: 10_000 })
   })
 
   test('displays stat cards section', async ({ page }) => {
-    // The dashboard renders stat cards — look for common stat labels
-    const dashboard = page.locator('main, [role="main"], .flex-1')
+    // The dashboard renders stat cards in a grid
+    const dashboard = page.getByRole('main')
     await expect(dashboard).toBeVisible({ timeout: 10_000 })
   })
 
@@ -21,6 +21,6 @@ test.describe('Dashboard', () => {
   })
 
   test('shows recent activity section', async ({ page }) => {
-    await expect(page.getByText(/recent activity|activity/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByRole('heading', { name: 'Recent Activity', exact: true })).toBeVisible({ timeout: 10_000 })
   })
 })
