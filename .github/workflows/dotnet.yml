@@ -22,4 +22,7 @@ jobs:
     - name: Build
       run: dotnet build src/Tixora.sln --no-restore
     - name: Test
-      run: dotnet test src/Tixora.sln --no-build --verbosity normal
+      run: |
+        dotnet test tests/Tixora.Domain.Tests --no-build --verbosity normal
+        dotnet test tests/Tixora.Application.Tests --no-build --verbosity normal
+        dotnet test tests/Tixora.Infrastructure.Tests --no-build --verbosity normal
