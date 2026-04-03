@@ -378,11 +378,88 @@ All E4 chunks merged to `frontend/foundation`. Summary:
 
 ---
 
-## FULL BACKEND STATUS — E1 + E2 + E3 + E4 COMPLETE
+---
 
-**103 tests passing** (36 infrastructure + 67 API integration)
+## FedEx Integration (BE DONE — FE: NOT WIRED)
 
-**Total API endpoints: 35+**
+Config toggle: `Shipping:Provider` = `"FedEx"` or `"None"` (default uses NoOp with fake tracking).
+
+**Endpoints:**
+- `POST /api/shipments/validate-address` — Validate recipient address
+- `POST /api/shipments/book` — Book shipment, returns tracking number + stores label PDF
+- `GET /api/shipments/by-ticket/{ticketId}` — Get shipment for a ticket (or 404)
+- `GET /api/shipments/{id}/label` — Download label PDF
+
+**ValidateAddressRequest:**
+```json
+{
+  "addressLine1": "123 Main St",
+  "addressLine2": null,
+  "city": "Dubai",
+  "stateProvince": "DU",
+  "postalCode": "00000",
+  "countryCode": "AE"
+}
+```
+
+**BookShipmentRequest:**
+```json
+{
+  "ticketId": "guid",
+  "recipientName": "John Smith",
+  "recipientCompany": "Al Ain Insurance",
+  "recipientPhone": "+971-50-123-4567",
+  "addressLine1": "123 Main St",
+  "addressLine2": null,
+  "city": "Dubai",
+  "stateProvince": "DU",
+  "postalCode": "00000",
+  "countryCode": "AE",
+  "weightKg": 0.5,
+  "serviceType": "STANDARD_OVERNIGHT"
+}
+```
+
+**ShipmentResponse:**
+```json
+{
+  "id": "guid",
+  "ticketId": "guid",
+  "ticketDisplayId": "SPM-RBT-T01-20260403-001",
+  "status": "LabelReady",
+  "trackingNumber": "NOOP-20260403120000-1234",
+  "recipientName": "John Smith",
+  "recipientCompany": "Al Ain Insurance",
+  "addressLine1": "123 Main St",
+  "addressLine2": null,
+  "city": "Dubai",
+  "stateProvince": "DU",
+  "postalCode": "00000",
+  "countryCode": "AE",
+  "weightKg": 0.5,
+  "serviceType": "STANDARD_OVERNIGHT",
+  "hasLabel": true,
+  "createdAt": "2026-04-03T...",
+  "shippedAt": "2026-04-03T..."
+}
+```
+
+**ServiceType options:** STANDARD_OVERNIGHT, PRIORITY_OVERNIGHT, FEDEX_GROUND, FEDEX_EXPRESS_SAVER, INTERNATIONAL_ECONOMY
+
+**FE wiring notes:**
+- T-01 tickets only — show "Ship Contract" panel on ticket detail at EA Sign-off stage
+- Flow: Enter address → Validate → Book → Print label
+- `GET /api/shipments/by-ticket/{ticketId}` to check if shipment already exists
+- Label download: `GET /api/shipments/{id}/label` returns PDF directly
+- With `Provider: "None"`, everything works with fake tracking numbers (good for dev/testing)
+
+---
+
+## FULL BACKEND STATUS — E1 + E2 + E3 + E4 + Integrations COMPLETE
+
+**108 tests passing** (36 infrastructure + 72 API integration)
+
+**Total API endpoints: 39+**
 - Auth: 2 (login, me)
 - Products: 1
 - Partners: 1
@@ -394,3 +471,4 @@ All E4 chunks merged to `frontend/foundation`. Summary:
 - Search: 2 (global, advanced)
 - Reports: 2 (overview, CSV export)
 - Admin: 10 (SLA config, business hours, holidays, delegates, workflow config)
+- Shipments: 4 (validate-address, book, get-by-ticket, label download)
