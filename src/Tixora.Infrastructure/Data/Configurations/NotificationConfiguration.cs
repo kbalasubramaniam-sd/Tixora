@@ -25,5 +25,6 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
 
         builder.HasIndex(n => n.RecipientUserId);
         builder.HasIndex(n => new { n.RecipientUserId, n.IsRead });
+        builder.HasIndex(n => new { n.RecipientUserId, n.IsRead, n.CreatedAt });
     }
 }

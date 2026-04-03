@@ -41,5 +41,9 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.HasIndex(t => t.AssignedToUserId);
         builder.HasIndex(t => t.CreatedAt);
         builder.HasIndex(t => t.CreatedByUserId);
+
+        // Compound indexes for common query patterns
+        builder.HasIndex(t => new { t.CreatedByUserId, t.CreatedAt });
+        builder.HasIndex(t => new { t.Status, t.CurrentStageOrder });
     }
 }
