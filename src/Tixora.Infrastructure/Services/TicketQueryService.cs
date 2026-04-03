@@ -414,7 +414,7 @@ public class TicketQueryService : ITicketQueryService
             .Select(a => new AuditEntryResponse(
                 Id: a.Id.ToString(),
                 Type: MapAuditType(a.ActionType),
-                Description: a.Details ?? $"{a.ActionType} by {a.Actor.FullName}",
+                Description: a.Details != null ? $"{a.Details} — {a.Actor.FullName}" : $"{a.ActionType} by {a.Actor.FullName}",
                 Timestamp: a.TimestampUtc
             ))
             .ToArray();
