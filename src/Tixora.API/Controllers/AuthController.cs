@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Tixora.Application.DTOs.Auth;
 using Tixora.Application.Interfaces;
 using Tixora.Domain.Enums;
@@ -14,10 +15,12 @@ namespace Tixora.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly ITixoraDbContext _db;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, ITixoraDbContext db)
     {
         _authService = authService;
+        _db = db;
     }
 
     /// <summary>
@@ -66,5 +69,27 @@ public class AuthController : ControllerBase
             true);
 
         return Ok(profile);
+    }
+
+    /// <summary>
+    /// Returns all active users for the demo login screen. No auth required.
+    /// </summary>
+    [HttpGet("demo-users")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<UserProfileResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDemoUsers()
+    {
+        var users = await _db.Users
+            .Where(u => u.IsActive)
+            .OrderBy(u => u.FullName)
+            .Select(u => new UserProfileResponse(
+                u.Id,
+                u.FullName,
+                u.Email,
+                u.Role.ToString(),
+                u.IsActive))
+            .ToListAsync();
+
+        return Ok(users);
     }
 }

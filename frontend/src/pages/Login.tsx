@@ -1,106 +1,172 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Input } from '@/components/ui/Input'
-import { Button } from '@/components/ui/Button'
+import { apiClient } from '@/api/client'
+import type { User } from '@/types/user'
+import type { UserRole } from '@/types/enums'
+
+/** Map PascalCase role strings to readable labels */
+const roleLabels: Record<string, string> = {
+  PartnershipTeam: 'Partnership Team',
+  LegalTeam: 'Legal Team',
+  ProductTeam: 'Product Team',
+  ExecutiveAuthority: 'Executive Authority',
+  IntegrationTeam: 'Integration Team',
+  DevTeam: 'Dev Team',
+  BusinessTeam: 'Business Team',
+  PartnerOps: 'Partner Ops',
+  SystemAdministrator: 'System Admin',
+}
+
+/** Distinct avatar background colors per role */
+const roleColors: Record<string, string> = {
+  PartnershipTeam: 'bg-primary',
+  LegalTeam: 'bg-tertiary',
+  ProductTeam: 'bg-secondary',
+  ExecutiveAuthority: 'bg-[#7c3aed]',
+  IntegrationTeam: 'bg-[#2563eb]',
+  DevTeam: 'bg-[#059669]',
+  BusinessTeam: 'bg-[#d97706]',
+  PartnerOps: 'bg-primary-container',
+  SystemAdministrator: 'bg-[#dc2626]',
+}
+
+function formatRole(role: UserRole): string {
+  return roleLabels[role] ?? String(role).replace(/([a-z])([A-Z])/g, '$1 $2')
+}
+
+function avatarColor(role: UserRole): string {
+  return roleColors[role] ?? 'bg-primary'
+}
 
 export default function Login() {
-  const navigate = useNavigate()
   const { login } = useAuth()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
-  const [loading, setLoading] = useState(false)
+  const [loggingInId, setLoggingInId] = useState<string | null>(null)
 
-  function validate() {
-    const errors: { email?: string; password?: string } = {}
-    if (!email.trim()) errors.email = 'Email is required'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Enter a valid email'
-    if (!password) errors.password = 'Password is required'
-    setFieldErrors(errors)
-    return Object.keys(errors).length === 0
-  }
+  useEffect(() => {
+    apiClient
+      .get<User[]>('/auth/demo-users')
+      .then((res) => setUsers(res.data))
+      .catch(() => setError('Failed to load demo users. Is the API running?'))
+      .finally(() => setLoading(false))
+  }, [])
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
+  async function handleSelect(user: User) {
+    if (loggingInId) return
     setError('')
-    if (!validate()) return
-    setLoading(true)
+    setLoggingInId(user.id)
+    localStorage.removeItem('tixora_token')
 
     try {
-      await login({ email, password })
-      navigate('/', { replace: true })
+      await login({ email: user.email, password: 'Password1!' })
+      // AuthContext handles redirect
     } catch {
-      setError('Invalid email or password')
-      setPassword('')
-    } finally {
-      setLoading(false)
+      setError('Login failed. Please try again.')
+      setLoggingInId(null)
     }
   }
 
   return (
     <div className="flex items-center justify-center min-h-svh bg-surface bg-[radial-gradient(circle_at_50%_50%,rgba(35,162,163,0.03),transparent_70%)]">
-      <div className="w-full max-w-[400px] bg-surface-container-lowest rounded-3xl p-8 shadow-ambient">
-        {/* Logo */}
-        <div className="text-center mb-8">
+      <div className="w-full max-w-2xl px-6 py-12">
+        {/* Branding */}
+        <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-primary-container tracking-tight">
-            Tixora
+            Tixora Demo
           </h1>
-          <p className="text-xs font-medium text-on-surface-variant mt-1">
-            Powering Every Request
+          <p className="text-sm font-medium text-on-surface-variant mt-2">
+            Select a user to continue
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-          <Input
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => { setEmail(e.target.value); setFieldErrors((prev) => ({ ...prev, email: undefined })) }}
-            error={fieldErrors.email}
-            autoFocus
-            autoComplete="email"
-          />
-
-          <Input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => { setPassword(e.target.value); setFieldErrors((prev) => ({ ...prev, password: undefined })) }}
-            error={fieldErrors.password}
-            autoComplete="current-password"
-            endAdornment={
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-on-surface-variant hover:text-on-surface transition-colors"
-                tabIndex={-1}
-              >
-                <span className="material-symbols-outlined text-xl">
-                  {showPassword ? 'visibility_off' : 'visibility'}
-                </span>
-              </button>
-            }
-          />
-
-          <div className="mt-2">
-            <Button
-              type="submit"
-              loading={loading}
-              size="lg"
-              className="w-full"
-            >
-              Sign In
-            </Button>
+        {/* Loading state */}
+        {loading && (
+          <div className="flex flex-col items-center gap-3 py-16">
+            <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <p className="text-sm text-on-surface-variant">Loading users...</p>
           </div>
+        )}
 
-          {error && (
-            <p className="text-xs text-error text-center">{error}</p>
-          )}
-        </form>
+        {/* Error state */}
+        {!loading && error && !users.length && (
+          <div className="bg-error-container/40 rounded-xl p-6 text-center">
+            <span className="material-symbols-outlined text-3xl text-error mb-2 block">error</span>
+            <p className="text-sm text-on-error-container">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 text-sm font-medium text-primary hover:underline"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Inline error (login failure) */}
+        {error && users.length > 0 && (
+          <p className="text-xs text-error text-center mb-4">{error}</p>
+        )}
+
+        {/* User grid */}
+        {!loading && users.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {users.map((user) => {
+              const isLoggingIn = loggingInId === user.id
+              const isDisabled = loggingInId !== null && !isLoggingIn
+
+              return (
+                <button
+                  key={user.id}
+                  onClick={() => handleSelect(user)}
+                  disabled={isDisabled}
+                  className={[
+                    'group relative bg-surface-container-lowest rounded-2xl p-5 text-left',
+                    'shadow-sm hover:shadow-lg hover:-translate-y-0.5',
+                    'transition-all duration-200 ease-out',
+                    'focus:outline-none focus:ring-2 focus:ring-primary/20',
+                    'active:scale-[0.98]',
+                    isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+                  ].join(' ')}
+                >
+                  {/* Loading overlay */}
+                  {isLoggingIn && (
+                    <div className="absolute inset-0 bg-surface-container-lowest/80 rounded-2xl flex items-center justify-center z-10">
+                      <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    </div>
+                  )}
+
+                  {/* Avatar */}
+                  <div
+                    className={[
+                      'w-11 h-11 rounded-full flex items-center justify-center mb-3',
+                      avatarColor(user.role),
+                    ].join(' ')}
+                  >
+                    <span className="text-lg font-bold text-white">
+                      {user.fullName.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+
+                  {/* Name */}
+                  <p className="text-sm font-semibold text-on-surface truncate">
+                    {user.fullName}
+                  </p>
+
+                  {/* Role badge */}
+                  <span className="inline-block mt-1.5 px-2 py-0.5 text-[11px] font-medium tracking-wide uppercase rounded-full bg-primary/8 text-primary">
+                    {formatRole(user.role)}
+                  </span>
+
+                  {/* Email */}
+                  <p className="text-xs text-on-surface-variant mt-2 truncate">
+                    {user.email}
+                  </p>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
