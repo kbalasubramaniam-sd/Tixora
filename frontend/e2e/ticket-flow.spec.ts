@@ -1,53 +1,53 @@
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect, type Page, type Browser, request as playwrightRequest } from '@playwright/test'
 import { loginViaApi, USERS } from './helpers/auth'
 
 const API_BASE = 'https://localhost:7255/api'
+const APP_BASE = 'http://localhost:5173'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-async function getToken(page: Page, email: string): Promise<string> {
-  const res = await page.request.post(`${API_BASE}/auth/login`, {
-    data: { email, password: 'Password1!' },
+/**
+ * Approve the current stage using a fresh browser context per user.
+ * This avoids auth caching issues when switching JWT tokens mid-session.
+ */
+async function approveStage(browser: Browser, ticketGuid: string, userEmail: string, comment: string) {
+  const context = await browser.newContext({
+    baseURL: APP_BASE,
     ignoreHTTPSErrors: true,
   })
-  expect(res.ok()).toBeTruthy()
-  const body = await res.json()
-  return body.token
-}
+  const page = await context.newPage()
 
-async function switchUser(page: Page, email: string) {
-  const token = await getToken(page, email)
-  await page.evaluate((t) => {
-    localStorage.setItem('tixora_token', t)
-  }, token)
-  await page.reload()
-}
+  try {
+    // Login via API in the fresh context
+    const res = await page.request.post(`${API_BASE}/auth/login`, {
+      data: { email: userEmail, password: 'Password1!' },
+      ignoreHTTPSErrors: true,
+    })
+    expect(res.ok()).toBeTruthy()
+    const { token } = await res.json()
 
-/** Navigate to ticket detail and approve the current stage. */
-async function approveStage(page: Page, ticketGuid: string, userEmail: string, comment: string) {
-  const token = await getToken(page, userEmail)
+    // Set token and navigate to ticket
+    await page.goto('/login')
+    await page.evaluate((t) => {
+      localStorage.setItem('tixora_token', t)
+    }, token)
+    await page.goto(`/tickets/${ticketGuid}`)
 
-  // Navigate to app root first to ensure we're on the right origin
-  await page.goto('/')
-  // Set the new user's token
-  await page.evaluate((t) => {
-    localStorage.setItem('tixora_token', t)
-  }, token)
-  // Full reload to pick up the new token
-  await page.goto(`/tickets/${ticketGuid}`)
+    // Wait for the approve button
+    const approveBtn = page.getByRole('button', { name: /Approve & Advance/i })
+    await expect(approveBtn).toBeVisible({ timeout: 20_000 })
+    await approveBtn.click()
 
-  // Wait for the approve button (sidebar may render after main content)
-  const approveBtn = page.getByRole('button', { name: /Approve & Advance/i })
-  await expect(approveBtn).toBeVisible({ timeout: 20_000 })
-  await approveBtn.click()
+    // Modal — fill comment and confirm
+    const commentBox = page.locator('textarea').last()
+    await commentBox.fill(comment)
+    await page.getByRole('button', { name: /Confirm/i }).click()
 
-  // Modal — fill comment and confirm
-  const commentBox = page.locator('textarea').last()
-  await commentBox.fill(comment)
-  await page.getByRole('button', { name: /Confirm/i }).click()
-
-  // Wait for action to complete
-  await expect(approveBtn).not.toBeVisible({ timeout: 15_000 })
+    // Wait for action to complete (button disappears after successful approval)
+    await expect(approveBtn).not.toBeVisible({ timeout: 15_000 })
+  } finally {
+    await context.close()
+  }
 }
 
 /** Extract ticket GUID from the current /tickets/:id URL. */
@@ -93,8 +93,12 @@ async function reviewAndSubmit(page: Page, partnerLabel: string, ticketIdPattern
 }
 
 /** Verify ticket reached Completed status with no remaining approve buttons. */
-async function verifyCompleted(page: Page) {
-  await expect(page.getByText(/Completed/i)).toBeVisible({ timeout: 15_000 })
+async function verifyCompleted(page: Page, ticketGuid: string) {
+  // Wait a moment for the backend to finalize status after last approval
+  await page.waitForTimeout(2_000)
+  // Reload the ticket detail page to see the updated status
+  await page.goto(`/tickets/${ticketGuid}`)
+  await expect(page.getByText('Completed', { exact: true })).toBeVisible({ timeout: 20_000 })
   await expect(page.getByRole('button', { name: /Approve/i })).not.toBeVisible({ timeout: 5_000 })
 }
 
@@ -104,14 +108,22 @@ async function verifyCompleted(page: Page) {
 //   None → [T-01] → Onboarded → [T-02] → UatCompleted → [T-03] → Live → [T-04] → Live (no change)
 
 test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => {
-  test.setTimeout(120_000)
+  test.setTimeout(180_000)
+
+  // Reset database to seed state before the test suite
+  test.beforeAll(async () => {
+    const apiContext = await playwrightRequest.newContext({ ignoreHTTPSErrors: true })
+    const res = await apiContext.post(`${API_BASE}/admin/test-reset`, { timeout: 30_000 })
+    expect(res.ok()).toBeTruthy()
+    await apiContext.dispose()
+  })
 
   // ═════════════════════════════════════════════════════════════════
   //  T-01: Agreement Validation & Sign-off (3 stages)
   //  None → Onboarded
   // ═════════════════════════════════════════════════════════════════
 
-  test('T-01: submit Agreement ticket and approve through 3 stages', async ({ page }) => {
+  test('T-01: submit Agreement ticket and approve through 3 stages', async ({ browser, page }) => {
     await loginViaApi(page, 'sarah')
     await selectProductAndTask(page, 'Rabet', 'Agreement Validation')
     await selectPartner(page, 'Al Ain Insurance')
@@ -119,11 +131,11 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T01-/)
 
     // Stage 1: Omar (Legal) → Stage 2: Hannoun (Product) → Stage 3: Fatima (EA)
-    await approveStage(page, guid, USERS.omar.email, 'Legal review complete.')
-    await approveStage(page, guid, USERS.hannoun.email, 'Product review approved.')
-    await approveStage(page, guid, USERS.fatima.email, 'Executive sign-off granted.')
+    await approveStage(browser, guid, USERS.omar.email, 'Legal review complete.')
+    await approveStage(browser, guid, USERS.hannoun.email, 'Product review approved.')
+    await approveStage(browser, guid, USERS.fatima.email, 'Executive sign-off granted.')
 
-    await verifyCompleted(page)
+    await verifyCompleted(page, guid)
   })
 
   // ═════════════════════════════════════════════════════════════════
@@ -131,7 +143,7 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
   //  Onboarded → UatCompleted
   // ═════════════════════════════════════════════════════════════════
 
-  test('T-02: submit UAT Access ticket with repeatable entries and approve 5 stages', async ({ page }) => {
+  test('T-02: submit UAT Access ticket with repeatable entries and approve 5 stages', async ({ browser, page }) => {
     await loginViaApi(page, 'sarah')
     await selectProductAndTask(page, 'Rabet', 'UAT Access Creation')
     await selectPartner(page, 'Al Ain Insurance')
@@ -145,13 +157,13 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T02-/)
 
     // 5 stages: ProductTeam → IntegrationTeam → DevTeam → PartnershipTeam (gate) → IntegrationTeam
-    await approveStage(page, guid, USERS.hannoun.email, 'Product team review OK.')
-    await approveStage(page, guid, USERS.khalid.email, 'Access provisioned.')
-    await approveStage(page, guid, USERS.ahmed.email, 'API credentials created.')
-    await approveStage(page, guid, USERS.sarah.email, 'UAT signal received from partner.')
-    await approveStage(page, guid, USERS.khalid.email, 'UAT sign-off complete.')
+    await approveStage(browser, guid, USERS.hannoun.email, 'Product team review OK.')
+    await approveStage(browser, guid, USERS.khalid.email, 'Access provisioned.')
+    await approveStage(browser, guid, USERS.ahmed.email, 'API credentials created.')
+    await approveStage(browser, guid, USERS.sarah.email, 'UAT signal received from partner.')
+    await approveStage(browser, guid, USERS.khalid.email, 'UAT sign-off complete.')
 
-    await verifyCompleted(page)
+    await verifyCompleted(page, guid)
   })
 
   // ═════════════════════════════════════════════════════════════════
@@ -161,6 +173,7 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
   // ═════════════════════════════════════════════════════════════════
 
   test('T-03: submit Production Account ticket (Portal+API) with multi-section form and approve 5 stages', async ({
+    browser,
     page,
   }) => {
     await loginViaApi(page, 'sarah')
@@ -168,8 +181,9 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
     await selectPartner(page, 'Al Ain Insurance')
 
     // ── API Opt-In toggle (enables PortalAndApi path → 5 stages) ──
-    const apiToggle = page.locator('input[type="checkbox"]')
-    await apiToggle.check()
+    // Fixed header/sidebar/footer overlay the toggle; use JS click on the input directly
+    await page.locator('input[name="apiOptIn"]').evaluate((el: HTMLInputElement) => el.click())
+    await expect(page.locator('input[name="apiOptIn"]')).toBeChecked()
 
     // ── Portal Admin User section ──
     await page.getByPlaceholder('Johnathan Doe').fill('Admin Test User')
@@ -196,13 +210,13 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T03-/)
 
     // 5 stages (PortalAndApi): PartnerOps → ProductTeam → DevTeam → BusinessTeam → IntegrationTeam
-    await approveStage(page, guid, USERS.vilina.email, 'Partner ops review complete.')
-    await approveStage(page, guid, USERS.hannoun.email, 'Product team sign-off approved.')
-    await approveStage(page, guid, USERS.ahmed.email, 'Dev provisioning done.')
-    await approveStage(page, guid, USERS.layla.email, 'Business provisioning done.')
-    await approveStage(page, guid, USERS.khalid.email, 'API provisioning complete.')
+    await approveStage(browser, guid, USERS.vilina.email, 'Partner ops review complete.')
+    await approveStage(browser, guid, USERS.hannoun.email, 'Product team sign-off approved.')
+    await approveStage(browser, guid, USERS.ahmed.email, 'Dev provisioning done.')
+    await approveStage(browser, guid, USERS.layla.email, 'Business provisioning done.')
+    await approveStage(browser, guid, USERS.khalid.email, 'API provisioning complete.')
 
-    await verifyCompleted(page)
+    await verifyCompleted(page, guid)
   })
 
   // ═════════════════════════════════════════════════════════════════
@@ -211,7 +225,7 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
   //  Simplest form: radio-card issue type + description textarea
   // ═════════════════════════════════════════════════════════════════
 
-  test('T-04: submit Support ticket with radio-card selection and approve 1 stage', async ({ page }) => {
+  test('T-04: submit Support ticket with radio-card selection and approve 1 stage', async ({ browser, page }) => {
     await loginViaApi(page, 'sarah')
     await selectProductAndTask(page, 'Rabet', 'Access & Credential Support')
     await selectPartner(page, 'Al Ain Insurance')
@@ -228,8 +242,8 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T04-/)
 
     // 1 stage: Ahmed (DevTeam) — Verify & Resolve
-    await approveStage(page, guid, USERS.ahmed.email, 'Password reset completed, new credentials sent.')
+    await approveStage(browser, guid, USERS.ahmed.email, 'Password reset completed, new credentials sent.')
 
-    await verifyCompleted(page)
+    await verifyCompleted(page, guid)
   })
 })

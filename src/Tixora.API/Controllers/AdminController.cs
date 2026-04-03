@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Tixora.Application.DTOs.Admin;
 using Tixora.Application.Interfaces;
 using Tixora.Domain.Enums;
@@ -13,10 +14,14 @@ namespace Tixora.API.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly IAdminService _adminService;
+    private readonly IWebHostEnvironment _env;
+    private readonly ITixoraDbContext _db;
 
-    public AdminController(IAdminService adminService)
+    public AdminController(IAdminService adminService, IWebHostEnvironment env, ITixoraDbContext db)
     {
         _adminService = adminService;
+        _env = env;
+        _db = db;
     }
 
     private UserRole? GetCurrentUserRole()
@@ -163,5 +168,33 @@ public class AdminController : ControllerBase
         if (RequireAdmin() is { } forbidden) return forbidden;
         var result = await _adminService.GetWorkflowConfigAsync();
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Reset database to seed state. Development environment only.
+    /// Deletes all tickets and resets partner lifecycles to None.
+    /// </summary>
+    [HttpPost("test-reset")]
+    [AllowAnonymous]
+    public async Task<IActionResult> TestReset()
+    {
+        if (!_env.IsDevelopment())
+            return NotFound();
+
+        // Single batch: delete transactional data + reset partner lifecycles
+        await _db.Database.ExecuteSqlRawAsync("""
+            DELETE FROM Shipments;
+            DELETE FROM Notifications;
+            DELETE FROM Documents;
+            DELETE FROM Comments;
+            DELETE FROM StageLogs;
+            DELETE FROM SlaPauses;
+            DELETE FROM SlaTrackers;
+            DELETE FROM AuditEntries;
+            DELETE FROM Tickets;
+            UPDATE PartnerProducts SET LifecycleState = 0;
+            """);
+
+        return Ok(new { message = "Database reset to seed state." });
     }
 }
