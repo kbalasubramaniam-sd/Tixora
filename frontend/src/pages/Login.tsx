@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { apiClient } from '@/api/client'
 import type { User } from '@/types/user'
 import type { UserRole } from '@/types/enums'
+import { TixoraLogo } from '@/components/ui/TixoraLogo'
 
 /** Map PascalCase role strings to readable labels */
 const roleLabels: Record<string, string> = {
@@ -74,11 +75,9 @@ export default function Login() {
     <div className="flex items-center justify-center min-h-svh bg-surface bg-[radial-gradient(circle_at_50%_50%,rgba(35,162,163,0.03),transparent_70%)]">
       <div className="w-full max-w-2xl px-6 py-12">
         {/* Branding */}
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-primary-container tracking-tight">
-            Tixora Demo
-          </h1>
-          <p className="text-sm font-medium text-on-surface-variant mt-2">
+        <div className="text-center mb-10 flex flex-col items-center">
+          <TixoraLogo size="lg" />
+          <p className="text-sm font-medium text-on-surface-variant mt-3">
             Select a user to continue
           </p>
         </div>

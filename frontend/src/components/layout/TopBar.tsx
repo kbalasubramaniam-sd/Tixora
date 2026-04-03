@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useUnreadCount } from '@/api/hooks/useNotifications'
 import { useGlobalSearch } from '@/api/hooks/useSearch'
 import { Chip } from '@/components/ui/Chip'
+import { TixoraLogo } from '@/components/ui/TixoraLogo'
 
 interface TopBarProps {
   onMenuToggle?: () => void
@@ -65,7 +66,7 @@ export function TopBar({ onMenuToggle, showMenuButton }: TopBarProps) {
 
       {/* Logo */}
       <div className="flex flex-col mr-4">
-        <span className="text-xl font-bold tracking-tighter text-primary leading-tight">Tixora</span>
+        <TixoraLogo size="sm" />
         <span className="text-[0.6875rem] text-on-surface-variant leading-tight hidden sm:block">
           Powering Every Request
         </span>
