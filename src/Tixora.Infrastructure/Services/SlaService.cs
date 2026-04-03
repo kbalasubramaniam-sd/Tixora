@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Tixora.Application.Interfaces;
 using Tixora.Domain.Entities;
 using Tixora.Domain.Enums;
@@ -8,19 +9,25 @@ namespace Tixora.Infrastructure.Services;
 public class SlaService : ISlaService
 {
     private readonly ITixoraDbContext _db;
+    private readonly IMemoryCache _cache;
     private static readonly TimeZoneInfo GstZone = TimeZoneInfo.CreateCustomTimeZone("GST", TimeSpan.FromHours(4), "Gulf Standard Time", "Gulf Standard Time");
 
-    public SlaService(ITixoraDbContext db)
+    public SlaService(ITixoraDbContext db, IMemoryCache cache)
     {
         _db = db;
+        _cache = cache;
     }
 
     public async Task<double> CalculateBusinessHoursAsync(DateTime startUtc, DateTime endUtc)
     {
         if (endUtc <= startUtc) return 0;
 
-        var configs = await _db.BusinessHoursConfigs.ToListAsync();
-        var configByDay = configs.ToDictionary(c => c.DayOfWeek);
+        var configByDay = await _cache.GetOrCreateAsync("sla:business-hours", async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+            var configs = await _db.BusinessHoursConfigs.AsNoTracking().ToListAsync();
+            return configs.ToDictionary(c => c.DayOfWeek);
+        })!;
 
         // Convert to GST for business hours calculation
         var startGst = TimeZoneInfo.ConvertTimeFromUtc(startUtc, GstZone);
@@ -28,11 +35,17 @@ public class SlaService : ISlaService
         var startDate = DateOnly.FromDateTime(startGst);
         var endDate = DateOnly.FromDateTime(endGst);
 
-        var holidays = await _db.Holidays
-            .Where(h => h.Date >= startDate && h.Date <= endDate)
-            .Select(h => h.Date)
-            .ToListAsync();
-        var holidaySet = new HashSet<DateOnly>(holidays);
+        var cacheKey = $"sla:holidays:{startDate:yyyyMMdd}-{endDate:yyyyMMdd}";
+        var holidaySet = await _cache.GetOrCreateAsync(cacheKey, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+            var holidays = await _db.Holidays
+                .AsNoTracking()
+                .Where(h => h.Date >= startDate && h.Date <= endDate)
+                .Select(h => h.Date)
+                .ToListAsync();
+            return new HashSet<DateOnly>(holidays);
+        })!;
 
         double totalHours = 0;
         var currentDate = startDate;

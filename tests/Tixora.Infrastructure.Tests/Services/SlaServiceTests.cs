@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Tixora.Domain.Entities;
 using Tixora.Domain.Enums;
 using Tixora.Infrastructure.Data;
@@ -28,7 +29,7 @@ public class SlaServiceTests : IDisposable
             .Options;
 
         _db = new TixoraDbContext(options);
-        _slaService = new SlaService(_db);
+        _slaService = new SlaService(_db, new MemoryCache(new MemoryCacheOptions()));
 
         SeedBusinessHoursConfig();
         SeedTicketData();

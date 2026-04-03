@@ -1,5 +1,6 @@
 // File: tests/Tixora.Infrastructure.Tests/Services/WorkflowEngineTests.cs
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Tixora.Application.DTOs.Tickets;
 using Tixora.Domain.Entities;
@@ -29,7 +30,7 @@ public class WorkflowEngineTests : IDisposable
             .Options;
 
         _db = new TixoraDbContext(options);
-        var slaService = new SlaService(_db);
+        var slaService = new SlaService(_db, new MemoryCache(new MemoryCacheOptions()));
         var emailSender = new NoOpEmailSender(NullLogger<NoOpEmailSender>.Instance);
         var notificationService = new NotificationService(_db, emailSender, NullLogger<NotificationService>.Instance);
         _engine = new WorkflowEngine(_db, slaService, notificationService);
