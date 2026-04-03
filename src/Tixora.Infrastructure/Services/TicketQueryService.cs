@@ -232,11 +232,11 @@ public class TicketQueryService : ITicketQueryService
 
         var scopedTicketIds = scopedTickets.Select(t => t.Id);
 
-        // Run all stats in parallel — 2 queries instead of 5
-        var openCountTask = scopedTickets.CountAsync();
+        // Sequential: DbContext is not thread-safe, can't use Task.WhenAll
+        var openCount = await scopedTickets.CountAsync();
 
         // Single query for all SLA stats: breach count, compliance, avg resolution
-        var slaStatsTask = _db.SlaTrackers.AsNoTracking()
+        var sla = await _db.SlaTrackers.AsNoTracking()
             .Where(s => role == UserRole.PartnershipTeam
                 ? s.Ticket.CreatedByUserId == userId
                 : role == UserRole.SystemAdministrator
@@ -252,11 +252,6 @@ public class TicketQueryService : ITicketQueryService
                     .Average(s => (double?)s.BusinessHoursElapsed)
             })
             .FirstOrDefaultAsync();
-
-        await Task.WhenAll(openCountTask, slaStatsTask);
-
-        var openCount = openCountTask.Result;
-        var sla = slaStatsTask.Result;
 
         var breachCount = sla?.BreachCount ?? 0;
         var totalCompleted = sla?.TotalCompleted ?? 0;
