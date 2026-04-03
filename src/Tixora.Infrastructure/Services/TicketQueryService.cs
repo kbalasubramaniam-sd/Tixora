@@ -33,6 +33,9 @@ public class TicketQueryService : ITicketQueryService
 
         var baseQuery = _db.Tickets
             .AsNoTracking()
+            .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
+            .Include(t => t.CreatedBy)
+            .Include(t => t.WorkflowDefinition).ThenInclude(w => w.Stages)
             .Where(t => t.CreatedByUserId == userId);
 
         var totalCount = await baseQuery.CountAsync();
@@ -85,6 +88,9 @@ public class TicketQueryService : ITicketQueryService
 
         var query = _db.Tickets
             .AsNoTracking()
+            .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
+            .Include(t => t.CreatedBy)
+            .Include(t => t.WorkflowDefinition).ThenInclude(w => w.Stages)
             .Where(t => !TerminalStatuses.Contains(t.Status));
 
         // Visibility by role
@@ -156,6 +162,9 @@ public class TicketQueryService : ITicketQueryService
     {
         var query = _db.Tickets
             .AsNoTracking()
+            .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
+            .Include(t => t.CreatedBy)
+            .Include(t => t.WorkflowDefinition).ThenInclude(w => w.Stages)
             .Where(t => !TerminalStatuses.Contains(t.Status));
 
         if (role == UserRole.PartnershipTeam)
