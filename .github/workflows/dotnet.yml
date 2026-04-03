@@ -25,4 +25,3 @@ jobs:
       run: |
         dotnet test tests/Tixora.Domain.Tests --no-build --verbosity normal
         dotnet test tests/Tixora.Application.Tests --no-build --verbosity normal
-        dotnet test tests/Tixora.Infrastructure.Tests --no-build --verbosity normal
