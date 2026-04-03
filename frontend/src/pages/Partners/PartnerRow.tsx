@@ -1,6 +1,6 @@
 import type { PartnerSummary } from '@/api/endpoints/partners'
 import { LifecycleState } from '@/types/enums'
-import { PRODUCT_LABELS } from '@/utils/labels'
+import { PRODUCT_LABELS, LIFECYCLE_LABELS } from '@/utils/labels'
 import { getInitials } from '@/utils/format'
 
 const statusBadge: Record<string, string> = {
@@ -11,13 +11,7 @@ const statusBadge: Record<string, string> = {
   [LifecycleState.None]: 'bg-surface-container text-on-surface-variant',
 }
 
-const statusLabel: Record<string, string> = {
-  [LifecycleState.Live]: 'Live',
-  [LifecycleState.UatCompleted]: 'UAT Done',
-  [LifecycleState.UatActive]: 'UAT',
-  [LifecycleState.Onboarded]: 'Onboarded',
-  [LifecycleState.None]: 'None',
-}
+const statusLabel = LIFECYCLE_LABELS
 
 interface PartnerRowProps {
   partner: PartnerSummary
