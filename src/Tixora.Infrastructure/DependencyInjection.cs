@@ -19,6 +19,7 @@ public static class DependencyInjection
                 b => b.MigrationsAssembly(typeof(TixoraDbContext).Assembly.FullName)));
 
         services.AddScoped<ITixoraDbContext>(provider => provider.GetRequiredService<TixoraDbContext>());
+        services.AddMemoryCache();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IWorkflowEngine, WorkflowEngine>();
         services.AddScoped<ITicketQueryService, TicketQueryService>();
