@@ -94,21 +94,49 @@ Server=tixora-db.abc123.me-south-1.rds.amazonaws.com,1433;Database=TixoraDb;User
 
 ### Step 2.4: Run EF Migration
 
-From your local machine, pointing at the RDS instance:
+**How migrations work:** Migrations are run from your local machine, targeting the RDS database. You do this once on first deploy, and again whenever you add new entities or change the schema. The API itself never runs migrations — it only reads/writes data.
+
+**Why local, not auto-migrate:** Running migrations manually means you see exactly what SQL is being executed, can review it, and can roll back if something goes wrong. Auto-migrate on startup is risky — a bad migration deploys and runs before you can stop it.
+
+**When to run migrations:**
+- First deploy (creates all tables + seed data)
+- After adding/changing entities (e.g., new DocumentType column, new Shipment table)
+- After merging branches that added new entities
+
+**Steps:**
 
 ```bash
-# Set the connection string temporarily
+# 1. Set the connection string to point at RDS (one-time per terminal session)
 export ConnectionStrings__DefaultConnection="Server=tixora-db.abc123.me-south-1.rds.amazonaws.com,1433;Database=TixoraDb;User Id=tixoraadmin;Password=YOUR_PASSWORD;TrustServerCertificate=True;"
 
-# Generate migration for all E3/E4/FedEx entities
+# 2. (First time only) Generate a migration if one doesn't exist yet
 cd C:/Claude/Tixora
-dotnet ef migrations add E3E4FedExEntities --project src/Tixora.Infrastructure --startup-project src/Tixora.API
+dotnet ef migrations add InitialDeploy --project src/Tixora.Infrastructure --startup-project src/Tixora.API
 
-# Apply migration to RDS
+# 3. Preview the SQL that will run (optional but recommended)
+dotnet ef migrations script --project src/Tixora.Infrastructure --startup-project src/Tixora.API
+
+# 4. Apply the migration to RDS
 dotnet ef database update --project src/Tixora.Infrastructure --startup-project src/Tixora.API
 ```
 
-This creates the database and all tables with seed data on RDS.
+This creates the database, all tables, indexes, and seed data (products, users, partners, workflows, business hours) on RDS.
+
+**For subsequent deployments** (when schema changes):
+```bash
+# Generate a new migration for the changes
+dotnet ef migrations add DescriptiveName --project src/Tixora.Infrastructure --startup-project src/Tixora.API
+
+# Review the generated file in src/Tixora.Infrastructure/Migrations/
+# Then apply
+dotnet ef database update --project src/Tixora.Infrastructure --startup-project src/Tixora.API
+```
+
+**Rollback** (if a migration went wrong):
+```bash
+# Roll back to the previous migration
+dotnet ef database update PreviousMigrationName --project src/Tixora.Infrastructure --startup-project src/Tixora.API
+```
 
 ---
 
