@@ -704,6 +704,8 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
 
   return (
     <>
+      {/* Hidden file input at top level — avoids re-mount during form re-renders (Windows perf) */}
+      <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileInputChange} />
       <div className="max-w-5xl mx-auto pb-36">
         {/* Page Header — Stitch V2 style */}
         <div className="mb-12">
@@ -832,7 +834,6 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                   All uploads must be PDF or High-Res Image
                 </span>
               </div>
-              <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileInputChange} />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {schema.requiredDocuments.map((doc) => (
                   <FileUpload
