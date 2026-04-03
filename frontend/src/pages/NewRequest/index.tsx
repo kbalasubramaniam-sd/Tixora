@@ -25,7 +25,7 @@ export default function NewRequest() {
   const [task, setTask] = useState<TaskOption | null>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formData, setFormData] = useState<Record<string, any>>({})
-  const [result, setResult] = useState<{ id: string; ticketId: string; currentStageName: string | null } | null>(null)
+  const [result, setResult] = useState<{ id: string; ticketId: string; currentStageName: string | null; assignedToName: string | null } | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const submitMutation = useSubmitTicket()
@@ -89,7 +89,7 @@ export default function NewRequest() {
         await Promise.all(uploads)
       }
 
-      setResult({ id: res.id, ticketId: res.ticketId, currentStageName: res.currentStageName })
+      setResult({ id: res.id, ticketId: res.ticketId, currentStageName: res.currentStageName, assignedToName: res.assignedToName })
       setStep(4)
     } catch {
       setSubmitError('Failed to submit ticket. Please check your connection and try again.')
@@ -98,7 +98,7 @@ export default function NewRequest() {
 
   // Confirmation is step 4 — no stepper shown
   if (step === 4 && result) {
-    return <ConfirmationStep id={result.id} ticketId={result.ticketId} routedTo={result.currentStageName ?? 'Processing'} />
+    return <ConfirmationStep id={result.id} ticketId={result.ticketId} routedTo={result.currentStageName ?? 'Processing'} assignedTo={result.assignedToName} />
   }
 
   return (

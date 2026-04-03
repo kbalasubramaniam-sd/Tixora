@@ -5,9 +5,10 @@ interface ConfirmationStepProps {
   id: string
   ticketId: string
   routedTo: string
+  assignedTo?: string | null
 }
 
-export function ConfirmationStep({ id, ticketId, routedTo }: ConfirmationStepProps) {
+export function ConfirmationStep({ id, ticketId, routedTo, assignedTo }: ConfirmationStepProps) {
   return (
     <div className="max-w-lg mx-auto text-center py-16">
       <div className="bg-surface-container-lowest rounded-3xl p-12 shadow-xl shadow-teal-900/5">
@@ -55,6 +56,9 @@ export function ConfirmationStep({ id, ticketId, routedTo }: ConfirmationStepPro
             </div>
             <div>
               <p className="text-xs font-bold text-on-surface">{routedTo}</p>
+              {assignedTo && (
+                <p className="text-xs text-primary font-medium">Assigned to {assignedTo}</p>
+              )}
               <p className="text-xs text-on-surface-variant">You'll receive a notification when it advances</p>
             </div>
           </div>
