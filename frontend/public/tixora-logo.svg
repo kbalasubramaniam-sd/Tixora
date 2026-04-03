@@ -1,0 +1,216 @@
+<svg width="680" height="420" viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg" style="background:#F0FAF8;display:block;">
+<defs>
+  <style>
+    @keyframes ropeFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+    @keyframes fadeGlow  { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
+    .rope-group { animation: ropeFloat 4s ease-in-out infinite; }
+    .halo       { animation: fadeGlow 3s ease-in-out infinite; }
+  </style>
+  <linearGradient id="gBg" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#F0FAF8"/><stop offset="100%" stop-color="#E6F7F4"/>
+  </linearGradient>
+  <linearGradient id="gBrand" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#0D9488"/><stop offset="100%" stop-color="#0F766E"/>
+  </linearGradient>
+  <linearGradient id="gWord" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%" stop-color="#134E4A"/><stop offset="60%" stop-color="#0D9488"/><stop offset="100%" stop-color="#14B8A6"/>
+  </linearGradient>
+  <linearGradient id="gRope" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="#0D9488" stop-opacity="0.15"/>
+    <stop offset="20%"  stop-color="#0D9488" stop-opacity="0.8"/>
+    <stop offset="80%"  stop-color="#0D9488" stop-opacity="0.8"/>
+    <stop offset="100%" stop-color="#0D9488" stop-opacity="0.15"/>
+  </linearGradient>
+  <linearGradient id="gTicket" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#F0FDFB"/>
+  </linearGradient>
+  <linearGradient id="gTag" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%" stop-color="#0F766E"/><stop offset="100%" stop-color="#0D9488"/>
+  </linearGradient>
+  <radialGradient id="gGlow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#99F6E4" stop-opacity="0.4"/><stop offset="100%" stop-color="#99F6E4" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="fWord" x="-5%" y="-20%" width="110%" height="140%">
+    <feDropShadow dx="0" dy="2" stdDeviation="8" flood-color="#0D9488" flood-opacity="0.15"/>
+  </filter>
+  <filter id="fTicket" x="-20%" y="-20%" width="140%" height="140%">
+    <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0D9488" flood-opacity="0.12"/>
+    <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.06"/>
+  </filter>
+  <filter id="fRope" x="-5%" y="-50%" width="110%" height="200%">
+    <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#0D9488" flood-opacity="0.2"/>
+  </filter>
+  <filter id="fPin" x="-100%" y="-100%" width="300%" height="300%">
+    <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#0D9488" flood-opacity="0.4"/>
+  </filter>
+  <filter id="fCard" x="-2%" y="-2%" width="104%" height="104%">
+    <feDropShadow dx="0" dy="8" stdDeviation="24" flood-color="#0D9488" flood-opacity="0.08"/>
+    <feDropShadow dx="0" dy="2" stdDeviation="6"  flood-color="#000"    flood-opacity="0.04"/>
+  </filter>
+</defs>
+
+<rect width="680" height="420" fill="url(#gBg)"/>
+<ellipse cx="340" cy="170" rx="320" ry="150" fill="url(#gGlow)" class="halo"/>
+
+<rect x="28" y="20" width="624" height="380" rx="20" fill="#FFFFFF" fill-opacity="0.75" filter="url(#fCard)"/>
+<rect x="28" y="20" width="624" height="380" rx="20" fill="none" stroke="#0D9488" stroke-width="0.7" opacity="0.15"/>
+
+<line x1="28"  y1="52"  x2="28"  y2="20"  stroke="#0D9488" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+<line x1="28"  y1="20"  x2="56"  y2="20"  stroke="#0D9488" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+<line x1="652" y1="368" x2="652" y2="400" stroke="#0D9488" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+<line x1="652" y1="400" x2="624" y2="400" stroke="#0D9488" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+<text x="340" y="188"
+  font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+  font-size="120" font-weight="700" letter-spacing="-4"
+  text-anchor="middle" fill="url(#gWord)" filter="url(#fWord)">Tixora</text>
+<rect x="215" y="198" width="250" height="1.5" rx="0.75" fill="url(#gBrand)" opacity="0.35"/>
+
+<g class="rope-group">
+  <path d="M 56 220 Q 312 244 568 220" fill="none" stroke="#0D9488" stroke-width="3" stroke-linecap="round" opacity="0.06"/>
+  <path d="M 56 220 Q 312 242 568 220" fill="none" stroke="url(#gRope)" stroke-width="2" stroke-linecap="round" filter="url(#fRope)"/>
+  <path d="M 56 220 Q 312 242 568 220" fill="none" stroke="#fff" stroke-width="0.8" stroke-dasharray="5 9" stroke-linecap="round" opacity="0.6"/>
+
+  <line x1="104" y1="223" x2="104" y2="235" stroke="#0D9488" stroke-width="0.8" opacity="0.4"/>
+  <circle cx="104" cy="223" r="1.8" fill="#0D9488" opacity="0.6" filter="url(#fPin)"/>
+  <g filter="url(#fTicket)">
+    <rect x="86" y="235" width="36" height="26" rx="5" fill="url(#gTicket)"/>
+    <rect x="86" y="235" width="36" height="26" rx="5" fill="none" stroke="#0D9488" stroke-width="0.7" opacity="0.25"/>
+    <line x1="102" y1="236" x2="102" y2="260" stroke="#0D9488" stroke-width="0.7" stroke-dasharray="2.5 2.5" opacity="0.2"/>
+    <rect x="89"  y="241" width="11" height="2"   rx="1"    fill="#0D9488" opacity="0.6"/>
+    <rect x="89"  y="245" width="9"  height="1.5" rx="0.75" fill="#0D9488" opacity="0.25"/>
+    <rect x="89"  y="248" width="10" height="1.5" rx="0.75" fill="#0D9488" opacity="0.18"/>
+    <rect x="105" y="240" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.5"/>
+    <rect x="109" y="240" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.3"/>
+    <rect x="112" y="240" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.45"/>
+    <rect x="115" y="240" width="1"   height="16" rx="0.5" fill="#0D9488" opacity="0.25"/>
+    <rect x="118" y="240" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.4"/>
+    <circle cx="86"  cy="248" r="4" fill="#F0FAF8"/>
+    <circle cx="122" cy="248" r="4" fill="#F0FAF8"/>
+  </g>
+
+  <line x1="178" y1="230" x2="178" y2="242" stroke="#0D9488" stroke-width="0.8" opacity="0.4"/>
+  <circle cx="178" cy="230" r="1.8" fill="#0D9488" opacity="0.6" filter="url(#fPin)"/>
+  <g filter="url(#fTicket)">
+    <rect x="160" y="242" width="36" height="26" rx="5" fill="url(#gTicket)"/>
+    <rect x="160" y="242" width="36" height="26" rx="5" fill="none" stroke="#0D9488" stroke-width="0.7" opacity="0.25"/>
+    <line x1="176" y1="243" x2="176" y2="267" stroke="#0D9488" stroke-width="0.7" stroke-dasharray="2.5 2.5" opacity="0.2"/>
+    <rect x="163" y="248" width="11" height="2"   rx="1"    fill="#0D9488" opacity="0.6"/>
+    <rect x="163" y="252" width="9"  height="1.5" rx="0.75" fill="#0D9488" opacity="0.25"/>
+    <rect x="163" y="255" width="10" height="1.5" rx="0.75" fill="#0D9488" opacity="0.18"/>
+    <rect x="179" y="247" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.5"/>
+    <rect x="183" y="247" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.3"/>
+    <rect x="186" y="247" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.45"/>
+    <rect x="189" y="247" width="1"   height="16" rx="0.5" fill="#0D9488" opacity="0.25"/>
+    <rect x="192" y="247" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.4"/>
+    <circle cx="160" cy="255" r="4" fill="#F0FAF8"/>
+    <circle cx="196" cy="255" r="4" fill="#F0FAF8"/>
+  </g>
+
+  <line x1="252" y1="236" x2="252" y2="248" stroke="#0D9488" stroke-width="0.8" opacity="0.4"/>
+  <circle cx="252" cy="236" r="1.8" fill="#0D9488" opacity="0.6" filter="url(#fPin)"/>
+  <g filter="url(#fTicket)">
+    <rect x="234" y="248" width="36" height="26" rx="5" fill="url(#gTicket)"/>
+    <rect x="234" y="248" width="36" height="26" rx="5" fill="none" stroke="#0D9488" stroke-width="0.7" opacity="0.25"/>
+    <line x1="250" y1="249" x2="250" y2="273" stroke="#0D9488" stroke-width="0.7" stroke-dasharray="2.5 2.5" opacity="0.2"/>
+    <rect x="237" y="254" width="11" height="2"   rx="1"    fill="#0D9488" opacity="0.6"/>
+    <rect x="237" y="258" width="9"  height="1.5" rx="0.75" fill="#0D9488" opacity="0.25"/>
+    <rect x="237" y="261" width="10" height="1.5" rx="0.75" fill="#0D9488" opacity="0.18"/>
+    <rect x="253" y="253" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.5"/>
+    <rect x="257" y="253" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.3"/>
+    <rect x="260" y="253" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.45"/>
+    <rect x="263" y="253" width="1"   height="16" rx="0.5" fill="#0D9488" opacity="0.25"/>
+    <rect x="266" y="253" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.4"/>
+    <circle cx="234" cy="261" r="4" fill="#F0FAF8"/>
+    <circle cx="270" cy="261" r="4" fill="#F0FAF8"/>
+  </g>
+
+  <line x1="312" y1="240" x2="312" y2="252" stroke="#0D9488" stroke-width="0.8" opacity="0.4"/>
+  <circle cx="312" cy="240" r="1.8" fill="#0D9488" opacity="0.6" filter="url(#fPin)"/>
+  <g filter="url(#fTicket)">
+    <rect x="294" y="252" width="36" height="26" rx="5" fill="url(#gTicket)"/>
+    <rect x="294" y="252" width="36" height="26" rx="5" fill="none" stroke="#0D9488" stroke-width="0.9" opacity="0.35"/>
+    <line x1="310" y1="253" x2="310" y2="277" stroke="#0D9488" stroke-width="0.7" stroke-dasharray="2.5 2.5" opacity="0.2"/>
+    <rect x="297" y="258" width="11" height="2"   rx="1"    fill="#0D9488" opacity="0.7"/>
+    <rect x="297" y="262" width="9"  height="1.5" rx="0.75" fill="#0D9488" opacity="0.3"/>
+    <rect x="297" y="265" width="10" height="1.5" rx="0.75" fill="#0D9488" opacity="0.22"/>
+    <rect x="313" y="257" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.55"/>
+    <rect x="317" y="257" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.35"/>
+    <rect x="320" y="257" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.5"/>
+    <rect x="323" y="257" width="1"   height="16" rx="0.5" fill="#0D9488" opacity="0.3"/>
+    <rect x="326" y="257" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.48"/>
+    <circle cx="294" cy="265" r="4" fill="#F0FAF8"/>
+    <circle cx="330" cy="265" r="4" fill="#F0FAF8"/>
+  </g>
+
+  <line x1="374" y1="236" x2="374" y2="248" stroke="#0D9488" stroke-width="0.8" opacity="0.4"/>
+  <circle cx="374" cy="236" r="1.8" fill="#0D9488" opacity="0.6" filter="url(#fPin)"/>
+  <g filter="url(#fTicket)">
+    <rect x="356" y="248" width="36" height="26" rx="5" fill="url(#gTicket)"/>
+    <rect x="356" y="248" width="36" height="26" rx="5" fill="none" stroke="#0D9488" stroke-width="0.7" opacity="0.25"/>
+    <line x1="372" y1="249" x2="372" y2="273" stroke="#0D9488" stroke-width="0.7" stroke-dasharray="2.5 2.5" opacity="0.2"/>
+    <rect x="359" y="254" width="11" height="2"   rx="1"    fill="#0D9488" opacity="0.6"/>
+    <rect x="359" y="258" width="9"  height="1.5" rx="0.75" fill="#0D9488" opacity="0.25"/>
+    <rect x="359" y="261" width="10" height="1.5" rx="0.75" fill="#0D9488" opacity="0.18"/>
+    <rect x="375" y="253" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.5"/>
+    <rect x="379" y="253" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.3"/>
+    <rect x="382" y="253" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.45"/>
+    <rect x="385" y="253" width="1"   height="16" rx="0.5" fill="#0D9488" opacity="0.25"/>
+    <rect x="388" y="253" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.4"/>
+    <circle cx="356" cy="261" r="4" fill="#F0FAF8"/>
+    <circle cx="392" cy="261" r="4" fill="#F0FAF8"/>
+  </g>
+
+  <line x1="448" y1="230" x2="448" y2="242" stroke="#0D9488" stroke-width="0.8" opacity="0.4"/>
+  <circle cx="448" cy="230" r="1.8" fill="#0D9488" opacity="0.6" filter="url(#fPin)"/>
+  <g filter="url(#fTicket)">
+    <rect x="430" y="242" width="36" height="26" rx="5" fill="url(#gTicket)"/>
+    <rect x="430" y="242" width="36" height="26" rx="5" fill="none" stroke="#0D9488" stroke-width="0.7" opacity="0.25"/>
+    <line x1="446" y1="243" x2="446" y2="267" stroke="#0D9488" stroke-width="0.7" stroke-dasharray="2.5 2.5" opacity="0.2"/>
+    <rect x="433" y="248" width="11" height="2"   rx="1"    fill="#0D9488" opacity="0.6"/>
+    <rect x="433" y="252" width="9"  height="1.5" rx="0.75" fill="#0D9488" opacity="0.25"/>
+    <rect x="433" y="255" width="10" height="1.5" rx="0.75" fill="#0D9488" opacity="0.18"/>
+    <rect x="449" y="247" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.5"/>
+    <rect x="453" y="247" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.3"/>
+    <rect x="456" y="247" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.45"/>
+    <rect x="459" y="247" width="1"   height="16" rx="0.5" fill="#0D9488" opacity="0.25"/>
+    <rect x="462" y="247" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.4"/>
+    <circle cx="430" cy="255" r="4" fill="#F0FAF8"/>
+    <circle cx="466" cy="255" r="4" fill="#F0FAF8"/>
+  </g>
+
+  <line x1="520" y1="223" x2="520" y2="235" stroke="#0D9488" stroke-width="0.8" opacity="0.4"/>
+  <circle cx="520" cy="223" r="1.8" fill="#0D9488" opacity="0.6" filter="url(#fPin)"/>
+  <g filter="url(#fTicket)">
+    <rect x="502" y="235" width="36" height="26" rx="5" fill="url(#gTicket)"/>
+    <rect x="502" y="235" width="36" height="26" rx="5" fill="none" stroke="#0D9488" stroke-width="0.9" opacity="0.4"/>
+    <line x1="518" y1="236" x2="518" y2="260" stroke="#0D9488" stroke-width="0.7" stroke-dasharray="2.5 2.5" opacity="0.2"/>
+    <rect x="505" y="241" width="11" height="2"   rx="1"    fill="#0D9488" opacity="0.7"/>
+    <rect x="505" y="245" width="9"  height="1.5" rx="0.75" fill="#0D9488" opacity="0.3"/>
+    <path d="M506 253 L510 257 L518 248" fill="none" stroke="#0D9488" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+    <rect x="521" y="240" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.6"/>
+    <rect x="525" y="240" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.38"/>
+    <rect x="528" y="240" width="2"   height="16" rx="0.5" fill="#0D9488" opacity="0.55"/>
+    <rect x="531" y="240" width="1"   height="16" rx="0.5" fill="#0D9488" opacity="0.3"/>
+    <rect x="534" y="240" width="1.5" height="16" rx="0.5" fill="#0D9488" opacity="0.5"/>
+    <circle cx="502" cy="248" r="4" fill="#F0FAF8"/>
+    <circle cx="538" cy="248" r="4" fill="#F0FAF8"/>
+  </g>
+
+  <circle cx="56"  cy="220" r="4" fill="#0D9488" opacity="0.7" filter="url(#fPin)"/>
+  <circle cx="568" cy="220" r="4" fill="#0D9488" opacity="0.7" filter="url(#fPin)"/>
+</g>
+
+<text x="340" y="312"
+  font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+  font-size="11.5" font-weight="300" letter-spacing="6"
+  text-anchor="middle" fill="url(#gTag)" opacity="0.65">POWERING EVERY REQUEST.</text>
+
+<line x1="56" y1="328" x2="624" y2="328" stroke="#0D9488" stroke-width="0.5" opacity="0.12"/>
+
+<text x="340" y="352"
+  font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+  font-size="11" font-weight="300" letter-spacing="6"
+  text-anchor="middle" fill="#0D9488" opacity="0.28">SLASHDATA</text>
+
+</svg>

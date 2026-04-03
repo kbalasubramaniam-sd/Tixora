@@ -2,6 +2,7 @@ import { NavLink } from 'react-router'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@/types/enums'
 import { cn } from '@/utils/cn'
+import { TixoraLogo } from '@/components/ui/TixoraLogo'
 
 interface NavItem {
   label: string
@@ -178,7 +179,7 @@ export function Sidebar({ mode, isOverlayOpen, onClose, onToggleCollapse }: Side
         {/* Overlay sidebar */}
         <div className="fixed left-0 top-0 bottom-0 w-60 bg-surface-container-low z-50 flex flex-col py-4 px-3 overflow-y-auto shadow-2xl">
           <div className="flex items-center justify-between mb-4 pt-2">
-            <span className="text-lg font-bold text-primary">Tixora</span>
+            <TixoraLogo size="sm" />
             <button
               onClick={onClose}
               className="p-2 rounded-lg hover:bg-surface-container-high transition-colors"

@@ -28,6 +28,7 @@ export async function loginViaApi(page: Page, user: UserKey = 'parankush') {
   const response = await page.request.post(`${API_BASE_URL}/auth/login`, {
     data: { email, password: DEFAULT_PASSWORD },
     ignoreHTTPSErrors: true,
+    timeout: 30_000,
   })
 
   if (!response.ok()) {
