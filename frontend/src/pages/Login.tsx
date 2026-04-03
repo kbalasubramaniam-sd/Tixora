@@ -76,8 +76,8 @@ export default function Login() {
       <div className="w-full max-w-2xl px-6 py-12">
         {/* Branding */}
         <div className="text-center mb-10 flex flex-col items-center">
-          <TixoraLogo size="lg" />
-          <p className="text-sm font-medium text-on-surface-variant mt-3">
+          <img src="/tixora-logo.svg" alt="Tixora" className="w-full max-w-md mb-4" />
+          <p className="text-sm font-medium text-on-surface-variant">
             Select a user to continue
           </p>
         </div>
