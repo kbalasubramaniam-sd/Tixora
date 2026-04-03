@@ -34,7 +34,7 @@ async function approveStage(browser: Browser, ticketGuid: string, userEmail: str
     await page.goto(`/tickets/${ticketGuid}`)
 
     // Wait for the approve button
-    const approveBtn = page.getByRole('button', { name: /Approve & Advance/i })
+    const approveBtn = page.getByRole('button', { name: /Approve & Advance|Complete & Close/i })
     await expect(approveBtn).toBeVisible({ timeout: 20_000 })
     await approveBtn.click()
 
@@ -87,7 +87,7 @@ async function reviewAndSubmit(page: Page, partnerLabel: string, ticketIdPattern
   expect(ticketIdText).toMatch(ticketIdPattern)
 
   // Navigate to detail and return GUID
-  await page.getByRole('link', { name: /View Ticket/i }).click()
+  await page.getByRole('link', { name: /View Ticket/i }).first().click()
   await expect(page).toHaveURL(/\/tickets\//, { timeout: 10_000 })
   return extractTicketGuid(page)
 }
@@ -124,27 +124,27 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
   // ═════════════════════════════════════════════════════════════════
 
   test('T-01: submit Agreement ticket and approve through 3 stages', async ({ browser, page }) => {
-    await loginViaApi(page, 'sarah')
+    await loginViaApi(page, 'parankush')
     await selectProductAndTask(page, 'Rabet', 'Agreement Validation')
     await selectPartner(page, 'Al Ain Insurance')
 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T01-/)
 
-    // Stage 1: Omar (Legal) → Stage 2: Hannoun (Product) → Stage 3: Fatima (EA)
-    await approveStage(browser, guid, USERS.omar.email, 'Legal review complete.')
-    await approveStage(browser, guid, USERS.hannoun.email, 'Product review approved.')
-    await approveStage(browser, guid, USERS.fatima.email, 'Executive sign-off granted.')
+    // Stage 1: Bahnas (Legal) → Stage 2: Albaha (Product) → Stage 3: Leena (EA)
+    await approveStage(browser, guid, USERS.bahnas.email, 'Legal review complete.')
+    await approveStage(browser, guid, USERS.albaha.email, 'Product review approved.')
+    await approveStage(browser, guid, USERS.leena.email, 'Executive sign-off granted.')
 
     await verifyCompleted(page, guid)
   })
 
   // ═════════════════════════════════════════════════════════════════
-  //  T-02: UAT Access Creation (5 stages, repeatable form)
+  //  T-02: UAT Access Creation (4 stages, repeatable form)
   //  Onboarded → UatCompleted
   // ═════════════════════════════════════════════════════════════════
 
   test('T-02: submit UAT Access ticket with repeatable entries and approve 4 stages', async ({ browser, page }) => {
-    await loginViaApi(page, 'sarah')
+    await loginViaApi(page, 'parankush')
     await selectProductAndTask(page, 'Rabet', 'UAT Access Creation')
     await selectPartner(page, 'Al Ain Insurance')
 
@@ -157,10 +157,10 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T02-/)
 
     // 4 stages: IntegrationTeam → DevTeam → IntegrationTeam (gate) → IntegrationTeam
-    await approveStage(browser, guid, USERS.khalid.email, 'Access provisioned.')
-    await approveStage(browser, guid, USERS.ahmed.email, 'API credentials created.')
-    await approveStage(browser, guid, USERS.khalid.email, 'UAT signal received from partner.')
-    await approveStage(browser, guid, USERS.khalid.email, 'UAT sign-off complete.')
+    await approveStage(browser, guid, USERS.faiz.email, 'Access provisioned.')
+    await approveStage(browser, guid, USERS.karthik.email, 'API credentials created.')
+    await approveStage(browser, guid, USERS.faiz.email, 'UAT signal received from partner.')
+    await approveStage(browser, guid, USERS.faiz.email, 'UAT sign-off complete.')
 
     await verifyCompleted(page, guid)
   })
@@ -168,27 +168,25 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
   // ═════════════════════════════════════════════════════════════════
   //  T-03: Partner Account Creation — PortalAndApi path (5 stages)
   //  UatCompleted → Live
-  //  Most complex form: toggle, text fields, 2 repeatable sections
+  //  Created by PartnerOps (Vileena), reviewed by PartnershipTeam first
   // ═════════════════════════════════════════════════════════════════
 
   test('T-03: submit Production Account ticket (Portal+API) with multi-section form and approve 5 stages', async ({
     browser,
     page,
   }) => {
-    await loginViaApi(page, 'sarah')
+    await loginViaApi(page, 'vileena')
     await selectProductAndTask(page, 'Rabet', 'Partner Account Creation')
     await selectPartner(page, 'Al Ain Insurance')
 
     // ── API Opt-In toggle (enables PortalAndApi path → 5 stages) ──
-    // Fixed header/sidebar/footer overlay the toggle; use JS click on the input directly
     await page.locator('input[name="apiOptIn"]').evaluate((el: HTMLInputElement) => el.click())
     await expect(page.locator('input[name="apiOptIn"]')).toBeChecked()
 
     // ── Portal Admin User section ──
     await page.getByPlaceholder('Johnathan Doe').fill('Admin Test User')
     await page.getByPlaceholder('j.doe@company.com').fill('admin@alain.ae')
-    const mobileInputs = page.getByPlaceholder('+1 (555) 000-0000')
-    await mobileInputs.first().fill('+971 50 999 0001')
+    await page.getByPlaceholder('+971 50 000 0000').first().fill('+971 50 999 0001')
     await page.getByPlaceholder('Operations Manager').fill('IT Manager')
 
     // ── Network section ──
@@ -197,23 +195,22 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
     // ── Invoicing Contacts (repeatable, 1 pre-created entry) ──
     await page.getByPlaceholder('Finance Dept').first().fill('Finance Team')
     await page.getByPlaceholder('billing@company.com').first().fill('billing@alain.ae')
-    await page.getByPlaceholder('+1 (555) 123-4567').first().fill('+971 4 555 0001')
+    await page.getByPlaceholder('+971 4 000 0000').first().fill('+971 4 555 0001')
 
     // ── Customer Support Contact (repeatable, 1 pre-created entry) ──
     await page.getByPlaceholder('Name').first().fill('Support Lead')
-    await mobileInputs.nth(1).fill('+971 50 888 0001')
+    await page.getByPlaceholder('+971 50 000 0000').nth(1).fill('+971 50 888 0001')
     await page.getByPlaceholder('email@company.com').first().fill('support@alain.ae')
-    const roleSelect = page.locator('select').last()
-    await roleSelect.selectOption('Primary')
+    await page.getByPlaceholder('e.g. Primary, Escalation').first().fill('Primary')
 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T03-/)
 
-    // 5 stages (PortalAndApi): PartnerOps → ProductTeam → DevTeam → BusinessTeam → IntegrationTeam
-    await approveStage(browser, guid, USERS.vilina.email, 'Partner ops review complete.')
-    await approveStage(browser, guid, USERS.hannoun.email, 'Product team sign-off approved.')
-    await approveStage(browser, guid, USERS.ahmed.email, 'Dev provisioning done.')
-    await approveStage(browser, guid, USERS.layla.email, 'Business provisioning done.')
-    await approveStage(browser, guid, USERS.khalid.email, 'API provisioning complete.')
+    // 5 stages (PortalAndApi): PartnershipTeam → ProductTeam → DevTeam → BusinessTeam → IntegrationTeam
+    await approveStage(browser, guid, USERS.parankush.email, 'Partnership review complete.')
+    await approveStage(browser, guid, USERS.albaha.email, 'Product team sign-off approved.')
+    await approveStage(browser, guid, USERS.karthik.email, 'Dev provisioning done.')
+    await approveStage(browser, guid, USERS.fares.email, 'Business provisioning done.')
+    await approveStage(browser, guid, USERS.faiz.email, 'API provisioning complete.')
 
     await verifyCompleted(page, guid)
   })
@@ -225,12 +222,11 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
   // ═════════════════════════════════════════════════════════════════
 
   test('T-04: submit Support ticket with radio-card selection and approve 1 stage', async ({ browser, page }) => {
-    await loginViaApi(page, 'sarah')
+    await loginViaApi(page, 'parankush')
     await selectProductAndTask(page, 'Rabet', 'Access & Credential Support')
     await selectPartner(page, 'Al Ain Insurance')
 
     // ── Support Details: select issue type via radio-card ──
-    // Radio-cards render as clickable divs with the issue type labels
     await page.getByText('Password Reset', { exact: false }).first().click()
 
     // ── Description textarea ──
@@ -240,8 +236,8 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T04-/)
 
-    // 1 stage: Ahmed (DevTeam) — Verify & Resolve
-    await approveStage(browser, guid, USERS.ahmed.email, 'Password reset completed, new credentials sent.')
+    // 1 stage: Karthik (DevTeam) — Verify & Resolve
+    await approveStage(browser, guid, USERS.karthik.email, 'Password reset completed, new credentials sent.')
 
     await verifyCompleted(page, guid)
   })

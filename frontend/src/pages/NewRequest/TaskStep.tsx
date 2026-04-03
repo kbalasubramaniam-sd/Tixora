@@ -1,4 +1,6 @@
 import { useTasks } from '@/api/hooks/useProducts'
+import { useAuth } from '@/contexts/AuthContext'
+import { TaskType, UserRole } from '@/types/enums'
 import type { Product, TaskOption } from '@/types/product'
 import { cn } from '@/utils/cn'
 
@@ -9,7 +11,15 @@ interface TaskStepProps {
 }
 
 export function TaskStep({ product, onSelect, onBack }: TaskStepProps) {
-  const { data: tasks, isLoading } = useTasks(product.code)
+  const { user } = useAuth()
+  const { data: allTasks, isLoading } = useTasks(product.code)
+
+  // PartnerOps can only create T-03, PartnershipTeam can create T-01/T-02/T-04 (not T-03)
+  const tasks = allTasks?.filter((t) => {
+    if (user?.role === UserRole.PartnerOps) return t.type === TaskType.T03
+    if (user?.role === UserRole.PartnershipTeam) return t.type !== TaskType.T03
+    return true
+  })
 
   return (
     <div className="max-w-4xl mx-auto">
