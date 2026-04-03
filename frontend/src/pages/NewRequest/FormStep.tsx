@@ -497,6 +497,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
 
   // File state: docName -> File | null
   const [files, setFiles] = useState<Record<string, File | null>>({})
+  const [fileSubmitAttempted, setFileSubmitAttempted] = useState(false)
 
   // Determine which sections are repeatable
   const repeatableSectionNames = useMemo(() => {
@@ -633,6 +634,15 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
       return
     }
     setRepeatableErrors({})
+
+    // Validate required documents — all must be uploaded
+    if (schema && schema.requiredDocuments.length > 0) {
+      const missingFiles = schema.requiredDocuments.some((doc) => !files[doc.name])
+      if (missingFiles) {
+        setFileSubmitAttempted(true)
+        return
+      }
+    }
 
     // Merge repeatable data into formData as JSON strings
     const merged: AnyRecord = { ...data }
@@ -787,9 +797,16 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                     onFileSelect={(f) => setFiles((prev) => ({ ...prev, [doc.name]: f }))}
                     accept=".pdf,.docx,.xlsx,.png,.jpg,.jpeg"
                     maxSizeMB={10}
+                    showError={fileSubmitAttempted && !files[doc.name]}
                   />
                 ))}
               </div>
+              {fileSubmitAttempted && schema.requiredDocuments.some((doc) => !files[doc.name]) && (
+                <p className="text-sm text-error font-medium flex items-center gap-1.5 mt-2">
+                  <span className="material-symbols-outlined text-base">error</span>
+                  All required documents must be uploaded before submitting
+                </p>
+              )}
             </section>
           )}
         </form>

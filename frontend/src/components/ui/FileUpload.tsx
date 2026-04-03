@@ -31,8 +31,10 @@ export function FileUpload({
   const [error, setError] = useState<string | null>(null)
 
   function handleUploadClick() {
-    setError(null)
+    // Click the input first, then clear error — avoids a re-render
+    // before the browser opens the file dialog (which can cause delay on Windows)
     inputRef.current?.click()
+    setError(null)
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
