@@ -23,6 +23,7 @@ public interface ITixoraDbContext
     DbSet<Holiday> Holidays { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<DelegateApprover> DelegateApprovers { get; }
+    DbSet<Shipment> Shipments { get; }
 
     DatabaseFacade Database { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
