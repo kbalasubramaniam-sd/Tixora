@@ -125,19 +125,136 @@ namespace Tixora.Infrastructure.Migrations
                 name: "IX_SlaPauses_SlaTrackerId",
                 table: "SlaPauses",
                 column: "SlaTrackerId");
+
+            // --- Comments ---
+            migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TicketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AuthorUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.Id);
+                    table.ForeignKey("FK_Comments_Tickets_TicketId", x => x.TicketId, "Tickets", "Id", onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey("FK_Comments_Users_AuthorUserId", x => x.AuthorUserId, "Users", "Id", onDelete: ReferentialAction.Restrict);
+                });
+            migrationBuilder.CreateIndex("IX_Comments_TicketId", "Comments", "TicketId");
+
+            // --- Documents ---
+            migrationBuilder.CreateTable(
+                name: "Documents",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TicketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    SizeBytes = table.Column<long>(type: "bigint", nullable: false),
+                    StoragePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    UploadedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Documents", x => x.Id);
+                    table.ForeignKey("FK_Documents_Tickets_TicketId", x => x.TicketId, "Tickets", "Id", onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey("FK_Documents_Users_UploadedByUserId", x => x.UploadedByUserId, "Users", "Id", onDelete: ReferentialAction.Restrict);
+                });
+            migrationBuilder.CreateIndex("IX_Documents_TicketId", "Documents", "TicketId");
+
+            // --- Notifications ---
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RecipientUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
+                    TicketId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    ReadAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey("FK_Notifications_Users_RecipientUserId", x => x.RecipientUserId, "Users", "Id", onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey("FK_Notifications_Tickets_TicketId", x => x.TicketId, "Tickets", "Id", onDelete: ReferentialAction.SetNull);
+                });
+            migrationBuilder.CreateIndex("IX_Notifications_RecipientUserId", "Notifications", "RecipientUserId");
+            migrationBuilder.CreateIndex("IX_Notifications_RecipientUserId_IsRead", "Notifications", new[] { "RecipientUserId", "IsRead" });
+
+            // --- BusinessHoursConfigs ---
+            migrationBuilder.CreateTable(
+                name: "BusinessHoursConfigs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DayOfWeek = table.Column<int>(type: "int", nullable: false),
+                    IsWorkingDay = table.Column<bool>(type: "bit", nullable: false),
+                    StartTime = table.Column<TimeOnly>(type: "time", nullable: false),
+                    EndTime = table.Column<TimeOnly>(type: "time", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BusinessHoursConfigs", x => x.Id);
+                });
+
+            // --- Holidays ---
+            migrationBuilder.CreateTable(
+                name: "Holidays",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Holidays", x => x.Id);
+                });
+
+            // --- DelegateApprovers ---
+            migrationBuilder.CreateTable(
+                name: "DelegateApprovers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PrimaryUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DelegateUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ValidFrom = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ValidTo = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DelegateApprovers", x => x.Id);
+                    table.ForeignKey("FK_DelegateApprovers_Users_PrimaryUserId", x => x.PrimaryUserId, "Users", "Id", onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey("FK_DelegateApprovers_Users_DelegateUserId", x => x.DelegateUserId, "Users", "Id", onDelete: ReferentialAction.Restrict);
+                });
+            migrationBuilder.CreateIndex("IX_DelegateApprovers_PrimaryUserId_DelegateUserId_IsActive", "DelegateApprovers", new[] { "PrimaryUserId", "DelegateUserId", "IsActive" });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "SlaPauses");
-
-            migrationBuilder.DropTable(
-                name: "SlaTrackers");
-
-            migrationBuilder.DropTable(
-                name: "Shipments");
+            migrationBuilder.DropTable(name: "DelegateApprovers");
+            migrationBuilder.DropTable(name: "Holidays");
+            migrationBuilder.DropTable(name: "BusinessHoursConfigs");
+            migrationBuilder.DropTable(name: "Notifications");
+            migrationBuilder.DropTable(name: "Documents");
+            migrationBuilder.DropTable(name: "Comments");
+            migrationBuilder.DropTable(name: "SlaPauses");
+            migrationBuilder.DropTable(name: "SlaTrackers");
+            migrationBuilder.DropTable(name: "Shipments");
         }
     }
 }

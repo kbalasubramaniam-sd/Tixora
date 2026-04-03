@@ -12,7 +12,7 @@ using Tixora.Infrastructure.Data;
 namespace Tixora.Infrastructure.Migrations
 {
     [DbContext(typeof(TixoraDbContext))]
-    [Migration("20260403032511_FixSnapshot")]
+    [Migration("20260403033920_FixSnapshot")]
     partial class FixSnapshot
     {
         /// <inheritdoc />
