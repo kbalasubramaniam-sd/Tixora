@@ -274,13 +274,9 @@ const schemaT03: FormSchema = {
     {
       name: 'contactRole',
       label: 'Role',
-      type: 'select',
+      type: 'text',
       required: true,
-      placeholder: 'Select role...',
-      options: [
-        { label: 'Primary', value: 'Primary' },
-        { label: 'Escalation', value: 'Escalation' },
-      ],
+      placeholder: 'e.g. Primary, Escalation',
       section: 'Customer Support Contact',
     },
   ],
