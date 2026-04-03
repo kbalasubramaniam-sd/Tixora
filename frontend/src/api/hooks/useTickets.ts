@@ -38,7 +38,8 @@ export function useDocuments(ticketId: string) {
 export function useUploadDocument(ticketId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (file: File) => uploadDocument(ticketId, file),
+    mutationFn: ({ file, documentType }: { file: File; documentType?: string }) =>
+      uploadDocument(ticketId, file, documentType),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents', ticketId] })
     },

@@ -38,7 +38,7 @@ public class DocumentsController : ControllerBase
     [ProducesResponseType(typeof(DocumentResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [RequestSizeLimit(10 * 1024 * 1024)]
-    public async Task<IActionResult> Upload(Guid ticketId, IFormFile file)
+    public async Task<IActionResult> Upload(Guid ticketId, IFormFile file, [FromForm] string? documentType = null)
     {
         var userId = GetCurrentUserId();
         if (userId is null)
@@ -51,7 +51,7 @@ public class DocumentsController : ControllerBase
         {
             using var stream = file.OpenReadStream();
             var doc = await _documentService.UploadAsync(
-                ticketId, userId.Value, file.FileName, file.ContentType, file.Length, stream);
+                ticketId, userId.Value, file.FileName, file.ContentType, file.Length, stream, documentType ?? "Other");
             return CreatedAtAction(nameof(Download), new { id = doc.Id }, doc);
         }
         catch (InvalidOperationException ex)

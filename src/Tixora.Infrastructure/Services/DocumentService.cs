@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Tixora.Application.DTOs.Documents;
 using Tixora.Application.Interfaces;
 using Tixora.Domain.Entities;
+using Tixora.Domain.Enums;
 
 namespace Tixora.Infrastructure.Services;
 
@@ -30,7 +31,7 @@ public class DocumentService : IDocumentService
         _fileStorage = fileStorage;
     }
 
-    public async Task<DocumentResponse> UploadAsync(Guid ticketId, Guid uploadedByUserId, string fileName, string contentType, long sizeBytes, Stream content)
+    public async Task<DocumentResponse> UploadAsync(Guid ticketId, Guid uploadedByUserId, string fileName, string contentType, long sizeBytes, Stream content, string documentType)
     {
         var ticket = await _db.Tickets.FindAsync(ticketId)
             ?? throw new InvalidOperationException($"Ticket '{ticketId}' not found.");
@@ -46,10 +47,14 @@ public class DocumentService : IDocumentService
 
         var storagePath = await _fileStorage.SaveAsync(fileName, content);
 
+        if (!Enum.TryParse<DocumentType>(documentType, true, out var docType))
+            docType = DocumentType.Other;
+
         var document = new Document
         {
             Id = Guid.CreateVersion7(),
             TicketId = ticketId,
+            DocumentType = docType,
             FileName = fileName,
             ContentType = contentType,
             SizeBytes = sizeBytes,
@@ -67,7 +72,8 @@ public class DocumentService : IDocumentService
             document.ContentType,
             document.SizeBytes,
             user.FullName,
-            document.UploadedAt
+            document.UploadedAt,
+            document.DocumentType.ToString()
         );
     }
 
@@ -82,7 +88,8 @@ public class DocumentService : IDocumentService
                 d.ContentType,
                 d.SizeBytes,
                 d.UploadedBy.FullName,
-                d.UploadedAt
+                d.UploadedAt,
+                d.DocumentType.ToString()
             ))
             .ToListAsync();
     }

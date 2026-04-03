@@ -24,7 +24,7 @@ export function DocumentsTab({ ticketId }: DocumentsTabProps) {
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      uploadMutation.mutate(file)
+      uploadMutation.mutate({ file, documentType: 'Other' })
       e.target.value = ''
     }
   }
