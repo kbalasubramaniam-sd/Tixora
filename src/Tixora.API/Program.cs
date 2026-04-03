@@ -88,6 +88,12 @@ try
         app.MapScalarApiReference();
     }
 
+    // IIS virtual directory "/api" strips the prefix from incoming requests.
+    // UsePathBase restores it so [Route("api/[controller]")] routes still match.
+    var pathBase = builder.Configuration.GetValue<string>("PathBase");
+    if (!string.IsNullOrEmpty(pathBase))
+        app.UsePathBase(pathBase);
+
     app.UseHttpsRedirection();
     app.UseCors();
     app.UseSerilogRequestLogging(options =>

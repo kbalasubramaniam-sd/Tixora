@@ -11,7 +11,7 @@ public static class SeedUsers
     // Generated via: BCrypt.Net.BCrypt.HashPassword("Password1!")
     private const string PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2";
 
-    public static readonly Guid SarahAhmadId = new("a1b2c3d4-0001-0001-0001-000000000001");
+    public static readonly Guid ParankushId = new("a1b2c3d4-0001-0001-0001-000000000001");
     public static readonly Guid OmarKhalidId = new("a1b2c3d4-0001-0001-0001-000000000002");
     public static readonly Guid HannounId = new("a1b2c3d4-0001-0001-0001-000000000003");
     public static readonly Guid AlbahaId = new("a1b2c3d4-0001-0001-0001-000000000004");
@@ -31,9 +31,9 @@ public static class SeedUsers
         modelBuilder.Entity<User>().HasData(
             new User
             {
-                Id = SarahAhmadId,
-                FullName = "Sarah Ahmad",
-                Email = "sarah.ahmad@tixora.ae",
+                Id = ParankushId,
+                FullName = "Parankush",
+                Email = "parankush@tixora.ae",
                 PasswordHash = PasswordHash,
                 Role = UserRole.PartnershipTeam,
                 IsActive = true,

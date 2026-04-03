@@ -98,7 +98,8 @@ public class FedExShippingProvider : IShippingProvider
         var resolved = output.GetProperty("resolvedAddresses")[0];
 
         var classification = resolved.TryGetProperty("classification", out var cls) ? cls.GetString() : null;
-        var isValid = classification != "UNKNOWN" && classification != "FAILED";
+        // Validation is advisory for MVP 1 — always return valid, show corrected address
+        var isValid = true;
 
         var streetLines = resolved.TryGetProperty("streetLinesToken", out var sl)
             ? sl.EnumerateArray().Select(s => s.GetString()).ToArray()

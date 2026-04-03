@@ -38,13 +38,19 @@ public class SlaMonitoringService : BackgroundService
                 }
 
                 _logger.LogInformation("SLA monitoring: recalculated {Count} active trackers", activeTrackers.Count);
+
+                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                // Graceful shutdown
+                break;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "SLA monitoring error");
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
-
-            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
         }
     }
 }
