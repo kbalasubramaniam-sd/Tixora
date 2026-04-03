@@ -44,6 +44,12 @@ build/
 .eslintcache
 .stitch-ref/
 
+## Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
 ## OS
 Thumbs.db
 ehthumbs.db
