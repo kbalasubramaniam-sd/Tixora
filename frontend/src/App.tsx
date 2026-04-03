@@ -11,6 +11,8 @@ const TeamQueue = lazy(() => import('@/pages/TeamQueue'))
 const MyTickets = lazy(() => import('@/pages/MyTickets'))
 const Partners = lazy(() => import('@/pages/Partners'))
 const Notifications = lazy(() => import('@/pages/Notifications'))
+const Search = lazy(() => import('@/pages/Search'))
+const Reports = lazy(() => import('@/pages/Reports'))
 const Workflows = lazy(() => import('@/pages/Admin/Workflows'))
 const SlaSettings = lazy(() => import('@/pages/Admin/SlaSettings'))
 const BusinessHours = lazy(() => import('@/pages/Admin/BusinessHours'))
@@ -34,6 +36,8 @@ export default function App() {
           <Route path="my-tickets" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><MyTickets /></Suspense>} />
           <Route path="partners" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><Partners /></Suspense>} />
           <Route path="notifications" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><Notifications /></Suspense>} />
+          <Route path="search" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><Search /></Suspense>} />
+          <Route path="reports" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><Reports /></Suspense>} />
           <Route path="admin/workflows" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><Workflows /></Suspense>} />
           <Route path="admin/sla" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><SlaSettings /></Suspense>} />
           <Route path="admin/business-hours" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><BusinessHours /></Suspense>} />
