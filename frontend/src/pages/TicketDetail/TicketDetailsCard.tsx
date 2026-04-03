@@ -66,7 +66,10 @@ export function TicketDetailsCard({ ticket }: TicketDetailsCardProps) {
               )}
               <div className={cols === 2 ? 'grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12' : 'space-y-6'}>
                 {fields.map((field) => {
-                  const value = ticket.formData[field.name]
+                  // partnerName and companyCode are top-level ticket fields, not in formData
+                  const value = field.name === 'partnerName' ? ticket.partnerName
+                    : field.name === 'companyCode' ? ticket.companyCode
+                    : ticket.formData[field.name]
                   return (
                     <div key={field.name} className="space-y-1">
                       <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-extrabold">

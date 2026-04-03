@@ -212,47 +212,50 @@ public class TicketQueryService : ITicketQueryService
 
     public async Task<DashboardStatsResponse> GetDashboardStatsAsync(Guid userId, UserRole role)
     {
-        // Stat 1: Open/active tickets (role-scoped)
-        var openQuery = _db.Tickets.AsNoTracking()
+        // Build role-scoped ticket filter as an IQueryable (stays as SQL subquery)
+        var scopedTickets = _db.Tickets.AsNoTracking()
             .Where(t => !TerminalStatuses.Contains(t.Status));
 
         if (role == UserRole.PartnershipTeam)
-            openQuery = openQuery.Where(t => t.CreatedByUserId == userId);
+            scopedTickets = scopedTickets.Where(t => t.CreatedByUserId == userId);
         else if (role != UserRole.SystemAdministrator)
-            openQuery = openQuery.Where(t => t.WorkflowDefinition.Stages.Any(s => s.AssignedRole == role));
+            scopedTickets = scopedTickets.Where(t => t.WorkflowDefinition.Stages.Any(s => s.AssignedRole == role));
 
-        var openCount = await openQuery.CountAsync();
+        var scopedTicketIds = scopedTickets.Select(t => t.Id);
 
-        // Stat 2: SLA breaches (active trackers with Breached status, same role scope)
-        var breachedQuery = _db.SlaTrackers.AsNoTracking()
-            .Where(s => s.IsActive && s.Status == SlaStatus.Breached);
+        // Run all stats in parallel — 2 queries instead of 5
+        var openCountTask = scopedTickets.CountAsync();
 
-        if (role == UserRole.PartnershipTeam)
-            breachedQuery = breachedQuery.Where(s => s.Ticket.CreatedByUserId == userId);
-        else if (role != UserRole.SystemAdministrator)
-            breachedQuery = breachedQuery.Where(s => s.Ticket.WorkflowDefinition.Stages.Any(st => st.AssignedRole == role));
+        // Single query for all SLA stats: breach count, compliance, avg resolution
+        var slaStatsTask = _db.SlaTrackers.AsNoTracking()
+            .Where(s => role == UserRole.PartnershipTeam
+                ? s.Ticket.CreatedByUserId == userId
+                : role == UserRole.SystemAdministrator
+                    ? true
+                    : s.Ticket.WorkflowDefinition.Stages.Any(st => st.AssignedRole == role))
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                BreachCount = g.Count(s => s.IsActive && s.Status == SlaStatus.Breached),
+                TotalCompleted = g.Count(s => !s.IsActive && s.CompletedAtUtc != null),
+                CompliantCount = g.Count(s => !s.IsActive && s.CompletedAtUtc != null && s.Status != SlaStatus.Breached),
+                AvgHours = g.Where(s => !s.IsActive && s.CompletedAtUtc != null)
+                    .Average(s => (double?)s.BusinessHoursElapsed)
+            })
+            .FirstOrDefaultAsync();
 
-        var breachCount = await breachedQuery.CountAsync();
+        await Task.WhenAll(openCountTask, slaStatsTask);
 
-        // Stat 3: SLA compliance % (completed trackers that never breached / total completed)
-        var completedTrackersQuery = _db.SlaTrackers.AsNoTracking()
-            .Where(s => !s.IsActive && s.CompletedAtUtc != null);
+        var openCount = openCountTask.Result;
+        var sla = slaStatsTask.Result;
 
-        if (role == UserRole.PartnershipTeam)
-            completedTrackersQuery = completedTrackersQuery.Where(s => s.Ticket.CreatedByUserId == userId);
-        else if (role != UserRole.SystemAdministrator)
-            completedTrackersQuery = completedTrackersQuery.Where(s => s.Ticket.WorkflowDefinition.Stages.Any(st => st.AssignedRole == role));
-
-        var totalCompleted = await completedTrackersQuery.CountAsync();
-        var compliantCount = await completedTrackersQuery.CountAsync(s => s.Status != SlaStatus.Breached);
+        var breachCount = sla?.BreachCount ?? 0;
+        var totalCompleted = sla?.TotalCompleted ?? 0;
+        var compliantCount = sla?.CompliantCount ?? 0;
         var compliancePercent = totalCompleted > 0
             ? Math.Round((double)compliantCount / totalCompleted * 100, 1)
             : 100.0;
-
-        // Stat 4: Avg resolution time in business hours (from completed trackers)
-        var avgHours = totalCompleted > 0
-            ? Math.Round(await completedTrackersQuery.AverageAsync(s => s.BusinessHoursElapsed), 1)
-            : 0.0;
+        var avgHours = sla?.AvgHours != null ? Math.Round(sla.AvgHours.Value, 1) : 0.0;
         var avgDisplay = totalCompleted > 0 ? $"{avgHours}h" : "—";
 
         return new DashboardStatsResponse(
@@ -270,26 +273,11 @@ public class TicketQueryService : ITicketQueryService
 
     public async Task<List<ActivityEntryResponse>> GetRecentActivityAsync(Guid userId)
     {
-        // Get ticket IDs the user is involved in
-        var involvedTicketIds = await _db.Tickets.AsNoTracking()
-            .Where(t => t.CreatedByUserId == userId || t.AssignedToUserId == userId)
-            .Select(t => t.Id)
-            .ToListAsync();
-
-        // Also include tickets where user was an actor in stage logs
-        var actedOnTicketIds = await _db.StageLogs.AsNoTracking()
-            .Where(sl => sl.ActorUserId == userId)
-            .Select(sl => sl.TicketId)
-            .Distinct()
-            .ToListAsync();
-
-        var allTicketIds = involvedTicketIds.Union(actedOnTicketIds).Distinct().ToList();
-
-        if (allTicketIds.Count == 0)
-            return [];
-
+        // Single query: filter audit entries where the user is involved via subqueries (no memory materialization)
         var entries = await _db.AuditEntries.AsNoTracking()
-            .Where(a => allTicketIds.Contains(a.TicketId))
+            .Where(a =>
+                _db.Tickets.Any(t => t.Id == a.TicketId && (t.CreatedByUserId == userId || t.AssignedToUserId == userId))
+                || _db.StageLogs.Any(sl => sl.TicketId == a.TicketId && sl.ActorUserId == userId))
             .OrderByDescending(a => a.TimestampUtc)
             .Take(10)
             .Include(a => a.Actor)
@@ -353,6 +341,7 @@ public class TicketQueryService : ITicketQueryService
     {
         var ticket = await _db.Tickets
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
             .Include(t => t.CreatedBy)
             .Include(t => t.AssignedTo)
