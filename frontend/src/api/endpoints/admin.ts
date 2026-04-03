@@ -140,6 +140,6 @@ export async function deleteDelegate(id: string): Promise<void> {
 
 // Workflow Config (read-only)
 export async function fetchWorkflowConfig(): Promise<WorkflowConfig[]> {
-  const res = await apiClient.get<WorkflowConfig[]>('/admin/workflow-config')
-  return res.data
+  const res = await apiClient.get<{ workflows: WorkflowConfig[] } | WorkflowConfig[]>('/admin/workflow-config')
+  return Array.isArray(res.data) ? res.data : res.data.workflows
 }
