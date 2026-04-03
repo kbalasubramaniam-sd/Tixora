@@ -230,8 +230,6 @@ public class TicketQueryService : ITicketQueryService
         else if (role != UserRole.SystemAdministrator)
             scopedTickets = scopedTickets.Where(t => t.WorkflowDefinition.Stages.Any(s => s.AssignedRole == role));
 
-        var scopedTicketIds = scopedTickets.Select(t => t.Id);
-
         // Sequential: DbContext is not thread-safe, can't use Task.WhenAll
         var openCount = await scopedTickets.CountAsync();
 

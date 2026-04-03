@@ -333,25 +333,27 @@ export default function AdminPartners() {
 
               {/* Actions */}
               {editingId !== partner.id && (
-                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => {
-                      setEditingId(partner.id)
-                      setEditName(partner.name)
-                      setEditAlias(partner.alias ?? '')
-                    }}
-                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors"
-                    title="Edit partner"
-                  >
-                    <span className="material-symbols-outlined text-on-surface-variant text-lg">edit</span>
-                  </button>
-                  <button
-                    onClick={() => handleDeletePartner(partner.id, partner.name)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-error-container transition-colors"
-                    title="Delete partner"
-                  >
-                    <span className="material-symbols-outlined text-on-surface-variant hover:text-error text-lg">delete</span>
-                  </button>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => {
+                        setEditingId(partner.id)
+                        setEditName(partner.name)
+                        setEditAlias(partner.alias ?? '')
+                      }}
+                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors"
+                      title="Edit partner"
+                    >
+                      <span className="material-symbols-outlined text-on-surface-variant text-lg">edit</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeletePartner(partner.id, partner.name)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-error-container transition-colors"
+                      title="Delete partner"
+                    >
+                      <span className="material-symbols-outlined text-on-surface-variant hover:text-error text-lg">delete</span>
+                    </button>
+                  </div>
                   <span className="material-symbols-outlined text-on-surface-variant ml-2 transition-transform duration-200" style={{ transform: expandedId === partner.id ? 'rotate(180deg)' : undefined }}>
                     expand_more
                   </span>
