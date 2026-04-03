@@ -7,7 +7,7 @@ test.describe('Dashboard', () => {
   })
 
   test('shows greeting with user name', async ({ page }) => {
-    await expect(page.getByText('Parankush')).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByRole('heading', { name: /Parankush/i })).toBeVisible({ timeout: 10_000 })
   })
 
   test('displays stat cards section', async ({ page }) => {
