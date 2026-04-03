@@ -9,6 +9,7 @@ import { TicketDetailsCard } from './TicketDetailsCard'
 import { ActionsPanel } from './ActionsPanel'
 import { SlaPanel } from './SlaPanel'
 import { PartnerPanel } from './PartnerPanel'
+import { ShipmentPanel } from './ShipmentPanel'
 import { CommentsTab } from './CommentsTab'
 import { DocumentsTab } from './DocumentsTab'
 import { AuditTrailTab } from './AuditTrailTab'
@@ -118,6 +119,7 @@ export default function TicketDetail() {
           <ActionsPanel ticket={ticket} onActionComplete={() => refetch()} />
           <SlaPanel ticket={ticket} />
           <PartnerPanel ticket={ticket} />
+          <ShipmentPanel ticket={ticket} />
         </aside>
       </div>
     </div>
