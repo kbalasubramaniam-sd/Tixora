@@ -38,6 +38,18 @@ public static class DependencyInjection
             services.AddSingleton<IEmailSender, NoOpEmailSender>();
         }
 
+        var shippingProvider = configuration.GetValue<string>("Shipping:Provider") ?? "None";
+        if (shippingProvider.Equals("FedEx", StringComparison.OrdinalIgnoreCase))
+        {
+            services.Configure<FedExSettings>(configuration.GetSection("Shipping:FedEx"));
+            services.AddHttpClient<IShippingProvider, FedExShippingProvider>();
+        }
+        else
+        {
+            services.AddSingleton<IShippingProvider, NoOpShippingProvider>();
+        }
+        services.AddScoped<IShipmentService, ShipmentService>();
+
         services.AddScoped<ISearchService, SearchService>();
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IAdminService, AdminService>();
