@@ -34,6 +34,7 @@ export interface DocumentResponse {
   sizeBytes: number
   uploadedBy: string
   uploadedAt: string
+  documentType: string
 }
 
 export async function fetchDocuments(ticketId: string): Promise<DocumentResponse[]> {
@@ -41,9 +42,12 @@ export async function fetchDocuments(ticketId: string): Promise<DocumentResponse
   return res.data
 }
 
-export async function uploadDocument(ticketId: string, file: File): Promise<void> {
+export async function uploadDocument(ticketId: string, file: File, documentType?: string): Promise<void> {
   const formData = new FormData()
   formData.append('file', file)
+  if (documentType) {
+    formData.append('documentType', documentType)
+  }
   await apiClient.post(`/tickets/${ticketId}/documents`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })

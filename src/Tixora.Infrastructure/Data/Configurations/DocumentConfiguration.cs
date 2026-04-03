@@ -12,6 +12,7 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
         builder.Property(d => d.FileName).IsRequired().HasMaxLength(255);
         builder.Property(d => d.ContentType).IsRequired().HasMaxLength(100);
         builder.Property(d => d.StoragePath).IsRequired().HasMaxLength(500);
+        builder.Property(d => d.DocumentType).HasConversion<int>();
 
         builder.HasOne(d => d.Ticket)
             .WithMany(t => t.Documents)

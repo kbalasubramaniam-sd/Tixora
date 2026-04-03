@@ -639,6 +639,8 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
     for (const [sectionKey, entries] of Object.entries(repeatableData)) {
       merged[`_repeatable_${sectionKey}`] = JSON.stringify(entries)
     }
+    // Attach files for upload after ticket creation
+    merged._files = files
     onSubmit(merged)
   }
 

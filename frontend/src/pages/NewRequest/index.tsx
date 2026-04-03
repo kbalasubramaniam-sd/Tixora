@@ -6,6 +6,7 @@ import { FormStep } from './FormStep'
 import { ReviewStep } from './ReviewStep'
 import { ConfirmationStep } from './ConfirmationStep'
 import { useSubmitTicket } from '@/api/hooks/useProducts'
+import { uploadDocument } from '@/api/endpoints/tickets'
 import { TaskType } from '@/types/enums'
 import type { Product, TaskOption } from '@/types/product'
 
@@ -52,7 +53,7 @@ export default function NewRequest() {
     setSubmitError(null)
 
     // Extract top-level fields from formData, rest goes into JSON blob
-    const { partnerName: partnerId, issueType, apiOptIn, ...rest } = formData
+    const { partnerName: partnerId, issueType, apiOptIn, _files, ...rest } = formData
     const provisioningPath = apiOptIn ? 'PortalAndApi' : 'PortalOnly'
 
     try {
@@ -64,6 +65,16 @@ export default function NewRequest() {
         issueType: task.type === TaskType.T04 ? (issueType as string) : null,
         formData: JSON.stringify(rest),
       })
+
+      // Upload attached documents after ticket creation
+      const files = _files as Record<string, File | null> | undefined
+      if (files) {
+        const uploads = Object.entries(files)
+          .filter((entry): entry is [string, File] => entry[1] !== null)
+          .map(([docName, file]) => uploadDocument(res.id, file, docName))
+        await Promise.all(uploads)
+      }
+
       setResult({ id: res.id, ticketId: res.ticketId, currentStageName: res.currentStageName })
       setStep(4)
     } catch {
