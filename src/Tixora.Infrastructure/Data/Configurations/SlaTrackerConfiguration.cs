@@ -12,5 +12,7 @@ public class SlaTrackerConfiguration : IEntityTypeConfiguration<SlaTracker>
         builder.Property(s => s.Status).HasConversion<int>();
         builder.HasOne(s => s.Ticket).WithMany(t => t.SlaTrackers).HasForeignKey(s => s.TicketId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(s => new { s.TicketId, s.StageOrder });
+        builder.HasIndex(s => s.IsActive);
+        builder.HasIndex(s => new { s.IsActive, s.TicketId });
     }
 }

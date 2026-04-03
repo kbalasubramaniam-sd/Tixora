@@ -69,20 +69,19 @@ export interface CreateDelegateRequest {
 
 // Workflow Config
 export interface WorkflowStageConfig {
-  stageId: string
+  id: string
   stageName: string
   stageOrder: number
+  stageType: string
   assignedRole: string
   slaBusinessHours: number
-  isConditional: boolean
-  requiredDocuments: string[]
 }
 
 export interface WorkflowConfig {
+  id: string
   productCode: string
-  productName: string
-  taskTypeCode: string
-  taskTypeName: string
+  taskType: string
+  provisioningPath: string | null
   stages: WorkflowStageConfig[]
 }
 
@@ -140,6 +139,6 @@ export async function deleteDelegate(id: string): Promise<void> {
 
 // Workflow Config (read-only)
 export async function fetchWorkflowConfig(): Promise<WorkflowConfig[]> {
-  const res = await apiClient.get<WorkflowConfig[]>('/admin/workflow-config')
-  return res.data
+  const res = await apiClient.get<{ workflows: WorkflowConfig[] } | WorkflowConfig[]>('/admin/workflow-config')
+  return Array.isArray(res.data) ? res.data : res.data.workflows
 }

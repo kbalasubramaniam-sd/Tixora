@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, type FieldValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -125,16 +125,20 @@ function RadioCardField({
 function ToggleField({
   field,
   register,
+  checked,
 }: {
   field: FormFieldDefinition
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: any
+  checked?: boolean
 }) {
+  // Spread register but override checked so DOM stays in sync after reset()
+  const { ref, ...rest } = register(field.name)
   return (
     <div className="flex items-center justify-between">
       <p className="text-sm text-on-surface-variant font-medium max-w-lg">{field.label}</p>
       <label className="relative inline-flex items-center cursor-pointer shrink-0">
-        <input {...register(field.name)} type="checkbox" className="sr-only peer" />
+        <input ref={ref} {...rest} type="checkbox" checked={!!checked} className="sr-only peer" />
         <div className="w-14 h-7 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-container" />
       </label>
     </div>
@@ -148,6 +152,7 @@ function FormField({
   error,
   partnerOptions,
   companyCode,
+  watchedValue,
 }: {
   field: FormFieldDefinition
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -155,10 +160,11 @@ function FormField({
   error?: string
   partnerOptions?: { id: string; name: string }[]
   companyCode?: string | null
+  watchedValue?: unknown
 }) {
   if (field.type === 'readonly') return <ReadonlyField field={field} value={companyCode ?? undefined} />
   if (field.type === 'radio-card') return <RadioCardField field={field} register={register} error={error} />
-  if (field.type === 'toggle') return <ToggleField field={field} register={register} />
+  if (field.type === 'toggle') return <ToggleField field={field} register={register} checked={!!watchedValue} />
 
   const inputClass = cn(
     'w-full bg-surface-container-lowest border-none rounded-xl h-14 px-4',
@@ -495,8 +501,47 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
     )
   }, [allPartners, product.code, task.type])
 
-  // File state: docName -> File | null
-  const [files, setFiles] = useState<Record<string, File | null>>({})
+  // File upload: single shared <input> to avoid Windows file dialog perf issues
+  // Restore files from initialData when navigating back from Review step
+  const [files, setFiles] = useState<Record<string, File | null>>(() => {
+    if (initialData?._files && typeof initialData._files === 'object') {
+      return initialData._files as Record<string, File | null>
+    }
+    return {}
+  })
+  const [fileSubmitAttempted, setFileSubmitAttempted] = useState(false)
+  const [fileErrors, setFileErrors] = useState<Record<string, string | null>>({})
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const activeDocRef = useRef<string | null>(null)
+
+  const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.xlsx', '.png', '.jpg', '.jpeg', '.doc', '.xls', '.txt']
+  const MAX_FILE_SIZE_MB = 10
+
+  function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const docName = activeDocRef.current
+    if (!docName) return
+    const selected = e.target.files?.[0] ?? null
+    if (!selected) return
+    e.target.value = ''
+
+    const ext = '.' + selected.name.split('.').pop()?.toLowerCase()
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      setFileErrors((prev) => ({ ...prev, [docName]: 'Unsupported file type. Use: PDF, DOCX, XLSX, PNG, JPG' }))
+      return
+    }
+    if (selected.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      setFileErrors((prev) => ({ ...prev, [docName]: `File exceeds ${MAX_FILE_SIZE_MB} MB limit` }))
+      return
+    }
+
+    setFileErrors((prev) => ({ ...prev, [docName]: null }))
+    setFiles((prev) => ({ ...prev, [docName]: selected }))
+  }
+
+  function triggerFileUpload(docName: string) {
+    activeDocRef.current = docName
+    fileInputRef.current?.click()
+  }
 
   // Determine which sections are repeatable
   const repeatableSectionNames = useMemo(() => {
@@ -537,7 +582,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
 
     setRepeatableData(newRepData)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schema, repeatableSectionNames])
+  }, [schema, repeatableSectionNames, initialData])
 
   const zodSchema = useMemo(
     () => (schema ? buildZodSchema(schema.fields, repeatableSectionNames) : z.object({})),
@@ -634,6 +679,15 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
     }
     setRepeatableErrors({})
 
+    // Validate required documents — all must be uploaded
+    if (schema && schema.requiredDocuments.length > 0) {
+      const missingFiles = schema.requiredDocuments.some((doc) => !files[doc.name])
+      if (missingFiles) {
+        setFileSubmitAttempted(true)
+        return
+      }
+    }
+
     // Merge repeatable data into formData as JSON strings
     const merged: AnyRecord = { ...data }
     for (const [sectionKey, entries] of Object.entries(repeatableData)) {
@@ -650,6 +704,8 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
 
   return (
     <>
+      {/* Hidden file input at top level — avoids re-mount during form re-renders (Windows perf) */}
+      <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileInputChange} />
       <div className="max-w-5xl mx-auto pb-36">
         {/* Page Header — Stitch V2 style */}
         <div className="mb-12">
@@ -735,7 +791,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                   </div>
                   {/* Toggle rendered inline for API Opt-In section */}
                   {isToggleOnlySection && (
-                    <ToggleField field={fields[0]} register={register} />
+                    <ToggleField field={fields[0]} register={register} checked={!!watch(fields[0].name)} />
                   )}
                 </div>
 
@@ -755,6 +811,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                         error={errors[field.name]?.message as string | undefined}
                         partnerOptions={field.name === 'partnerName' ? eligiblePartners.map((p) => ({ id: p.id, name: p.name })) : undefined}
                         companyCode={field.name === 'companyCode' ? companyCode : undefined}
+                        watchedValue={field.type === 'toggle' ? watch(field.name) : undefined}
                       />
                     ))}
                   </div>
@@ -784,12 +841,22 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                     label={doc.label}
                     icon={doc.icon ?? 'description'}
                     file={files[doc.name] ?? null}
-                    onFileSelect={(f) => setFiles((prev) => ({ ...prev, [doc.name]: f }))}
-                    accept=".pdf,.docx,.xlsx,.png,.jpg,.jpeg"
-                    maxSizeMB={10}
+                    onUploadClick={() => triggerFileUpload(doc.name)}
+                    onRemove={() => {
+                      setFiles((prev) => ({ ...prev, [doc.name]: null }))
+                      setFileErrors((prev) => ({ ...prev, [doc.name]: null }))
+                    }}
+                    error={fileErrors[doc.name]}
+                    showError={fileSubmitAttempted && !files[doc.name]}
                   />
                 ))}
               </div>
+              {fileSubmitAttempted && schema.requiredDocuments.some((doc) => !files[doc.name]) && (
+                <p className="text-sm text-error font-medium flex items-center gap-1.5 mt-2">
+                  <span className="material-symbols-outlined text-base">error</span>
+                  All required documents must be uploaded before submitting
+                </p>
+              )}
             </section>
           )}
         </form>
@@ -853,8 +920,9 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
           {/* Save as Draft */}
           <button
             type="button"
-            className="text-on-surface-variant text-sm font-medium hover:underline underline-offset-4 decoration-tertiary transition-colors"
+            className="px-6 py-3 border border-outline-variant rounded-xl text-on-surface-variant font-bold text-sm hover:bg-surface-container-low hover:border-primary/20 transition-colors flex items-center gap-2"
           >
+            <span className="material-symbols-outlined text-base">save</span>
             Save as Draft
           </button>
 

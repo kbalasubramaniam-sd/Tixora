@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react'
 import { useNotifications, useMarkRead, useMarkAllRead } from '@/api/hooks/useNotifications'
 import { NotificationStats } from './NotificationStats'
 import { NotificationCard } from './NotificationCard'
-import { timeAgo } from '@/utils/format'
 import type { NotificationItem } from '@/api/endpoints/notifications'
 
 function groupByTime(notifications: NotificationItem[]): { label: string; items: NotificationItem[] }[] {

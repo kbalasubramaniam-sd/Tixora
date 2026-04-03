@@ -41,6 +41,7 @@ const navItems: NavItem[] = [
 
 const adminItems: NavItem[] = [
   { label: 'Users', icon: 'group', to: '/admin/users' },
+  { label: 'Partners', icon: 'handshake', to: '/admin/partners' },
   { label: 'Workflows', icon: 'account_tree', to: '/admin/workflows' },
   { label: 'SLA Settings', icon: 'schedule', to: '/admin/sla' },
   { label: 'Business Hours', icon: 'calendar_month', to: '/admin/business-hours' },

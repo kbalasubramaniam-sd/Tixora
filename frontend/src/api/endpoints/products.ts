@@ -44,7 +44,7 @@ const schemaT01: FormSchema = {
       label: 'Partner Name',
       type: 'select',
       required: true,
-      placeholder: 'Select an active partner...',
+      placeholder: 'Select a partner...',
       section: 'Partner Information',
     },
     {
@@ -100,7 +100,7 @@ const schemaT02: FormSchema = {
       label: 'Partner Name',
       type: 'select',
       required: true,
-      placeholder: 'Select onboarded partner...',
+      placeholder: 'Select a partner...',
       section: 'Partner Information',
     },
     {
@@ -129,23 +129,17 @@ const schemaT02: FormSchema = {
     {
       name: 'mobileNumber',
       label: 'Mobile Number',
-      type: 'text',
+      type: 'tel',
       required: true,
-      placeholder: '+1 (555) 000-0000',
+      placeholder: '+971 50 000 0000',
       section: 'UAT User Details',
     },
     {
       name: 'designation',
       label: 'Designation',
-      type: 'select',
+      type: 'text',
       required: true,
-      placeholder: 'Select role...',
-      options: [
-        { label: 'QA Engineer', value: 'qa' },
-        { label: 'Product Manager', value: 'pm' },
-        { label: 'Lead Developer', value: 'dev' },
-        { label: 'Operations Specialist', value: 'ops' },
-      ],
+      placeholder: 'e.g. QA Engineer',
       section: 'UAT User Details',
     },
   ],
@@ -166,7 +160,7 @@ const schemaT03: FormSchema = {
       label: 'Partner Name',
       type: 'select',
       required: true,
-      placeholder: 'Select Active UAT Partner',
+      placeholder: 'Select a partner...',
       section: 'Partner Information',
     },
     {
@@ -204,9 +198,9 @@ const schemaT03: FormSchema = {
     {
       name: 'adminMobile',
       label: 'Mobile Number',
-      type: 'text',
+      type: 'tel',
       required: true,
-      placeholder: '+1 (555) 000-0000',
+      placeholder: '+971 50 000 0000',
       section: 'Portal Admin User',
     },
     {
@@ -247,9 +241,9 @@ const schemaT03: FormSchema = {
     {
       name: 'contactPhone',
       label: 'Phone',
-      type: 'text',
+      type: 'tel',
       required: true,
-      placeholder: '+1 (555) 123-4567',
+      placeholder: '+971 4 000 0000',
       section: 'Invoicing Contacts',
     },
     // Customer Support Contact (repeatable with role)
@@ -264,9 +258,9 @@ const schemaT03: FormSchema = {
     {
       name: 'contactMobile',
       label: 'Mobile',
-      type: 'text',
+      type: 'tel',
       required: true,
-      placeholder: '+1 (555) 000-0000',
+      placeholder: '+971 50 000 0000',
       section: 'Customer Support Contact',
     },
     {
@@ -280,13 +274,9 @@ const schemaT03: FormSchema = {
     {
       name: 'contactRole',
       label: 'Role',
-      type: 'select',
+      type: 'text',
       required: true,
-      placeholder: 'Select role...',
-      options: [
-        { label: 'Primary', value: 'Primary' },
-        { label: 'Escalation', value: 'Escalation' },
-      ],
+      placeholder: 'e.g. Primary, Escalation',
       section: 'Customer Support Contact',
     },
   ],
@@ -310,7 +300,7 @@ const schemaT04: FormSchema = {
       label: 'Partner Name',
       type: 'select',
       required: true,
-      placeholder: 'Select Live Partner...',
+      placeholder: 'Select a partner...',
       section: 'Partner Information',
     },
     {

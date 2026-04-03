@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useMyTickets } from '@/api/hooks/useMyTickets'
 import { ApiError } from '@/components/ui/ApiError'
 import { FilterBar } from '@/pages/TeamQueue/FilterBar'
 import { QueueTable } from '@/pages/TeamQueue/QueueTable'
+import { TicketStatus } from '@/types/enums'
 
 export default function MyTickets() {
   const [product, setProduct] = useState('All')
@@ -10,17 +11,34 @@ export default function MyTickets() {
   const [slaStatus, setSlaStatus] = useState('All')
   const [status, setStatus] = useState('All')
 
-  const filters = {
-    product: product !== 'All' ? product : undefined,
-    task: task !== 'All' ? task : undefined,
-    slaStatus: slaStatus !== 'All' ? slaStatus : undefined,
-    status: status !== 'All' ? status : undefined,
-  }
+  const { data: result, isLoading, isError, refetch } = useMyTickets()
+  const allTickets = result?.items ?? []
 
-  const { data: result, isLoading, isError, refetch } = useMyTickets(
-    Object.values(filters).some(Boolean) ? filters : undefined,
-  )
-  const tickets = result?.items ?? []
+  // Client-side filtering (backend GetMyTickets does not support filter params)
+  const tickets = useMemo(() => {
+    let filtered = allTickets
+    if (product !== 'All') {
+      filtered = filtered.filter((t) => t.productCode === product)
+    }
+    if (task !== 'All') {
+      filtered = filtered.filter((t) => t.taskType === task)
+    }
+    if (slaStatus !== 'All') {
+      filtered = filtered.filter((t) => t.slaStatus === slaStatus)
+    }
+    if (status !== 'All') {
+      // Map friendly filter values to actual TicketStatus values
+      const statusMap: Record<string, string[]> = {
+        Open: [TicketStatus.Submitted],
+        InProgress: [TicketStatus.InReview, TicketStatus.PendingRequesterAction, TicketStatus.InProvisioning, TicketStatus.Phase1Complete, TicketStatus.AwaitingUatSignal, TicketStatus.Phase2InReview],
+        Completed: [TicketStatus.Completed],
+        Cancelled: [TicketStatus.Cancelled, TicketStatus.Rejected],
+      }
+      const matchStatuses = statusMap[status] ?? [status]
+      filtered = filtered.filter((t) => matchStatuses.includes(t.status))
+    }
+    return filtered
+  }, [allTickets, product, task, slaStatus, status])
 
   const clearFilters = () => {
     setProduct('All')

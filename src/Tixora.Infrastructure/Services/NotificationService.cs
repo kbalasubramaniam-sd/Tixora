@@ -105,6 +105,8 @@ public class NotificationService : INotificationService
         page = Math.Max(1, page);
 
         var query = _db.Notifications
+            .AsNoTracking()
+            .Include(n => n.Ticket)
             .Where(n => n.RecipientUserId == userId);
 
         if (unreadOnly)
@@ -157,18 +159,31 @@ public class NotificationService : INotificationService
 
     public async Task MarkAllReadAsync(Guid userId)
     {
-        var unread = await _db.Notifications
-            .Where(n => n.RecipientUserId == userId && !n.IsRead)
-            .ToListAsync();
-
-        var now = DateTime.UtcNow;
-        foreach (var n in unread)
+        try
         {
-            n.IsRead = true;
-            n.ReadAt = now;
+            // Preferred: single SQL UPDATE, zero entity materialization
+            await _db.Notifications
+                .Where(n => n.RecipientUserId == userId && !n.IsRead)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(n => n.IsRead, true)
+                    .SetProperty(n => n.ReadAt, DateTime.UtcNow));
         }
+        catch (InvalidOperationException)
+        {
+            // Fallback for providers that don't support ExecuteUpdateAsync (e.g. InMemory)
+            var unread = await _db.Notifications
+                .Where(n => n.RecipientUserId == userId && !n.IsRead)
+                .ToListAsync();
 
-        if (unread.Count > 0)
-            await _db.SaveChangesAsync();
+            var now = DateTime.UtcNow;
+            foreach (var n in unread)
+            {
+                n.IsRead = true;
+                n.ReadAt = now;
+            }
+
+            if (unread.Count > 0)
+                await _db.SaveChangesAsync();
+        }
     }
 }

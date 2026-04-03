@@ -72,6 +72,7 @@ public class DocumentService : IDocumentService
             document.ContentType,
             document.SizeBytes,
             user.FullName,
+            user.Role.ToString(),
             document.UploadedAt,
             document.DocumentType.ToString()
         );
@@ -80,6 +81,8 @@ public class DocumentService : IDocumentService
     public async Task<List<DocumentResponse>> GetByTicketAsync(Guid ticketId)
     {
         return await _db.Documents
+            .AsNoTracking()
+            .Include(d => d.UploadedBy)
             .Where(d => d.TicketId == ticketId)
             .OrderByDescending(d => d.UploadedAt)
             .Select(d => new DocumentResponse(
@@ -88,6 +91,7 @@ public class DocumentService : IDocumentService
                 d.ContentType,
                 d.SizeBytes,
                 d.UploadedBy.FullName,
+                d.UploadedBy.Role.ToString(),
                 d.UploadedAt,
                 d.DocumentType.ToString()
             ))

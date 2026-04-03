@@ -4,7 +4,7 @@ import { cn } from '@/utils/cn'
 import { formatTime, getInitials } from '@/utils/format'
 import { PRODUCT_LABELS, TASK_LABELS, SLA_LABELS } from '@/utils/labels'
 import type { TicketSummary } from '@/types/ticket'
-import { SlaStatus } from '@/types/enums'
+import { SlaStatus, TicketStatus } from '@/types/enums'
 
 interface QueueTableProps {
   tickets: TicketSummary[]
@@ -18,17 +18,6 @@ const slaDotColor: Record<string, string> = {
   [SlaStatus.AtRisk]: 'bg-warning',
   [SlaStatus.Critical]: 'bg-error',
   [SlaStatus.Breached]: 'bg-error',
-}
-
-const stageIcon: Record<string, string> = {
-  'Legal Review': 'gavel',
-  'Product Review': 'inventory_2',
-  'EA Sign-off': 'verified',
-  'Integration Review': 'integration_instructions',
-  'Access Provisioning': 'vpn_key',
-  'Support Triage': 'support_agent',
-  'Compliance Check': 'policy',
-  'Account Provisioning': 'settings',
 }
 
 type SortKey = 'ticketId' | 'partnerName' | 'slaHoursRemaining'
@@ -131,8 +120,13 @@ export function QueueTable({ tickets, emptyIcon = 'inbox', emptyTitle = 'Your qu
                   </div>
                 </td>
                 <td className="px-6 py-2">
-                  <span className="text-xs bg-surface-container-highest text-on-surface px-2 py-1 rounded font-medium">
-                    {ticket.currentStage}
+                  <span className={cn(
+                    'text-xs px-2 py-1 rounded font-medium',
+                    ticket.status === TicketStatus.Cancelled || ticket.status === TicketStatus.Rejected
+                      ? 'bg-error/10 text-error'
+                      : 'bg-surface-container-highest text-on-surface',
+                  )}>
+                    {ticket.currentStage || (ticket.status === TicketStatus.Cancelled ? 'Cancelled' : ticket.status === TicketStatus.Rejected ? 'Rejected' : '\u2014')}
                   </span>
                 </td>
                 <td className="px-6 py-2">
@@ -153,23 +147,25 @@ export function QueueTable({ tickets, emptyIcon = 'inbox', emptyTitle = 'Your qu
         </div>
       </div>
 
-      {/* Pagination */}
-      <div className="p-6 bg-surface-container-low rounded-b-xl flex flex-col sm:flex-row justify-between items-center gap-4 -mt-px">
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-on-surface-variant">Showing {tickets.length} items</span>
+      {/* Pagination — only show when more than 1 page worth of results */}
+      {tickets.length > 20 && (
+        <div className="p-6 bg-surface-container-low rounded-b-xl flex flex-col sm:flex-row justify-between items-center gap-4 -mt-px">
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-on-surface-variant">Showing {tickets.length} items</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">
+              <span className="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button className="w-10 h-10 rounded-full primary-gradient text-white flex items-center justify-center font-bold">1</button>
+            <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">2</button>
+            <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">3</button>
+            <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">
-            <span className="material-symbols-outlined">chevron_left</span>
-          </button>
-          <button className="w-10 h-10 rounded-full primary-gradient text-white flex items-center justify-center font-bold">1</button>
-          <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">2</button>
-          <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">3</button>
-          <button className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-white transition-colors">
-            <span className="material-symbols-outlined">chevron_right</span>
-          </button>
-        </div>
-      </div>
+      )}
     </>
   )
 }

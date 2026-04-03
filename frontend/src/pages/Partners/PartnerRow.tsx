@@ -1,6 +1,6 @@
 import type { PartnerSummary } from '@/api/endpoints/partners'
 import { LifecycleState } from '@/types/enums'
-import { PRODUCT_LABELS } from '@/utils/labels'
+import { PRODUCT_LABELS, LIFECYCLE_LABELS } from '@/utils/labels'
 import { getInitials } from '@/utils/format'
 
 const statusBadge: Record<string, string> = {
@@ -11,13 +11,7 @@ const statusBadge: Record<string, string> = {
   [LifecycleState.None]: 'bg-surface-container text-on-surface-variant',
 }
 
-const statusLabel: Record<string, string> = {
-  [LifecycleState.Live]: 'LIVE',
-  [LifecycleState.UatCompleted]: 'UAT_COMPLETE',
-  [LifecycleState.UatActive]: 'UAT_ACTIVE',
-  [LifecycleState.Onboarded]: 'ONBOARDED',
-  [LifecycleState.None]: 'NONE',
-}
+const statusLabel = LIFECYCLE_LABELS
 
 interface PartnerRowProps {
   partner: PartnerSummary
@@ -38,27 +32,21 @@ export function PartnerRow({ partner }: PartnerRowProps) {
           </span>
         </div>
         <div className="flex gap-2 mt-2">
-          {partner.products.map((code) => (
-            <span
-              key={code}
-              className="bg-primary/10 text-primary px-2.5 py-0.5 rounded text-[10px] font-extrabold tracking-wider"
-            >
-              {PRODUCT_LABELS[code] ?? code}
+          {partner.productDetails.map((pd) => (
+            <span key={pd.productCode} className="inline-flex items-center bg-surface-container-low rounded-full overflow-hidden text-[10px] font-bold">
+              <span className="bg-primary/10 text-primary px-2.5 py-1 tracking-wider">
+                {PRODUCT_LABELS[pd.productCode] ?? pd.productCode}
+              </span>
+              <span className={`${statusBadge[pd.lifecycleState] ?? statusBadge[LifecycleState.None]} px-2 py-1`}>
+                {statusLabel[pd.lifecycleState] ?? '—'}
+              </span>
             </span>
           ))}
         </div>
       </div>
-      <div className="flex items-center gap-10">
-        <div className="text-right">
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</div>
-          <span className={`${statusBadge[partner.lifecycleState] ?? statusBadge[LifecycleState.None]} px-4 py-1.5 rounded-full text-[11px] font-bold`}>
-            {statusLabel[partner.lifecycleState] ?? 'UNKNOWN'}
-          </span>
-        </div>
-        <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">
-          chevron_right
-        </span>
-      </div>
+      <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors flex-shrink-0">
+        chevron_right
+      </span>
     </div>
   )
 }

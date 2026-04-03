@@ -61,6 +61,7 @@ public class DocumentsController : ControllerBase
     }
 
     [HttpGet("api/documents/{id:guid}")]
+    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Download(Guid id)

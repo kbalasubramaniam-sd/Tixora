@@ -39,12 +39,19 @@ function tryParseRepeatableEntries(value: string): Record<string, string>[] | nu
 export function ReviewStep({ product, task, formData, onSubmit, onBack, isSubmitting }: ReviewStepProps) {
   const { data: partners = [] } = usePartners()
 
+  // Count uploaded files
+  const filesMap = formData._files as Record<string, File | null> | undefined
+  const uploadedFiles = filesMap ? Object.entries(filesMap).filter(([, f]) => f != null) : []
+
   // Separate flat entries from repeatable entries
   const flatEntries: [string, string | boolean][] = []
   const repeatableEntries: { sectionLabel: string; entries: Record<string, string>[] }[] = []
 
   for (const [key, value] of Object.entries(formData)) {
     if (value === '' || value === undefined) continue
+
+    // Skip internal fields that aren't meant for display
+    if (key === '_files') continue
 
     if (key.startsWith('_repeatable_')) {
       const sectionKey = key.replace('_repeatable_', '')
@@ -83,10 +90,10 @@ export function ReviewStep({ product, task, formData, onSubmit, onBack, isSubmit
       {/* Product & Task */}
       <div className="bg-surface-container-lowest rounded-xl p-8 mb-8">
         <div className="flex items-center gap-3">
-          <span className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+          <span className="bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider">
             {product.name} · {product.code}
           </span>
-          <span className="text-on-surface-variant text-sm">
+          <span className="text-on-surface font-medium text-base">
             {task.name}
           </span>
         </div>
@@ -135,6 +142,25 @@ export function ReviewStep({ product, task, formData, onSubmit, onBack, isSubmit
           </div>
         </div>
       ))}
+
+      {/* Documents */}
+      {uploadedFiles.length > 0 && (
+        <div className="bg-surface-container-lowest rounded-xl p-8 mb-8">
+          <h2 className="text-lg font-bold text-on-surface mb-6">Documents</h2>
+          <div className="space-y-3">
+            {uploadedFiles.map(([docName, file]) => (
+              <div key={docName} className="flex items-center gap-3 border-b border-outline/50 pb-3">
+                <span className="material-symbols-outlined text-primary text-lg">description</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-on-surface truncate">{(file as File).name}</p>
+                  <p className="text-xs text-on-surface-variant">{formatLabel(docName)}</p>
+                </div>
+                <span className="material-symbols-outlined text-success text-lg">check_circle</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex gap-3 justify-end">

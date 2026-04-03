@@ -97,14 +97,7 @@ public class ReportService : IReportService
 
     public async Task<string> ExportCsvAsync(DateTime? dateFrom, DateTime? dateTo, string? productCode, string? taskType, string? status)
     {
-        var query = _db.Tickets
-            .Include(t => t.PartnerProduct)
-                .ThenInclude(pp => pp.Partner)
-            .Include(t => t.CreatedBy)
-            .Include(t => t.SlaTrackers)
-            .Include(t => t.WorkflowDefinition)
-                .ThenInclude(w => w.Stages)
-            .AsQueryable();
+        var query = _db.Tickets.AsNoTracking().AsQueryable();
 
         if (dateFrom.HasValue)
             query = query.Where(t => t.CreatedAt >= dateFrom.Value);
@@ -117,30 +110,44 @@ public class ReportService : IReportService
         if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<TicketStatus>(status, true, out var ts))
             query = query.Where(t => t.Status == ts);
 
-        var tickets = await query.OrderByDescending(t => t.CreatedAt).Take(10000).ToListAsync();
+        var rows = await query
+            .OrderByDescending(t => t.CreatedAt)
+            .Take(10000)
+            .Select(t => new
+            {
+                t.TicketId,
+                ProductCode = t.ProductCode.ToString(),
+                TaskType = t.TaskType.ToString(),
+                PartnerName = t.PartnerProduct.Partner.Name,
+                RequesterName = t.CreatedBy.FullName,
+                Status = t.Status.ToString(),
+                CurrentStage = t.WorkflowDefinition.Stages
+                    .Where(s => s.StageOrder == t.CurrentStageOrder)
+                    .Select(s => s.StageName).FirstOrDefault() ?? "",
+                SlaStatus = t.SlaTrackers.Any(s => s.IsActive && s.Status == SlaStatus.Breached) ? "Breached" :
+                            t.SlaTrackers.Any(s => s.IsActive && s.Status == SlaStatus.Critical) ? "Critical" :
+                            t.SlaTrackers.Any(s => s.IsActive && s.Status == SlaStatus.AtRisk) ? "AtRisk" : "OnTrack",
+                CreatedAt = t.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+                UpdatedAt = t.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+            })
+            .ToListAsync();
 
         var sb = new StringBuilder();
         sb.AppendLine("TicketId,ProductCode,TaskType,PartnerName,RequesterName,Status,CurrentStage,SlaStatus,CreatedAt,UpdatedAt");
 
-        foreach (var ticket in tickets)
+        foreach (var r in rows)
         {
-            var partnerName = EscapeCsv(ticket.PartnerProduct.Partner.Name);
-            var requesterName = EscapeCsv(ticket.CreatedBy.FullName);
-            var currentStage = ticket.WorkflowDefinition.Stages
-                .FirstOrDefault(s => s.StageOrder == ticket.CurrentStageOrder)?.StageName ?? "";
-            var slaStatus = GetOverallSlaStatus(ticket.SlaTrackers);
-
             sb.AppendLine(string.Join(",",
-                EscapeCsv(ticket.TicketId),
-                EscapeCsv(ticket.ProductCode.ToString()),
-                EscapeCsv(ticket.TaskType.ToString()),
-                partnerName,
-                requesterName,
-                EscapeCsv(ticket.Status.ToString()),
-                EscapeCsv(currentStage),
-                EscapeCsv(slaStatus),
-                EscapeCsv(ticket.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")),
-                EscapeCsv(ticket.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss"))
+                EscapeCsv(r.TicketId),
+                EscapeCsv(r.ProductCode),
+                EscapeCsv(r.TaskType),
+                EscapeCsv(r.PartnerName),
+                EscapeCsv(r.RequesterName),
+                EscapeCsv(r.Status),
+                EscapeCsv(r.CurrentStage),
+                EscapeCsv(r.SlaStatus),
+                EscapeCsv(r.CreatedAt),
+                EscapeCsv(r.UpdatedAt)
             ));
         }
 
@@ -152,18 +159,5 @@ public class ReportService : IReportService
         if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
             return $"\"{value.Replace("\"", "\"\"")}\"";
         return value;
-    }
-
-    private static string GetOverallSlaStatus(ICollection<Domain.Entities.SlaTracker> trackers)
-    {
-        if (!trackers.Any())
-            return "N/A";
-        if (trackers.Any(t => t.Status == SlaStatus.Breached))
-            return "Breached";
-        if (trackers.Any(t => t.Status == SlaStatus.Critical))
-            return "Critical";
-        if (trackers.Any(t => t.Status == SlaStatus.AtRisk))
-            return "AtRisk";
-        return "OnTrack";
     }
 }

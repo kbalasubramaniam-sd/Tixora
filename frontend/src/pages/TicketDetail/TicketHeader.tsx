@@ -58,22 +58,22 @@ export function TicketHeader({ ticket }: TicketHeaderProps) {
         </div>
         <h2 className="text-2xl font-black tracking-tight text-on-surface">{ticket.ticketId}</h2>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <span className="bg-surface-container-highest text-on-surface px-3 py-1.5 rounded-full text-xs font-bold">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center h-7 bg-surface-container-highest text-on-surface px-3 rounded-full text-xs font-bold">
           {PRODUCT_LABELS[ticket.productCode] ?? ticket.productCode}
         </span>
-        <span className="bg-surface-container-highest text-on-surface px-3 py-1.5 rounded-full text-xs font-bold">
+        <span className="inline-flex items-center h-7 bg-surface-container-highest text-on-surface px-3 rounded-full text-xs font-bold">
           {TASK_LABELS[ticket.taskType] ?? ticket.taskType}
         </span>
-        <span className={cn('px-3 py-1.5 rounded-full text-xs font-bold', statusStyles[ticket.status])}>
+        <span className={cn('inline-flex items-center h-7 px-3 rounded-full text-xs font-bold', statusStyles[ticket.status])}>
           {STATUS_LABELS[ticket.status] ?? ticket.status}
         </span>
-        <span className={cn('px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1', slaChipStyles[ticket.slaStatus])}>
+        <span className={cn('inline-flex items-center h-7 px-3 rounded-full text-xs font-bold gap-1', slaChipStyles[ticket.slaStatus])}>
           <span className="material-symbols-outlined text-sm">schedule</span>
           {formatSlaChip(ticket.slaStatus, ticket.slaHoursRemaining)}
         </span>
         {ticket.accessPath && (
-          <span className="bg-surface-container-highest text-on-surface px-3 py-1.5 rounded-full text-xs font-bold">
+          <span className="inline-flex items-center h-7 bg-surface-container-highest text-on-surface px-3 rounded-full text-xs font-bold">
             {accessPathLabel[ticket.accessPath]}
           </span>
         )}

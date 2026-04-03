@@ -26,6 +26,8 @@ public class SearchService : ISearchService
         // Search tickets by TicketId
         var ticketResults = await _db.Tickets
             .AsNoTracking()
+            .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
+            .Include(t => t.WorkflowDefinition).ThenInclude(w => w.Stages)
             .Where(t => t.TicketId.Contains(query))
             .OrderByDescending(t => t.CreatedAt)
             .Take(20)
@@ -43,6 +45,7 @@ public class SearchService : ISearchService
         // Search partners by Name or Alias
         var partnerResults = await _db.Partners
             .AsNoTracking()
+            .Include(p => p.PartnerProducts)
             .Where(p => p.Name.Contains(query) || (p.Alias != null && p.Alias.Contains(query)))
             .OrderBy(p => p.Name)
             .Take(20 - results.Count)
@@ -62,7 +65,11 @@ public class SearchService : ISearchService
 
     public async Task<PagedResult<TicketSummaryResponse>> AdvancedSearchAsync(AdvancedSearchRequest request)
     {
-        var query = _db.Tickets.AsNoTracking().AsQueryable();
+        var query = _db.Tickets.AsNoTracking()
+            .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
+            .Include(t => t.CreatedBy)
+            .Include(t => t.WorkflowDefinition).ThenInclude(w => w.Stages)
+            .AsQueryable();
 
         // Apply filters conditionally
         if (!string.IsNullOrEmpty(request.ProductCode) && Enum.TryParse<ProductCode>(request.ProductCode, out var pc))

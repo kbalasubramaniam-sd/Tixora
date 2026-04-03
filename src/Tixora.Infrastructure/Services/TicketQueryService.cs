@@ -33,6 +33,9 @@ public class TicketQueryService : ITicketQueryService
 
         var baseQuery = _db.Tickets
             .AsNoTracking()
+            .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
+            .Include(t => t.CreatedBy)
+            .Include(t => t.WorkflowDefinition).ThenInclude(w => w.Stages)
             .Where(t => t.CreatedByUserId == userId);
 
         var totalCount = await baseQuery.CountAsync();
@@ -85,6 +88,9 @@ public class TicketQueryService : ITicketQueryService
 
         var query = _db.Tickets
             .AsNoTracking()
+            .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
+            .Include(t => t.CreatedBy)
+            .Include(t => t.WorkflowDefinition).ThenInclude(w => w.Stages)
             .Where(t => !TerminalStatuses.Contains(t.Status));
 
         // Visibility by role
@@ -108,8 +114,12 @@ public class TicketQueryService : ITicketQueryService
         var totalCount = await query.CountAsync();
         var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
-        // Fetch all matching tickets to sort by SLA urgency in memory, then paginate
+        // Materializes to memory before pagination because SLA urgency ordering
+        // uses an in-memory helper (SlaUrgencyOrder) that can't be translated to SQL.
+        // Safety cap of 500 prevents loading unbounded results.
         var tickets = await query
+            .OrderByDescending(t => t.CreatedAt)
+            .Take(500)
             .Select(t => new
             {
                 t.Id,
@@ -152,6 +162,9 @@ public class TicketQueryService : ITicketQueryService
     {
         var query = _db.Tickets
             .AsNoTracking()
+            .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
+            .Include(t => t.CreatedBy)
+            .Include(t => t.WorkflowDefinition).ThenInclude(w => w.Stages)
             .Where(t => !TerminalStatuses.Contains(t.Status));
 
         if (role == UserRole.PartnershipTeam)
@@ -165,7 +178,12 @@ public class TicketQueryService : ITicketQueryService
             query = query.Where(t => t.AssignedToUserId == userId);
         }
 
+        // Materializes to memory because SLA urgency ordering uses an in-memory
+        // helper (SlaUrgencyOrder) that can't be translated to SQL.
+        // Safety cap of 500 prevents loading unbounded results.
         var tickets = await query
+            .OrderByDescending(t => t.CreatedAt)
+            .Take(500)
             .Select(t => new
             {
                 t.Id,
@@ -203,47 +221,44 @@ public class TicketQueryService : ITicketQueryService
 
     public async Task<DashboardStatsResponse> GetDashboardStatsAsync(Guid userId, UserRole role)
     {
-        // Stat 1: Open/active tickets (role-scoped)
-        var openQuery = _db.Tickets.AsNoTracking()
+        // Build role-scoped ticket filter as an IQueryable (stays as SQL subquery)
+        var scopedTickets = _db.Tickets.AsNoTracking()
             .Where(t => !TerminalStatuses.Contains(t.Status));
 
         if (role == UserRole.PartnershipTeam)
-            openQuery = openQuery.Where(t => t.CreatedByUserId == userId);
+            scopedTickets = scopedTickets.Where(t => t.CreatedByUserId == userId);
         else if (role != UserRole.SystemAdministrator)
-            openQuery = openQuery.Where(t => t.WorkflowDefinition.Stages.Any(s => s.AssignedRole == role));
+            scopedTickets = scopedTickets.Where(t => t.WorkflowDefinition.Stages.Any(s => s.AssignedRole == role));
 
-        var openCount = await openQuery.CountAsync();
+        // Sequential: DbContext is not thread-safe, can't use Task.WhenAll
+        var openCount = await scopedTickets.CountAsync();
 
-        // Stat 2: SLA breaches (active trackers with Breached status, same role scope)
-        var breachedQuery = _db.SlaTrackers.AsNoTracking()
-            .Where(s => s.IsActive && s.Status == SlaStatus.Breached);
+        // Single query for all SLA stats: breach count, compliance, avg resolution
+        var sla = await _db.SlaTrackers.AsNoTracking()
+            .Where(s => role == UserRole.PartnershipTeam
+                ? s.Ticket.CreatedByUserId == userId
+                : role == UserRole.SystemAdministrator
+                    ? true
+                    : s.Ticket.WorkflowDefinition.Stages.Any(st => st.AssignedRole == role))
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                BreachCount = g.Count(s => s.IsActive && s.Status == SlaStatus.Breached),
+                TotalCompleted = g.Count(s => !s.IsActive && s.CompletedAtUtc != null),
+                CompliantCount = g.Count(s => !s.IsActive && s.CompletedAtUtc != null && s.Status != SlaStatus.Breached),
+                AvgHours = g.Where(s => !s.IsActive && s.CompletedAtUtc != null)
+                    .Average(s => (double?)s.BusinessHoursElapsed)
+            })
+            .FirstOrDefaultAsync();
 
-        if (role == UserRole.PartnershipTeam)
-            breachedQuery = breachedQuery.Where(s => s.Ticket.CreatedByUserId == userId);
-        else if (role != UserRole.SystemAdministrator)
-            breachedQuery = breachedQuery.Where(s => s.Ticket.WorkflowDefinition.Stages.Any(st => st.AssignedRole == role));
-
-        var breachCount = await breachedQuery.CountAsync();
-
-        // Stat 3: SLA compliance % (completed trackers that never breached / total completed)
-        var completedTrackersQuery = _db.SlaTrackers.AsNoTracking()
-            .Where(s => !s.IsActive && s.CompletedAtUtc != null);
-
-        if (role == UserRole.PartnershipTeam)
-            completedTrackersQuery = completedTrackersQuery.Where(s => s.Ticket.CreatedByUserId == userId);
-        else if (role != UserRole.SystemAdministrator)
-            completedTrackersQuery = completedTrackersQuery.Where(s => s.Ticket.WorkflowDefinition.Stages.Any(st => st.AssignedRole == role));
-
-        var totalCompleted = await completedTrackersQuery.CountAsync();
-        var compliantCount = await completedTrackersQuery.CountAsync(s => s.Status != SlaStatus.Breached);
+        var breachCount = sla?.BreachCount ?? 0;
+        var totalCompleted = sla?.TotalCompleted ?? 0;
+        var compliantCount = sla?.CompliantCount ?? 0;
         var compliancePercent = totalCompleted > 0
             ? Math.Round((double)compliantCount / totalCompleted * 100, 1)
-            : 100.0;
-
-        // Stat 4: Avg resolution time in business hours (from completed trackers)
-        var avgHours = totalCompleted > 0
-            ? Math.Round(await completedTrackersQuery.AverageAsync(s => s.BusinessHoursElapsed), 1)
             : 0.0;
+        var complianceDisplay = totalCompleted > 0 ? $"{compliancePercent}%" : "—";
+        var avgHours = sla?.AvgHours != null ? Math.Round(sla.AvgHours.Value, 1) : 0.0;
         var avgDisplay = totalCompleted > 0 ? $"{avgHours}h" : "—";
 
         return new DashboardStatsResponse(
@@ -252,7 +267,7 @@ public class TicketQueryService : ITicketQueryService
                 breachCount > 0 ? "ALERT" : null,
                 breachCount > 0 ? "bg-error text-white px-2 py-0.5 rounded text-[10px] font-bold" : null,
                 breachCount > 0 ? "text-error" : null),
-            Stat3: new StatEntryResponse("SLA Compliance", $"{compliancePercent}%", "verified", "bg-success-container/30", "text-success", "Rate"),
+            Stat3: new StatEntryResponse("SLA Compliance", complianceDisplay, "verified", "bg-success-container/30", "text-success", "Rate"),
             Stat4: new StatEntryResponse("Avg Resolution", avgDisplay, "schedule", "bg-secondary-container/30", "text-secondary", "Avg")
         );
     }
@@ -261,26 +276,11 @@ public class TicketQueryService : ITicketQueryService
 
     public async Task<List<ActivityEntryResponse>> GetRecentActivityAsync(Guid userId)
     {
-        // Get ticket IDs the user is involved in
-        var involvedTicketIds = await _db.Tickets.AsNoTracking()
-            .Where(t => t.CreatedByUserId == userId || t.AssignedToUserId == userId)
-            .Select(t => t.Id)
-            .ToListAsync();
-
-        // Also include tickets where user was an actor in stage logs
-        var actedOnTicketIds = await _db.StageLogs.AsNoTracking()
-            .Where(sl => sl.ActorUserId == userId)
-            .Select(sl => sl.TicketId)
-            .Distinct()
-            .ToListAsync();
-
-        var allTicketIds = involvedTicketIds.Union(actedOnTicketIds).Distinct().ToList();
-
-        if (allTicketIds.Count == 0)
-            return [];
-
+        // Single query: filter audit entries where the user is involved via subqueries (no memory materialization)
         var entries = await _db.AuditEntries.AsNoTracking()
-            .Where(a => allTicketIds.Contains(a.TicketId))
+            .Where(a =>
+                _db.Tickets.Any(t => t.Id == a.TicketId && (t.CreatedByUserId == userId || t.AssignedToUserId == userId))
+                || _db.StageLogs.Any(sl => sl.TicketId == a.TicketId && sl.ActorUserId == userId))
             .OrderByDescending(a => a.TimestampUtc)
             .Take(10)
             .Include(a => a.Actor)
@@ -344,6 +344,7 @@ public class TicketQueryService : ITicketQueryService
     {
         var ticket = await _db.Tickets
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(t => t.PartnerProduct).ThenInclude(pp => pp.Partner)
             .Include(t => t.CreatedBy)
             .Include(t => t.AssignedTo)
@@ -413,7 +414,7 @@ public class TicketQueryService : ITicketQueryService
             .Select(a => new AuditEntryResponse(
                 Id: a.Id.ToString(),
                 Type: MapAuditType(a.ActionType),
-                Description: a.Details ?? $"{a.ActionType} by {a.Actor.FullName}",
+                Description: a.Details != null ? $"{a.Details} — {a.Actor.FullName}" : $"{a.ActionType} by {a.Actor.FullName}",
                 Timestamp: a.TimestampUtc
             ))
             .ToArray();

@@ -208,6 +208,9 @@ namespace Tixora.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("int");
+
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -299,6 +302,8 @@ namespace Tixora.Infrastructure.Migrations
                     b.HasIndex("TicketId");
 
                     b.HasIndex("RecipientUserId", "IsRead");
+
+                    b.HasIndex("RecipientUserId", "IsRead", "CreatedAt");
 
                     b.ToTable("Notifications");
                 });
@@ -668,6 +673,10 @@ namespace Tixora.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("IsActive", "TicketId");
+
                     b.HasIndex("TicketId", "StageOrder");
 
                     b.ToTable("SlaTrackers");
@@ -829,21 +838,11 @@ namespace Tixora.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("e5f6a7b8-0102-0001-0001-000000000001"),
-                            AssignedRole = 3,
-                            SlaBusinessHours = 8,
-                            StageName = "Product Team Review",
-                            StageOrder = 1,
-                            StageType = 0,
-                            WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000001")
-                        },
-                        new
-                        {
                             Id = new Guid("e5f6a7b8-0102-0001-0002-000000000001"),
                             AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "Access Provisioning",
-                            StageOrder = 2,
+                            StageOrder = 1,
                             StageType = 2,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000001")
                         },
@@ -853,17 +852,17 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 6,
                             SlaBusinessHours = 8,
                             StageName = "API Credential Creation",
-                            StageOrder = 3,
+                            StageOrder = 2,
                             StageType = 2,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000001")
                         },
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0001-0004-000000000001"),
-                            AssignedRole = 1,
+                            AssignedRole = 5,
                             SlaBusinessHours = 0,
                             StageName = "Awaiting UAT Signal",
-                            StageOrder = 4,
+                            StageOrder = 3,
                             StageType = 3,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000001")
                         },
@@ -873,19 +872,9 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "UAT Sign-off",
-                            StageOrder = 5,
+                            StageOrder = 4,
                             StageType = 1,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000001")
-                        },
-                        new
-                        {
-                            Id = new Guid("e5f6a7b8-0102-0002-0001-000000000001"),
-                            AssignedRole = 3,
-                            SlaBusinessHours = 8,
-                            StageName = "Product Team Review",
-                            StageOrder = 1,
-                            StageType = 0,
-                            WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000002")
                         },
                         new
                         {
@@ -893,7 +882,7 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "Access Provisioning",
-                            StageOrder = 2,
+                            StageOrder = 1,
                             StageType = 2,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000002")
                         },
@@ -903,17 +892,17 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 6,
                             SlaBusinessHours = 8,
                             StageName = "API Credential Creation",
-                            StageOrder = 3,
+                            StageOrder = 2,
                             StageType = 2,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000002")
                         },
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0002-0004-000000000001"),
-                            AssignedRole = 1,
+                            AssignedRole = 5,
                             SlaBusinessHours = 0,
                             StageName = "Awaiting UAT Signal",
-                            StageOrder = 4,
+                            StageOrder = 3,
                             StageType = 3,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000002")
                         },
@@ -923,19 +912,9 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "UAT Sign-off",
-                            StageOrder = 5,
+                            StageOrder = 4,
                             StageType = 1,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000002")
-                        },
-                        new
-                        {
-                            Id = new Guid("e5f6a7b8-0102-0003-0001-000000000001"),
-                            AssignedRole = 3,
-                            SlaBusinessHours = 8,
-                            StageName = "Product Team Review",
-                            StageOrder = 1,
-                            StageType = 0,
-                            WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000003")
                         },
                         new
                         {
@@ -943,7 +922,7 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "Access Provisioning",
-                            StageOrder = 2,
+                            StageOrder = 1,
                             StageType = 2,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000003")
                         },
@@ -953,17 +932,17 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 6,
                             SlaBusinessHours = 8,
                             StageName = "API Credential Creation",
-                            StageOrder = 3,
+                            StageOrder = 2,
                             StageType = 2,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000003")
                         },
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0003-0004-000000000001"),
-                            AssignedRole = 1,
+                            AssignedRole = 5,
                             SlaBusinessHours = 0,
                             StageName = "Awaiting UAT Signal",
-                            StageOrder = 4,
+                            StageOrder = 3,
                             StageType = 3,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000003")
                         },
@@ -973,19 +952,9 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "UAT Sign-off",
-                            StageOrder = 5,
+                            StageOrder = 4,
                             StageType = 1,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000003")
-                        },
-                        new
-                        {
-                            Id = new Guid("e5f6a7b8-0102-0004-0001-000000000001"),
-                            AssignedRole = 3,
-                            SlaBusinessHours = 8,
-                            StageName = "Product Team Review",
-                            StageOrder = 1,
-                            StageType = 0,
-                            WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000004")
                         },
                         new
                         {
@@ -993,7 +962,7 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "Access Provisioning",
-                            StageOrder = 2,
+                            StageOrder = 1,
                             StageType = 2,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000004")
                         },
@@ -1003,17 +972,17 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 6,
                             SlaBusinessHours = 8,
                             StageName = "API Credential Creation",
-                            StageOrder = 3,
+                            StageOrder = 2,
                             StageType = 2,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000004")
                         },
                         new
                         {
                             Id = new Guid("e5f6a7b8-0102-0004-0004-000000000001"),
-                            AssignedRole = 1,
+                            AssignedRole = 5,
                             SlaBusinessHours = 0,
                             StageName = "Awaiting UAT Signal",
-                            StageOrder = 4,
+                            StageOrder = 3,
                             StageType = 3,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000004")
                         },
@@ -1023,16 +992,16 @@ namespace Tixora.Infrastructure.Migrations
                             AssignedRole = 5,
                             SlaBusinessHours = 8,
                             StageName = "UAT Sign-off",
-                            StageOrder = 5,
+                            StageOrder = 4,
                             StageType = 1,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0102-0001-0001-000000000004")
                         },
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0001-0001-000000000001"),
-                            AssignedRole = 8,
+                            AssignedRole = 1,
                             SlaBusinessHours = 8,
-                            StageName = "Partner Ops Review",
+                            StageName = "Partnership Review",
                             StageOrder = 1,
                             StageType = 0,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0103-0001-0001-000000000001")
@@ -1070,9 +1039,9 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0003-0001-000000000001"),
-                            AssignedRole = 8,
+                            AssignedRole = 1,
                             SlaBusinessHours = 8,
-                            StageName = "Partner Ops Review",
+                            StageName = "Partnership Review",
                             StageOrder = 1,
                             StageType = 0,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0103-0001-0001-000000000003")
@@ -1110,9 +1079,9 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0002-0001-000000000001"),
-                            AssignedRole = 8,
+                            AssignedRole = 1,
                             SlaBusinessHours = 8,
-                            StageName = "Partner Ops Review",
+                            StageName = "Partnership Review",
                             StageOrder = 1,
                             StageType = 0,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0103-0001-0001-000000000002")
@@ -1160,9 +1129,9 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0004-0001-000000000001"),
-                            AssignedRole = 8,
+                            AssignedRole = 1,
                             SlaBusinessHours = 8,
-                            StageName = "Partner Ops Review",
+                            StageName = "Partnership Review",
                             StageOrder = 1,
                             StageType = 0,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0103-0001-0001-000000000004")
@@ -1210,9 +1179,9 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0005-0001-000000000001"),
-                            AssignedRole = 8,
+                            AssignedRole = 1,
                             SlaBusinessHours = 8,
-                            StageName = "Partner Ops Review",
+                            StageName = "Partnership Review",
                             StageOrder = 1,
                             StageType = 0,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0103-0001-0001-000000000005")
@@ -1240,9 +1209,9 @@ namespace Tixora.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e5f6a7b8-0103-0006-0001-000000000001"),
-                            AssignedRole = 8,
+                            AssignedRole = 1,
                             SlaBusinessHours = 8,
-                            StageName = "Partner Ops Review",
+                            StageName = "Partnership Review",
                             StageOrder = 1,
                             StageType = 0,
                             WorkflowDefinitionId = new Guid("d4e5f6a7-0103-0001-0001-000000000006")
@@ -1418,6 +1387,8 @@ namespace Tixora.Infrastructure.Migrations
 
                     b.HasIndex("AssignedToUserId");
 
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("PartnerProductId");
@@ -1428,6 +1399,10 @@ namespace Tixora.Infrastructure.Migrations
                         .IsUnique();
 
                     b.HasIndex("WorkflowDefinitionId");
+
+                    b.HasIndex("CreatedByUserId", "CreatedAt");
+
+                    b.HasIndex("Status", "CurrentStageOrder");
 
                     b.ToTable("Tickets");
                 });
@@ -1476,8 +1451,8 @@ namespace Tixora.Infrastructure.Migrations
                         {
                             Id = new Guid("a1b2c3d4-0001-0001-0001-000000000001"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "sarah.ahmad@tixora.ae",
-                            FullName = "Sarah Ahmad",
+                            Email = "parankush@tixora.ae",
+                            FullName = "Parankush",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
                             Role = 1
@@ -1486,21 +1461,11 @@ namespace Tixora.Infrastructure.Migrations
                         {
                             Id = new Guid("a1b2c3d4-0001-0001-0001-000000000002"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "omar.khalid@tixora.ae",
-                            FullName = "Omar Khalid",
+                            Email = "bahnas@tixora.ae",
+                            FullName = "Bahnas",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
                             Role = 2
-                        },
-                        new
-                        {
-                            Id = new Guid("a1b2c3d4-0001-0001-0001-000000000003"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "hannoun@tixora.ae",
-                            FullName = "Hannoun",
-                            IsActive = true,
-                            PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 3
                         },
                         new
                         {
@@ -1516,8 +1481,8 @@ namespace Tixora.Infrastructure.Migrations
                         {
                             Id = new Guid("a1b2c3d4-0001-0001-0001-000000000005"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "fatima.noor@tixora.ae",
-                            FullName = "Fatima Noor",
+                            Email = "leena@tixora.ae",
+                            FullName = "Leena",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
                             Role = 4
@@ -1526,8 +1491,8 @@ namespace Tixora.Infrastructure.Migrations
                         {
                             Id = new Guid("a1b2c3d4-0001-0001-0001-000000000006"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "khalid.rashed@tixora.ae",
-                            FullName = "Khalid Rashed",
+                            Email = "faiz@tixora.ae",
+                            FullName = "Faiz Siddiqui",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
                             Role = 5
@@ -1536,8 +1501,8 @@ namespace Tixora.Infrastructure.Migrations
                         {
                             Id = new Guid("a1b2c3d4-0001-0001-0001-000000000007"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "ahmed.tariq@tixora.ae",
-                            FullName = "Ahmed Tariq",
+                            Email = "karthik@tixora.ae",
+                            FullName = "Karthik",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
                             Role = 6
@@ -1546,8 +1511,8 @@ namespace Tixora.Infrastructure.Migrations
                         {
                             Id = new Guid("a1b2c3d4-0001-0001-0001-000000000008"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "layla.hassan@tixora.ae",
-                            FullName = "Layla Hassan",
+                            Email = "fares@tixora.ae",
+                            FullName = "Fares Alotaibi",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
                             Role = 7
@@ -1556,28 +1521,8 @@ namespace Tixora.Infrastructure.Migrations
                         {
                             Id = new Guid("a1b2c3d4-0001-0001-0001-000000000009"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "vilina.sequeira@tixora.ae",
-                            FullName = "Vilina Sequeira",
-                            IsActive = true,
-                            PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 8
-                        },
-                        new
-                        {
-                            Id = new Guid("a1b2c3d4-0001-0001-0001-00000000000a"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "sara.raeed@tixora.ae",
-                            FullName = "Sara Raeed",
-                            IsActive = true,
-                            PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
-                            Role = 8
-                        },
-                        new
-                        {
-                            Id = new Guid("a1b2c3d4-0001-0001-0001-00000000000b"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "shayman.ali@tixora.ae",
-                            FullName = "Shayman Ali",
+                            Email = "vileena@tixora.ae",
+                            FullName = "Vileena",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
                             Role = 8
@@ -1587,7 +1532,7 @@ namespace Tixora.Infrastructure.Migrations
                             Id = new Guid("a1b2c3d4-0001-0001-0001-00000000000c"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin@tixora.ae",
-                            FullName = "Admin User",
+                            FullName = "Admin",
                             IsActive = true,
                             PasswordHash = "$2a$11$zg9xWkRLs/TGlMdtLiLQ7u9gkpe1uCLYqAJ/HZV5jLnpnmC//19w2",
                             Role = 9

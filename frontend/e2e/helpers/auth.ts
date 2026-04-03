@@ -5,17 +5,15 @@ const DEFAULT_PASSWORD = 'Password1!'
 
 /** Seeded test users */
 export const USERS = {
-  sarah: { email: 'sarah.ahmad@tixora.ae', name: 'Sarah Ahmad', role: 'PartnershipTeam' },
-  omar: { email: 'omar.khalid@tixora.ae', name: 'Omar Khalid', role: 'LegalTeam' },
-  hannoun: { email: 'hannoun@tixora.ae', name: 'Hannoun', role: 'ProductTeam' },
-  fatima: { email: 'fatima.noor@tixora.ae', name: 'Fatima Noor', role: 'ExecutiveAuthority' },
-  khalid: { email: 'khalid.rashed@tixora.ae', name: 'Khalid Rashed', role: 'IntegrationTeam' },
-  ahmed: { email: 'ahmed.tariq@tixora.ae', name: 'Ahmed Tariq', role: 'DevTeam' },
-  layla: { email: 'layla.hassan@tixora.ae', name: 'Layla Hassan', role: 'BusinessTeam' },
-  vilina: { email: 'vilina.sequeira@tixora.ae', name: 'Vilina Sequeira', role: 'PartnerOps' },
-  sara: { email: 'sara.raeed@tixora.ae', name: 'Sara Raeed', role: 'PartnerOps' },
-  shayman: { email: 'shayman.ali@tixora.ae', name: 'Shayman Ali', role: 'PartnerOps' },
-  admin: { email: 'admin@tixora.ae', name: 'Admin User', role: 'SystemAdministrator' },
+  parankush: { email: 'parankush@tixora.ae', name: 'Parankush', role: 'PartnershipTeam' },
+  bahnas: { email: 'bahnas@tixora.ae', name: 'Bahnas', role: 'LegalTeam' },
+  albaha: { email: 'albaha@tixora.ae', name: 'Albaha', role: 'ProductTeam' },
+  leena: { email: 'leena@tixora.ae', name: 'Leena', role: 'ExecutiveAuthority' },
+  faiz: { email: 'faiz@tixora.ae', name: 'Faiz Siddiqui', role: 'IntegrationTeam' },
+  karthik: { email: 'karthik@tixora.ae', name: 'Karthik', role: 'DevTeam' },
+  fares: { email: 'fares@tixora.ae', name: 'Fares Alotaibi', role: 'BusinessTeam' },
+  vileena: { email: 'vileena@tixora.ae', name: 'Vileena', role: 'PartnerOps' },
+  admin: { email: 'admin@tixora.ae', name: 'Admin', role: 'SystemAdministrator' },
 } as const
 
 type UserKey = keyof typeof USERS
@@ -24,7 +22,7 @@ type UserKey = keyof typeof USERS
  * Authenticate by calling the login API directly, then injecting the token
  * into localStorage so the app treats the session as authenticated.
  */
-export async function loginViaApi(page: Page, user: UserKey = 'sarah') {
+export async function loginViaApi(page: Page, user: UserKey = 'parankush') {
   const { email } = USERS[user]
 
   const response = await page.request.post(`${API_BASE_URL}/auth/login`, {
@@ -54,7 +52,7 @@ export async function loginViaApi(page: Page, user: UserKey = 'sarah') {
 /**
  * Fallback: authenticate via the UI login form.
  */
-export async function loginViaUi(page: Page, user: UserKey = 'sarah') {
+export async function loginViaUi(page: Page, user: UserKey = 'parankush') {
   const { email } = USERS[user]
   await page.goto('/login')
   await page.getByPlaceholder('Email address').fill(email)

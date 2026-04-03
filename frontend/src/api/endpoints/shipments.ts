@@ -12,8 +12,12 @@ export interface ValidateAddressRequest {
 }
 
 export interface ValidateAddressResponse {
-  valid: boolean
-  correctedAddress?: ValidateAddressRequest
+  isValid: boolean
+  correctedAddressLine1?: string
+  correctedCity?: string
+  correctedStateProvince?: string
+  correctedPostalCode?: string
+  message?: string
   errors?: string[]
 }
 

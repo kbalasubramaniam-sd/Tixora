@@ -1,4 +1,4 @@
-import { TicketStatus, SlaStatus } from '@/types/enums'
+import { TicketStatus, SlaStatus, LifecycleState, UserRole } from '@/types/enums'
 
 // Mock label maps — single source of truth for frontend until backend APIs are live.
 // PRODUCT_LABELS and TASK_LABELS will be replaced by API-driven lookups (from products table).
@@ -44,4 +44,24 @@ export const SLA_LABELS: Record<SlaStatus, string> = {
   [SlaStatus.AtRisk]: 'At Risk',
   [SlaStatus.Critical]: 'Critical',
   [SlaStatus.Breached]: 'Breached',
+}
+
+export const LIFECYCLE_LABELS: Record<LifecycleState, string> = {
+  [LifecycleState.None]: 'None',
+  [LifecycleState.Onboarded]: 'Onboarded',
+  [LifecycleState.UatActive]: 'UAT Active',
+  [LifecycleState.UatCompleted]: 'UAT Complete',
+  [LifecycleState.Live]: 'Live',
+}
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  [UserRole.PartnershipTeam]: 'Partnership Team',
+  [UserRole.LegalTeam]: 'Legal Team',
+  [UserRole.ProductTeam]: 'Product Team',
+  [UserRole.ExecutiveAuthority]: 'Executive Authority',
+  [UserRole.IntegrationTeam]: 'Integration Team',
+  [UserRole.DevTeam]: 'Dev Team',
+  [UserRole.BusinessTeam]: 'Business Team',
+  [UserRole.PartnerOps]: 'Partner Ops',
+  [UserRole.SystemAdministrator]: 'System Administrator',
 }

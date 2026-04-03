@@ -16,6 +16,7 @@ const Reports = lazy(() => import('@/pages/Reports'))
 const Workflows = lazy(() => import('@/pages/Admin/Workflows'))
 const SlaSettings = lazy(() => import('@/pages/Admin/SlaSettings'))
 const BusinessHours = lazy(() => import('@/pages/Admin/BusinessHours'))
+const AdminPartners = lazy(() => import('@/pages/Admin/Partners'))
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="admin/workflows" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><Workflows /></Suspense>} />
           <Route path="admin/sla" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><SlaSettings /></Suspense>} />
           <Route path="admin/business-hours" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><BusinessHours /></Suspense>} />
+          <Route path="admin/partners" element={<Suspense fallback={<div className="flex items-center justify-center h-full"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div>}><AdminPartners /></Suspense>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

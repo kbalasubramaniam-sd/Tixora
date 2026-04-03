@@ -6,6 +6,7 @@ public record DocumentResponse(
     string ContentType,
     long SizeBytes,
     string UploadedBy,
+    string UploadedByRole,
     DateTime UploadedAt,
     string DocumentType
 );

@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router'
 import type { TicketSummary } from '@/types/ticket'
 import { SlaStatus } from '@/types/enums'
-import { TASK_LABELS_SHORT } from '@/utils/labels'
 
 interface UrgencySectionProps {
   tickets: TicketSummary[]

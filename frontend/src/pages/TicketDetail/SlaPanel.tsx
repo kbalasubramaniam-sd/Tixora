@@ -1,6 +1,6 @@
 import { cn } from '@/utils/cn'
 import type { TicketDetail } from '@/types/ticket'
-import { SlaStatus } from '@/types/enums'
+import { SlaStatus, TicketStatus } from '@/types/enums'
 
 interface SlaPanelProps {
   ticket: TicketDetail
@@ -35,6 +35,20 @@ const statusLabel: Record<string, string> = {
 }
 
 export function SlaPanel({ ticket }: SlaPanelProps) {
+  // Hide SLA for cancelled or rejected tickets
+  const isTerminal = ticket.status === TicketStatus.Cancelled || ticket.status === TicketStatus.Rejected
+  if (isTerminal) {
+    return (
+      <div className="bg-surface-container-lowest p-6 rounded-xl custom-shadow space-y-3">
+        <h4 className="text-sm font-extrabold uppercase tracking-widest text-on-surface-variant">SLA Tracking</h4>
+        <div className="flex items-center gap-2 text-on-surface-variant">
+          <span className="material-symbols-outlined text-sm">block</span>
+          <span className="text-sm font-medium">N/A</span>
+        </div>
+      </div>
+    )
+  }
+
   // SLA = 0 with OnTrack means no SLA tracking for this stage
   const noSla = ticket.slaStatus === SlaStatus.OnTrack && ticket.slaHoursRemaining === 0
 

@@ -1,4 +1,5 @@
 import type { TicketDetail } from '@/types/ticket'
+import { LIFECYCLE_LABELS } from '@/utils/labels'
 
 interface PartnerPanelProps {
   ticket: TicketDetail
@@ -22,7 +23,7 @@ export function PartnerPanel({ ticket }: PartnerPanelProps) {
       <div className="flex justify-between items-center pt-2">
         <span className="text-xs font-medium text-on-surface-variant">Lifecycle Status</span>
         <span className="text-xs font-black text-primary px-3 py-1 bg-primary/10 rounded-full">
-          {ticket.lifecycleState}
+          {LIFECYCLE_LABELS[ticket.lifecycleState as keyof typeof LIFECYCLE_LABELS] ?? ticket.lifecycleState}
         </span>
       </div>
     </div>
