@@ -1,22 +1,16 @@
 import { useState, useMemo } from 'react'
 import { useWorkflowConfig } from '@/api/hooks/useAdmin'
 import type { WorkflowStageConfig } from '@/api/endpoints/admin'
+import { PRODUCT_LABELS, TASK_LABELS, ROLE_LABELS } from '@/utils/labels'
 
 // --- Types ---
 
 interface Stage {
   name: string
   team: string
-  slaHours: number | null // null = no SLA (external wait gate)
-  docs?: string[]
-  conditional?: boolean
-}
-
-const TASK_LABELS: Record<string, string> = {
-  'T-01': 'T-01 — Agreement Validation & Sign-off',
-  'T-02': 'T-02 — UAT Access Creation',
-  'T-03': 'T-03 — Production Account Creation',
-  'T-04': 'T-04 — Access & Credential Support',
+  teamLabel: string
+  stageType: string
+  slaHours: number | null
 }
 
 // --- Sub-components ---
@@ -24,66 +18,33 @@ const TASK_LABELS: Record<string, string> = {
 function StageCard({ stage, index, isLast }: { stage: Stage; index: number; isLast: boolean }) {
   return (
     <div className="relative flex gap-4">
-      {/* Connecting line */}
       {!isLast && (
         <div className="absolute left-5 top-10 bottom-0 border-l-2 border-primary/20" />
       )}
 
-      {/* Number circle */}
       <div className="relative z-10 flex-shrink-0 w-10 h-10 rounded-full bg-primary text-on-primary font-bold flex items-center justify-center text-sm">
         {index + 1}
       </div>
 
-      {/* Card content */}
       <div className="flex-1 bg-surface-container-lowest p-5 rounded-xl mb-3">
-        <div className="flex flex-wrap items-start gap-2 mb-3">
-          <h3 className="font-bold text-on-surface text-sm flex-1 min-w-0">
-            {stage.name}
-            {stage.conditional && (
-              <span className="ml-2 text-[10px] font-extrabold tracking-wider uppercase text-on-surface-variant/60">
-                conditional
-              </span>
-            )}
-          </h3>
-        </div>
-
+        <h3 className="font-bold text-on-surface text-sm mb-3">{stage.name}</h3>
         <div className="flex flex-wrap items-center gap-2">
-          {/* Team chip */}
           <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded text-[10px] font-extrabold tracking-wider uppercase">
-            {stage.team}
+            {stage.teamLabel}
           </span>
-
-          {/* SLA badge */}
+          <span className="bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+            {stage.stageType}
+          </span>
           {stage.slaHours !== null ? (
             <span className="bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded text-xs font-bold">
               {stage.slaHours}h SLA
             </span>
           ) : (
             <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-xs font-bold">
-              No SLA — External Wait Gate
+              No SLA — External Wait
             </span>
           )}
         </div>
-
-        {/* Required docs */}
-        {stage.docs && stage.docs.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-outline-variant/20">
-            <p className="text-[10px] font-extrabold tracking-wider uppercase text-on-surface-variant/60 mb-1.5">
-              Required Documents
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {stage.docs.map((doc) => (
-                <span
-                  key={doc}
-                  className="flex items-center gap-1 bg-surface-container-low text-on-surface-variant px-2 py-0.5 rounded text-xs"
-                >
-                  <span className="material-symbols-outlined text-[12px]">description</span>
-                  {doc}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
@@ -94,44 +55,46 @@ function StageCard({ stage, index, isLast }: { stage: Stage; index: number; isLa
 export default function Workflows() {
   const { data: workflows, isLoading, error } = useWorkflowConfig()
 
-  // Derive products and tasks from API data
   const products = useMemo(() => {
     if (!workflows) return []
-    return [...new Set(workflows.map((w) => w.productName))]
+    return [...new Set(workflows.map((w) => w.productCode))]
   }, [workflows])
 
   const tasks = useMemo(() => {
     if (!workflows) return []
-    return [...new Set(workflows.map((w) => w.taskTypeCode))].sort()
+    return [...new Set(workflows.map((w) => w.taskType))].sort()
   }, [workflows])
 
   const [product, setProduct] = useState('')
   const [task, setTask] = useState('')
 
-  // Auto-select first product/task when data loads
   const activeProduct = product || products[0] || ''
   const activeTask = task || tasks[0] || ''
 
-  // Find matching workflow and map stages
-  const stages: Stage[] = useMemo(() => {
+  // Find matching workflow(s) — T-03 may have multiple (PortalOnly, PortalAndApi)
+  const matchingWorkflows = useMemo(() => {
     if (!workflows) return []
-    const wf = workflows.find(
-      (w) => w.productName === activeProduct && w.taskTypeCode === activeTask,
+    return workflows.filter(
+      (w) => w.productCode === activeProduct && w.taskType === activeTask,
     )
-    if (!wf) return []
+  }, [workflows, activeProduct, activeTask])
+
+  const stages: Stage[] = useMemo(() => {
+    if (matchingWorkflows.length === 0) return []
+    // Use first matching workflow (or could let user pick provisioning path)
+    const wf = matchingWorkflows[0]
     return wf.stages
       .sort((a: WorkflowStageConfig, b: WorkflowStageConfig) => a.stageOrder - b.stageOrder)
       .map((s: WorkflowStageConfig) => ({
         name: s.stageName,
         team: s.assignedRole,
+        teamLabel: ROLE_LABELS[s.assignedRole as keyof typeof ROLE_LABELS] ?? s.assignedRole,
+        stageType: s.stageType,
         slaHours: s.slaBusinessHours === 0 ? null : s.slaBusinessHours,
-        docs: s.requiredDocuments.length > 0 ? s.requiredDocuments : undefined,
-        conditional: s.isConditional || undefined,
       }))
-  }, [workflows, activeProduct, activeTask])
+  }, [matchingWorkflows])
 
   const totalSlaHours = stages.reduce((sum, s) => sum + (s.slaHours ?? 0), 0)
-  const stageCount = stages.length
 
   if (isLoading) {
     return (
@@ -172,7 +135,6 @@ export default function Workflows() {
             Workflow Management
           </h1>
 
-          {/* Filters */}
           <div className="flex items-center gap-3">
             <select
               value={activeProduct}
@@ -181,7 +143,7 @@ export default function Workflows() {
             >
               {products.map((p) => (
                 <option key={p} value={p}>
-                  {p}
+                  {PRODUCT_LABELS[p] ?? p}
                 </option>
               ))}
             </select>
@@ -193,16 +155,20 @@ export default function Workflows() {
             >
               {tasks.map((t) => (
                 <option key={t} value={t}>
-                  {t}
+                  {TASK_LABELS[t] ?? t}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Subtitle */}
         <p className="mt-2 text-sm text-on-surface-variant font-medium">
           {TASK_LABELS[activeTask] ?? activeTask}
+          {matchingWorkflows.length > 1 && (
+            <span className="ml-2 text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+              {matchingWorkflows.length} variants
+            </span>
+          )}
         </p>
       </div>
 
@@ -226,14 +192,14 @@ export default function Workflows() {
         )}
       </div>
 
-      {/* Summary Card */}
+      {/* Summary */}
       <div className="bg-surface-container-low rounded-xl p-5 border border-outline-variant/20">
         <div className="flex flex-wrap gap-6 mb-4">
           <div>
             <p className="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant/60 mb-1">
               Total Stages
             </p>
-            <p className="text-2xl font-extrabold text-on-surface">{stageCount}</p>
+            <p className="text-2xl font-extrabold text-on-surface">{stages.length}</p>
           </div>
           <div>
             <p className="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant/60 mb-1">
@@ -249,9 +215,7 @@ export default function Workflows() {
         </div>
 
         <div className="flex items-start gap-2 pt-4 border-t border-outline-variant/20">
-          <span className="material-symbols-outlined text-[16px] text-secondary mt-0.5 flex-shrink-0">
-            info
-          </span>
+          <span className="material-symbols-outlined text-[16px] text-secondary mt-0.5 flex-shrink-0">info</span>
           <p className="text-xs text-on-surface-variant">
             Workflows are read-only in MVP 1. Configuration editing coming in a future release.
           </p>

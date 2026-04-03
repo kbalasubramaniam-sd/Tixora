@@ -69,20 +69,19 @@ export interface CreateDelegateRequest {
 
 // Workflow Config
 export interface WorkflowStageConfig {
-  stageId: string
+  id: string
   stageName: string
   stageOrder: number
+  stageType: string
   assignedRole: string
   slaBusinessHours: number
-  isConditional: boolean
-  requiredDocuments: string[]
 }
 
 export interface WorkflowConfig {
+  id: string
   productCode: string
-  productName: string
-  taskTypeCode: string
-  taskTypeName: string
+  taskType: string
+  provisioningPath: string | null
   stages: WorkflowStageConfig[]
 }
 
