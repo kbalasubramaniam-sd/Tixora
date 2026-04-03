@@ -15,7 +15,7 @@ export function WorkflowStepper({ stages }: WorkflowStepperProps) {
           const isCompleted = stage.status === 'completed'
 
           return (
-            <div key={stage.name} className={cn('flex flex-col items-center relative flex-1', isLast && 'flex-none')}>
+            <div key={stage.name} className="flex flex-col items-center relative flex-1">
               {/* Circle */}
               <div
                 className={cn(
@@ -35,7 +35,7 @@ export function WorkflowStepper({ stages }: WorkflowStepperProps) {
               {/* Label */}
               <span
                 className={cn(
-                  'mt-2 text-xs font-bold text-center whitespace-nowrap',
+                  'mt-2 text-xs font-bold text-center',
                   isCurrent && 'font-extrabold text-primary',
                   isCompleted && 'text-primary',
                   stage.status === 'future' && 'text-on-surface-variant',
@@ -43,12 +43,12 @@ export function WorkflowStepper({ stages }: WorkflowStepperProps) {
               >
                 {stage.name}
               </span>
-              {/* Connecting line */}
+              {/* Connecting line (between this circle's center and next circle's center) */}
               {!isLast && (
                 <div
                   className={cn(
-                    'absolute top-5 left-1/2 w-full h-1',
-                    isCompleted ? 'bg-primary-container' : 'bg-surface-variant',
+                    'absolute top-5 left-1/2 w-full h-0.5 rounded-full',
+                    isCompleted ? 'bg-primary' : 'bg-surface-variant',
                   )}
                 />
               )}
