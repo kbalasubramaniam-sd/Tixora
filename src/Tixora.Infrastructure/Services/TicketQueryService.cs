@@ -108,8 +108,12 @@ public class TicketQueryService : ITicketQueryService
         var totalCount = await query.CountAsync();
         var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
-        // Fetch all matching tickets to sort by SLA urgency in memory, then paginate
+        // Materializes to memory before pagination because SLA urgency ordering
+        // uses an in-memory helper (SlaUrgencyOrder) that can't be translated to SQL.
+        // Safety cap of 500 prevents loading unbounded results.
         var tickets = await query
+            .OrderByDescending(t => t.CreatedAt)
+            .Take(500)
             .Select(t => new
             {
                 t.Id,
@@ -165,7 +169,12 @@ public class TicketQueryService : ITicketQueryService
             query = query.Where(t => t.AssignedToUserId == userId);
         }
 
+        // Materializes to memory because SLA urgency ordering uses an in-memory
+        // helper (SlaUrgencyOrder) that can't be translated to SQL.
+        // Safety cap of 500 prevents loading unbounded results.
         var tickets = await query
+            .OrderByDescending(t => t.CreatedAt)
+            .Take(500)
             .Select(t => new
             {
                 t.Id,

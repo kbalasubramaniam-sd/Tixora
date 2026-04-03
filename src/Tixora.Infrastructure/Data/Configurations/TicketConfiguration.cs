@@ -39,5 +39,7 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.HasIndex(t => t.PartnerProductId);
         builder.HasIndex(t => t.Status);
         builder.HasIndex(t => t.AssignedToUserId);
+        builder.HasIndex(t => t.CreatedAt);
+        builder.HasIndex(t => t.CreatedByUserId);
     }
 }

@@ -19,6 +19,7 @@ public class AdminService : IAdminService
     public async Task<SlaConfigResponse> GetSlaConfigAsync()
     {
         var workflows = await _db.WorkflowDefinitions
+            .AsNoTracking()
             .Where(w => w.IsActive)
             .Include(w => w.Stages)
             .OrderBy(w => w.ProductCode)
@@ -63,6 +64,7 @@ public class AdminService : IAdminService
     public async Task<BusinessHoursResponse> GetBusinessHoursAsync()
     {
         var configs = await _db.BusinessHoursConfigs
+            .AsNoTracking()
             .OrderBy(c => c.DayOfWeek)
             .ToListAsync();
 
@@ -109,6 +111,7 @@ public class AdminService : IAdminService
     public async Task<List<HolidayResponse>> GetHolidaysAsync()
     {
         var holidays = await _db.Holidays
+            .AsNoTracking()
             .OrderBy(h => h.Date)
             .ToListAsync();
 
@@ -153,6 +156,7 @@ public class AdminService : IAdminService
     public async Task<List<DelegateResponse>> GetDelegatesAsync()
     {
         var delegates = await _db.DelegateApprovers
+            .AsNoTracking()
             .Where(d => d.IsActive)
             .Include(d => d.PrimaryUser)
             .Include(d => d.DelegateUser)
@@ -215,6 +219,7 @@ public class AdminService : IAdminService
     public async Task<WorkflowConfigResponse> GetWorkflowConfigAsync()
     {
         var workflows = await _db.WorkflowDefinitions
+            .AsNoTracking()
             .Where(w => w.IsActive)
             .Include(w => w.Stages)
             .OrderBy(w => w.ProductCode)

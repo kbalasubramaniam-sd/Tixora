@@ -77,6 +77,7 @@ public class ShipmentService : IShipmentService
     public async Task<ShipmentResponse?> GetByTicketAsync(Guid ticketId)
     {
         var shipment = await _db.Shipments
+            .AsNoTracking()
             .Include(s => s.Ticket)
             .FirstOrDefaultAsync(s => s.TicketId == ticketId && s.Status != ShipmentStatus.Cancelled);
 

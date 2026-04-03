@@ -105,6 +105,7 @@ public class NotificationService : INotificationService
         page = Math.Max(1, page);
 
         var query = _db.Notifications
+            .AsNoTracking()
             .Where(n => n.RecipientUserId == userId);
 
         if (unreadOnly)

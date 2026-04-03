@@ -80,6 +80,7 @@ public class DocumentService : IDocumentService
     public async Task<List<DocumentResponse>> GetByTicketAsync(Guid ticketId)
     {
         return await _db.Documents
+            .AsNoTracking()
             .Where(d => d.TicketId == ticketId)
             .OrderByDescending(d => d.UploadedAt)
             .Select(d => new DocumentResponse(

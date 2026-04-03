@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router'
 import { useAuth } from '@/contexts/AuthContext'
 import { apiClient } from '@/api/client'
 import type { User } from '@/types/user'
@@ -40,6 +41,7 @@ function avatarColor(role: UserRole): string {
 
 export default function Login() {
   const { login } = useAuth()
+  const navigate = useNavigate()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -61,7 +63,7 @@ export default function Login() {
 
     try {
       await login({ email: user.email, password: 'Password1!' })
-      // AuthContext handles redirect
+      navigate('/', { replace: true })
     } catch {
       setError('Login failed. Please try again.')
       setLoggingInId(null)

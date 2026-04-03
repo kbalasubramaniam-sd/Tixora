@@ -46,6 +46,7 @@ public class CommentService : ICommentService
     public async Task<List<CommentResponse>> GetCommentsAsync(Guid ticketId)
     {
         return await _db.Comments
+            .AsNoTracking()
             .Where(c => c.TicketId == ticketId)
             .OrderBy(c => c.CreatedAt)
             .Select(c => new CommentResponse(

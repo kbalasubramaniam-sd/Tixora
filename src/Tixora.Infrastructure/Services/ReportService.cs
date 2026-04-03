@@ -98,6 +98,7 @@ public class ReportService : IReportService
     public async Task<string> ExportCsvAsync(DateTime? dateFrom, DateTime? dateTo, string? productCode, string? taskType, string? status)
     {
         var query = _db.Tickets
+            .AsNoTracking()
             .Include(t => t.PartnerProduct)
                 .ThenInclude(pp => pp.Partner)
             .Include(t => t.CreatedBy)
