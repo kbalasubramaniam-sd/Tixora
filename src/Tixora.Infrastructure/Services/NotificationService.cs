@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Tixora.Application.DTOs.Common;
 using Tixora.Application.DTOs.Notifications;
 using Tixora.Application.Interfaces;
@@ -10,10 +11,14 @@ namespace Tixora.Infrastructure.Services;
 public class NotificationService : INotificationService
 {
     private readonly ITixoraDbContext _db;
+    private readonly IEmailSender _emailSender;
+    private readonly ILogger<NotificationService> _logger;
 
-    public NotificationService(ITixoraDbContext db)
+    public NotificationService(ITixoraDbContext db, IEmailSender emailSender, ILogger<NotificationService> logger)
     {
         _db = db;
+        _emailSender = emailSender;
+        _logger = logger;
     }
 
     public async Task SendAsync(Guid recipientUserId, NotificationType type, string title, string message, Guid? ticketId = null)
@@ -32,21 +37,39 @@ public class NotificationService : INotificationService
 
         _db.Notifications.Add(notification);
         await _db.SaveChangesAsync();
+
+        try
+        {
+            var recipient = await _db.Users.FindAsync(recipientUserId);
+            if (recipient != null)
+            {
+                await _emailSender.SendAsync(
+                    recipient.Email,
+                    recipient.FullName,
+                    title,
+                    $"<p>{message}</p>");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log but don't fail — email is best-effort
+            _logger.LogWarning(ex, "Failed to send email notification to {UserId}", recipientUserId);
+        }
     }
 
     public async Task SendToRoleAsync(UserRole role, NotificationType type, string title, string message, Guid? ticketId = null)
     {
-        var userIds = await _db.Users
+        var users = await _db.Users
             .Where(u => u.Role == role && u.IsActive)
-            .Select(u => u.Id)
+            .Select(u => new { u.Id, u.Email, u.FullName })
             .ToListAsync();
 
-        foreach (var userId in userIds)
+        foreach (var user in users)
         {
             _db.Notifications.Add(new Notification
             {
                 Id = Guid.CreateVersion7(),
-                RecipientUserId = userId,
+                RecipientUserId = user.Id,
                 Type = type,
                 Title = title,
                 Message = message,
@@ -56,8 +79,24 @@ public class NotificationService : INotificationService
             });
         }
 
-        if (userIds.Count > 0)
+        if (users.Count > 0)
             await _db.SaveChangesAsync();
+
+        foreach (var user in users)
+        {
+            try
+            {
+                await _emailSender.SendAsync(
+                    user.Email,
+                    user.FullName,
+                    title,
+                    $"<p>{message}</p>");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send email notification to {UserId}", user.Id);
+            }
+        }
     }
 
     public async Task<PagedResult<NotificationResponse>> GetNotificationsAsync(Guid userId, bool unreadOnly = false, int page = 1, int pageSize = 20)
