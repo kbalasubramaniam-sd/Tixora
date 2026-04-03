@@ -156,10 +156,10 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T02-/)
 
-    // 4 stages: IntegrationTeam → DevTeam → PartnershipTeam (gate) → IntegrationTeam
+    // 4 stages: IntegrationTeam → DevTeam → IntegrationTeam (gate) → IntegrationTeam
     await approveStage(browser, guid, USERS.khalid.email, 'Access provisioned.')
     await approveStage(browser, guid, USERS.ahmed.email, 'API credentials created.')
-    await approveStage(browser, guid, USERS.sarah.email, 'UAT signal received from partner.')
+    await approveStage(browser, guid, USERS.khalid.email, 'UAT signal received from partner.')
     await approveStage(browser, guid, USERS.khalid.email, 'UAT sign-off complete.')
 
     await verifyCompleted(page, guid)
