@@ -81,6 +81,7 @@ public class DocumentService : IDocumentService
     {
         return await _db.Documents
             .AsNoTracking()
+            .Include(d => d.UploadedBy)
             .Where(d => d.TicketId == ticketId)
             .OrderByDescending(d => d.UploadedAt)
             .Select(d => new DocumentResponse(
