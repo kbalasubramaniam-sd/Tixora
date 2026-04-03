@@ -23,7 +23,7 @@ export interface TaskOption {
 export interface FormFieldDefinition {
   name: string
   label: string
-  type: 'text' | 'email' | 'textarea' | 'select' | 'date' | 'toggle' | 'file' | 'readonly' | 'radio-card'
+  type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'date' | 'toggle' | 'file' | 'readonly' | 'radio-card'
   required: boolean
   placeholder?: string
   helperText?: string
