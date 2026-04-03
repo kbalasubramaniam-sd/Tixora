@@ -4,6 +4,8 @@ import { getDocumentDownloadUrl } from '@/api/endpoints/tickets'
 
 interface DocumentsTabProps {
   ticketId: string
+  /** Render as an inline card instead of tab content */
+  inline?: boolean
 }
 
 function formatDate(dateStr: string): string {
@@ -16,7 +18,7 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export function DocumentsTab({ ticketId }: DocumentsTabProps) {
+export function DocumentsTab({ ticketId, inline = false }: DocumentsTabProps) {
   const { data: documents = [], isLoading } = useDocuments(ticketId)
   const uploadMutation = useUploadDocument(ticketId)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -39,8 +41,11 @@ export function DocumentsTab({ ticketId }: DocumentsTabProps) {
     )
   }
 
-  return (
-    <div className="space-y-4">
+  // Don't render inline card if no documents and no upload needed
+  if (inline && documents.length === 0 && !uploadMutation.isPending) return null
+
+  const content = (
+    <>
       {/* Upload button */}
       <div className="flex justify-end">
         <input
@@ -62,7 +67,7 @@ export function DocumentsTab({ ticketId }: DocumentsTabProps) {
 
       {/* Document list */}
       {documents.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-8">
           <span className="material-symbols-outlined text-4xl text-on-surface-variant/30 mb-2">folder_open</span>
           <p className="text-sm text-on-surface-variant">No documents uploaded</p>
         </div>
@@ -91,6 +96,25 @@ export function DocumentsTab({ ticketId }: DocumentsTabProps) {
           ))}
         </div>
       )}
-    </div>
+    </>
   )
+
+  if (inline) {
+    return (
+      <div className="bg-surface-container-lowest p-8 rounded-xl custom-shadow space-y-4">
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-primary">attach_file</span>
+          <h3 className="text-xl font-extrabold text-on-surface">Documents</h3>
+          {documents.length > 0 && (
+            <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+              {documents.length}
+            </span>
+          )}
+        </div>
+        {content}
+      </div>
+    )
+  }
+
+  return <div className="space-y-4">{content}</div>
 }

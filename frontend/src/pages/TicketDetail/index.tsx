@@ -14,11 +14,10 @@ import { CommentsTab } from './CommentsTab'
 import { DocumentsTab } from './DocumentsTab'
 import { AuditTrailTab } from './AuditTrailTab'
 
-type TabId = 'comments' | 'documents' | 'audit'
+type TabId = 'comments' | 'audit'
 
 const tabs: { id: TabId; label: string }[] = [
   { id: 'comments', label: 'Comments' },
-  { id: 'documents', label: 'Documents' },
   { id: 'audit', label: 'Audit Trail' },
 ]
 
@@ -52,6 +51,9 @@ export default function TicketDetail() {
         {/* Main Content */}
         <div className="w-full lg:w-[65%] space-y-8">
           <TicketDetailsCard ticket={ticket} />
+
+          {/* Inline Documents — always visible so reviewers don't need to click a tab */}
+          <DocumentsTab ticketId={ticket.id} inline />
 
           {/* Clarification Card (if present) */}
           {ticket.clarification && (
@@ -109,7 +111,6 @@ export default function TicketDetail() {
             </div>
 
             {activeTab === 'comments' && <CommentsTab ticketId={ticket.id} />}
-            {activeTab === 'documents' && <DocumentsTab ticketId={ticket.id} />}
             {activeTab === 'audit' && <AuditTrailTab entries={ticket.auditTrail} />}
           </div>
         </div>
