@@ -26,6 +26,18 @@ public static class DependencyInjection
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<ISlaService, SlaService>();
         services.AddScoped<INotificationService, NotificationService>();
+
+        var emailProvider = configuration.GetValue<string>("Email:Provider") ?? "None";
+        if (emailProvider.Equals("Brevo", StringComparison.OrdinalIgnoreCase))
+        {
+            services.Configure<BrevoEmailSettings>(configuration.GetSection("Email:Brevo"));
+            services.AddHttpClient<IEmailSender, BrevoEmailSender>();
+        }
+        else
+        {
+            services.AddSingleton<IEmailSender, NoOpEmailSender>();
+        }
+
         services.AddScoped<ISearchService, SearchService>();
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IAdminService, AdminService>();
