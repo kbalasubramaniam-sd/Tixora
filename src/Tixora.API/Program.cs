@@ -12,12 +12,14 @@ builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHostedService<Tixora.Infrastructure.Services.SlaMonitoringService>();
 
-// CORS — allow Vite dev server
+// CORS — allow configured origins (dev + production)
+var allowedOrigins = builder.Configuration.GetValue<string>("AllowedOrigins")?.Split(',', StringSplitOptions.RemoveEmptyEntries)
+    ?? ["http://localhost:5173", "https://localhost:5173"];
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

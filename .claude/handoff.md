@@ -472,3 +472,26 @@ Config toggle: `Shipping:Provider` = `"FedEx"` or `"None"` (default uses NoOp wi
 - Reports: 2 (overview, CSV export)
 - Admin: 10 (SLA config, business hours, holidays, delegates, workflow config)
 - Shipments: 4 (validate-address, book, get-by-ticket, label download)
+
+---
+
+## Deployment
+
+**Files:**
+- `Docs/deployment/aws-deployment-guide.md` — Full step-by-step AWS guide (6 phases)
+- `src/Dockerfile` — Multi-stage Docker build for the .NET API
+- `src/.dockerignore` — Excludes bin/obj/uploads from Docker context
+
+**Architecture:** S3+CloudFront (React) → App Runner (API Docker) → RDS SQL Server Express
+
+**CORS:** `Program.cs` now reads `AllowedOrigins` from config (comma-separated). Defaults to localhost:5173 for dev. Set via env var in production.
+
+**Before deploying:** Run EF migration against RDS to create all E3/E4/FedEx tables.
+
+**Config toggles (env vars in App Runner):**
+- `Email__Provider` = `None` or `Brevo`
+- `Shipping__Provider` = `None` or `FedEx`
+- `AllowedOrigins` = `https://your-cloudfront-domain.net`
+
+## Pending Worktrees (DO NOT MERGE without Karthik's OK)
+- `fe/doc-upload` — DocumentType enum + FE upload wiring (FormStep → API)

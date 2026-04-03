@@ -1,3 +1,5 @@
+using Amazon;
+using Amazon.S3;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,8 +23,26 @@ public static class DependencyInjection
         services.AddScoped<IWorkflowEngine, WorkflowEngine>();
         services.AddScoped<ITicketQueryService, TicketQueryService>();
         services.AddScoped<ICommentService, CommentService>();
-        services.AddSingleton<IFileStorage>(new LocalFileStorage(
-            Path.Combine(Directory.GetCurrentDirectory(), "uploads")));
+        var storageProvider = configuration.GetValue<string>("Storage:Provider") ?? "Local";
+        if (storageProvider.Equals("S3", StringComparison.OrdinalIgnoreCase))
+        {
+            services.Configure<S3StorageSettings>(configuration.GetSection("Storage:S3"));
+            var s3Settings = configuration.GetSection("Storage:S3").Get<S3StorageSettings>();
+            services.AddSingleton<IAmazonS3>(sp =>
+            {
+                var config = new AmazonS3Config
+                {
+                    RegionEndpoint = RegionEndpoint.GetBySystemName(s3Settings?.Region ?? "me-south-1")
+                };
+                return new AmazonS3Client(config); // uses default credential chain (env vars, IAM role, etc.)
+            });
+            services.AddSingleton<IFileStorage, S3FileStorage>();
+        }
+        else
+        {
+            services.AddSingleton<IFileStorage>(new LocalFileStorage(
+                Path.Combine(Directory.GetCurrentDirectory(), "uploads")));
+        }
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<ISlaService, SlaService>();
         services.AddScoped<INotificationService, NotificationService>();

@@ -10,7 +10,7 @@ test.describe('Login flow', () => {
     await page.goto('/login')
 
     await page.getByPlaceholder('Email address').fill('sarah.ahmad@tixora.ae')
-    await page.getByPlaceholder('Password').fill('anything')
+    await page.getByPlaceholder('Password').fill('Password1!')
     await page.getByRole('button', { name: 'Sign In' }).click()
 
     // Should navigate away from login
