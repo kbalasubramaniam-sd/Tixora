@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, type FieldValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -495,9 +495,41 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
     )
   }, [allPartners, product.code, task.type])
 
-  // File state: docName -> File | null
+  // File upload: single shared <input> to avoid Windows file dialog perf issues
   const [files, setFiles] = useState<Record<string, File | null>>({})
   const [fileSubmitAttempted, setFileSubmitAttempted] = useState(false)
+  const [fileErrors, setFileErrors] = useState<Record<string, string | null>>({})
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const activeDocRef = useRef<string | null>(null)
+
+  const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.xlsx', '.png', '.jpg', '.jpeg', '.doc', '.xls', '.txt']
+  const MAX_FILE_SIZE_MB = 10
+
+  function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const docName = activeDocRef.current
+    if (!docName) return
+    const selected = e.target.files?.[0] ?? null
+    if (!selected) return
+    e.target.value = ''
+
+    const ext = '.' + selected.name.split('.').pop()?.toLowerCase()
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      setFileErrors((prev) => ({ ...prev, [docName]: 'Unsupported file type. Use: PDF, DOCX, XLSX, PNG, JPG' }))
+      return
+    }
+    if (selected.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      setFileErrors((prev) => ({ ...prev, [docName]: `File exceeds ${MAX_FILE_SIZE_MB} MB limit` }))
+      return
+    }
+
+    setFileErrors((prev) => ({ ...prev, [docName]: null }))
+    setFiles((prev) => ({ ...prev, [docName]: selected }))
+  }
+
+  function triggerFileUpload(docName: string) {
+    activeDocRef.current = docName
+    fileInputRef.current?.click()
+  }
 
   // Determine which sections are repeatable
   const repeatableSectionNames = useMemo(() => {
@@ -787,6 +819,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                   All uploads must be PDF or High-Res Image
                 </span>
               </div>
+              <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileInputChange} />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {schema.requiredDocuments.map((doc) => (
                   <FileUpload
@@ -794,9 +827,12 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                     label={doc.label}
                     icon={doc.icon ?? 'description'}
                     file={files[doc.name] ?? null}
-                    onFileSelect={(f) => setFiles((prev) => ({ ...prev, [doc.name]: f }))}
-                    accept=".pdf,.docx,.xlsx,.png,.jpg,.jpeg"
-                    maxSizeMB={10}
+                    onUploadClick={() => triggerFileUpload(doc.name)}
+                    onRemove={() => {
+                      setFiles((prev) => ({ ...prev, [doc.name]: null }))
+                      setFileErrors((prev) => ({ ...prev, [doc.name]: null }))
+                    }}
+                    error={fileErrors[doc.name]}
                     showError={fileSubmitAttempted && !files[doc.name]}
                   />
                 ))}
