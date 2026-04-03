@@ -62,6 +62,9 @@ export function TicketDetailsCard({ ticket }: TicketDetailsCardProps) {
       <div className="space-y-8">
         {Array.from(sections.entries()).map(([sectionName, fields]) => {
           const meta = sectionMetaMap.get(sectionName)
+
+          // Skip repeatable sections — they're rendered separately below from _repeatable_ JSON
+          if (meta?.repeatable) return null
           const cols = meta?.columns ?? 2
 
           return (
