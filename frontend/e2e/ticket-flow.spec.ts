@@ -143,7 +143,7 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
   //  Onboarded → UatCompleted
   // ═════════════════════════════════════════════════════════════════
 
-  test('T-02: submit UAT Access ticket with repeatable entries and approve 5 stages', async ({ browser, page }) => {
+  test('T-02: submit UAT Access ticket with repeatable entries and approve 4 stages', async ({ browser, page }) => {
     await loginViaApi(page, 'sarah')
     await selectProductAndTask(page, 'Rabet', 'UAT Access Creation')
     await selectPartner(page, 'Al Ain Insurance')
@@ -151,13 +151,12 @@ test.describe.serial('Ticket lifecycle: T-01 → T-02 → T-03 → T-04', () => 
     // Fill repeatable UAT User Details (1 pre-created entry)
     await page.getByPlaceholder('e.g. Sarah Jenkins').first().fill('Test UAT User')
     await page.getByPlaceholder('sarah.j@company.com').first().fill('uat.user@alain.ae')
-    await page.getByPlaceholder('+1 (555) 000-0000').first().fill('+971 50 123 4567')
-    await page.locator('select').nth(1).selectOption('qa') // Designation
+    await page.getByPlaceholder('+971 50 000 0000').first().fill('+971 50 123 4567')
+    await page.getByPlaceholder('e.g. QA Engineer').first().fill('QA Engineer')
 
     const guid = await reviewAndSubmit(page, 'Al Ain Insurance', /^SPM-RBT-T02-/)
 
-    // 5 stages: ProductTeam → IntegrationTeam → DevTeam → PartnershipTeam (gate) → IntegrationTeam
-    await approveStage(browser, guid, USERS.hannoun.email, 'Product team review OK.')
+    // 4 stages: IntegrationTeam → DevTeam → PartnershipTeam (gate) → IntegrationTeam
     await approveStage(browser, guid, USERS.khalid.email, 'Access provisioned.')
     await approveStage(browser, guid, USERS.ahmed.email, 'API credentials created.')
     await approveStage(browser, guid, USERS.sarah.email, 'UAT signal received from partner.')

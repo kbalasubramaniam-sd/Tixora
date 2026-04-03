@@ -19,6 +19,18 @@ function resolveDisplayValue(field: FormFieldDefinition, value: unknown): string
   return String(value)
 }
 
+function formatFieldLabel(key: string): string {
+  return key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()).trim()
+}
+
+function tryParseRepeatable(value: string): Record<string, string>[] | null {
+  try {
+    const parsed = JSON.parse(value)
+    if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'object') return parsed
+  } catch { /* not JSON */ }
+  return null
+}
+
 export function TicketDetailsCard({ ticket }: TicketDetailsCardProps) {
   const { data: schema } = useFormSchema(ticket.productCode, ticket.taskType)
 
@@ -85,6 +97,55 @@ export function TicketDetailsCard({ ticket }: TicketDetailsCardProps) {
             </div>
           )
         })}
+
+        {/* Repeatable sections (e.g. UAT User Details, Invoicing Contacts) */}
+        {Object.entries(ticket.formData as Record<string, unknown>)
+          .filter(([key]) => key.startsWith('_repeatable_'))
+          .map(([key, value]) => {
+            const sectionLabel = key.replace('_repeatable_', '').replace(/_/g, ' ')
+            const entries = typeof value === 'string' ? tryParseRepeatable(value) : null
+            if (!entries || entries.length === 0) return null
+            const meta = sectionMetaMap.get(sectionLabel.replace(/ /g, '_')) ?? sectionMetaMap.get(sectionLabel)
+            return (
+              <div key={key}>
+                <div className="flex items-center gap-2 mb-4">
+                  {meta?.icon && (
+                    <span className="material-symbols-outlined text-primary text-lg">{meta.icon}</span>
+                  )}
+                  <h4 className="text-sm font-extrabold uppercase tracking-widest text-on-surface-variant">
+                    {sectionLabel}
+                  </h4>
+                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                    {entries.length}
+                  </span>
+                </div>
+                <div className="space-y-4">
+                  {entries.map((entry, idx) => (
+                    <div key={idx} className="bg-surface-container-low rounded-xl p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-6 h-6 rounded-full primary-gradient flex items-center justify-center">
+                          <span className="text-white text-[10px] font-bold">{idx + 1}</span>
+                        </div>
+                        <span className="text-xs font-bold text-on-surface-variant">{sectionLabel} {idx + 1}</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
+                        {Object.entries(entry)
+                          .filter(([, v]) => v !== '' && v !== undefined && v !== null)
+                          .map(([fieldKey, fieldValue]) => (
+                            <div key={fieldKey} className="space-y-1">
+                              <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-extrabold">
+                                {formatFieldLabel(fieldKey)}
+                              </p>
+                              <p className="text-sm font-semibold text-on-surface">{fieldValue}</p>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
 
         {/* Show uploaded documents if any */}
         {ticket.documents.length > 0 && (

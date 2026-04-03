@@ -377,35 +377,32 @@ public static class SeedWorkflows
 
     private static void SeedT02Stages(ModelBuilder modelBuilder)
     {
-        // T-02: Product Team Review → Access Provisioning → API Credential Creation → Awaiting UAT Signal → UAT Sign-off
+        // T-02: Access Provisioning → API Credential Creation → Awaiting UAT Signal → UAT Sign-off
+        // (Product Team Review removed — not needed for UAT access)
         modelBuilder.Entity<StageDefinition>().HasData(
             // ── RBT ──
-            new StageDefinition { Id = S_T02_RBT_1, WorkflowDefinitionId = T02_RBT, StageOrder = 1, StageName = "Product Team Review", StageType = StageType.Review, AssignedRole = UserRole.ProductTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_RBT_2, WorkflowDefinitionId = T02_RBT, StageOrder = 2, StageName = "Access Provisioning", StageType = StageType.Provisioning, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_RBT_3, WorkflowDefinitionId = T02_RBT, StageOrder = 3, StageName = "API Credential Creation", StageType = StageType.Provisioning, AssignedRole = UserRole.DevTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_RBT_4, WorkflowDefinitionId = T02_RBT, StageOrder = 4, StageName = "Awaiting UAT Signal", StageType = StageType.PhaseGate, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
-            new StageDefinition { Id = S_T02_RBT_5, WorkflowDefinitionId = T02_RBT, StageOrder = 5, StageName = "UAT Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_RBT_2, WorkflowDefinitionId = T02_RBT, StageOrder = 1, StageName = "Access Provisioning", StageType = StageType.Provisioning, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_RBT_3, WorkflowDefinitionId = T02_RBT, StageOrder = 2, StageName = "API Credential Creation", StageType = StageType.Provisioning, AssignedRole = UserRole.DevTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_RBT_4, WorkflowDefinitionId = T02_RBT, StageOrder = 3, StageName = "Awaiting UAT Signal", StageType = StageType.PhaseGate, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
+            new StageDefinition { Id = S_T02_RBT_5, WorkflowDefinitionId = T02_RBT, StageOrder = 4, StageName = "UAT Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
 
             // ── RHN ──
-            new StageDefinition { Id = S_T02_RHN_1, WorkflowDefinitionId = T02_RHN, StageOrder = 1, StageName = "Product Team Review", StageType = StageType.Review, AssignedRole = UserRole.ProductTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_RHN_2, WorkflowDefinitionId = T02_RHN, StageOrder = 2, StageName = "Access Provisioning", StageType = StageType.Provisioning, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_RHN_3, WorkflowDefinitionId = T02_RHN, StageOrder = 3, StageName = "API Credential Creation", StageType = StageType.Provisioning, AssignedRole = UserRole.DevTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_RHN_4, WorkflowDefinitionId = T02_RHN, StageOrder = 4, StageName = "Awaiting UAT Signal", StageType = StageType.PhaseGate, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
-            new StageDefinition { Id = S_T02_RHN_5, WorkflowDefinitionId = T02_RHN, StageOrder = 5, StageName = "UAT Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_RHN_2, WorkflowDefinitionId = T02_RHN, StageOrder = 1, StageName = "Access Provisioning", StageType = StageType.Provisioning, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_RHN_3, WorkflowDefinitionId = T02_RHN, StageOrder = 2, StageName = "API Credential Creation", StageType = StageType.Provisioning, AssignedRole = UserRole.DevTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_RHN_4, WorkflowDefinitionId = T02_RHN, StageOrder = 3, StageName = "Awaiting UAT Signal", StageType = StageType.PhaseGate, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
+            new StageDefinition { Id = S_T02_RHN_5, WorkflowDefinitionId = T02_RHN, StageOrder = 4, StageName = "UAT Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
 
             // ── WTQ ──
-            new StageDefinition { Id = S_T02_WTQ_1, WorkflowDefinitionId = T02_WTQ, StageOrder = 1, StageName = "Product Team Review", StageType = StageType.Review, AssignedRole = UserRole.ProductTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_WTQ_2, WorkflowDefinitionId = T02_WTQ, StageOrder = 2, StageName = "Access Provisioning", StageType = StageType.Provisioning, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_WTQ_3, WorkflowDefinitionId = T02_WTQ, StageOrder = 3, StageName = "API Credential Creation", StageType = StageType.Provisioning, AssignedRole = UserRole.DevTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_WTQ_4, WorkflowDefinitionId = T02_WTQ, StageOrder = 4, StageName = "Awaiting UAT Signal", StageType = StageType.PhaseGate, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
-            new StageDefinition { Id = S_T02_WTQ_5, WorkflowDefinitionId = T02_WTQ, StageOrder = 5, StageName = "UAT Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_WTQ_2, WorkflowDefinitionId = T02_WTQ, StageOrder = 1, StageName = "Access Provisioning", StageType = StageType.Provisioning, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_WTQ_3, WorkflowDefinitionId = T02_WTQ, StageOrder = 2, StageName = "API Credential Creation", StageType = StageType.Provisioning, AssignedRole = UserRole.DevTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_WTQ_4, WorkflowDefinitionId = T02_WTQ, StageOrder = 3, StageName = "Awaiting UAT Signal", StageType = StageType.PhaseGate, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
+            new StageDefinition { Id = S_T02_WTQ_5, WorkflowDefinitionId = T02_WTQ, StageOrder = 4, StageName = "UAT Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
 
             // ── MLM ──
-            new StageDefinition { Id = S_T02_MLM_1, WorkflowDefinitionId = T02_MLM, StageOrder = 1, StageName = "Product Team Review", StageType = StageType.Review, AssignedRole = UserRole.ProductTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_MLM_2, WorkflowDefinitionId = T02_MLM, StageOrder = 2, StageName = "Access Provisioning", StageType = StageType.Provisioning, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_MLM_3, WorkflowDefinitionId = T02_MLM, StageOrder = 3, StageName = "API Credential Creation", StageType = StageType.Provisioning, AssignedRole = UserRole.DevTeam, SlaBusinessHours = 8 },
-            new StageDefinition { Id = S_T02_MLM_4, WorkflowDefinitionId = T02_MLM, StageOrder = 4, StageName = "Awaiting UAT Signal", StageType = StageType.PhaseGate, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
-            new StageDefinition { Id = S_T02_MLM_5, WorkflowDefinitionId = T02_MLM, StageOrder = 5, StageName = "UAT Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 }
+            new StageDefinition { Id = S_T02_MLM_2, WorkflowDefinitionId = T02_MLM, StageOrder = 1, StageName = "Access Provisioning", StageType = StageType.Provisioning, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_MLM_3, WorkflowDefinitionId = T02_MLM, StageOrder = 2, StageName = "API Credential Creation", StageType = StageType.Provisioning, AssignedRole = UserRole.DevTeam, SlaBusinessHours = 8 },
+            new StageDefinition { Id = S_T02_MLM_4, WorkflowDefinitionId = T02_MLM, StageOrder = 3, StageName = "Awaiting UAT Signal", StageType = StageType.PhaseGate, AssignedRole = UserRole.PartnershipTeam, SlaBusinessHours = 0 },
+            new StageDefinition { Id = S_T02_MLM_5, WorkflowDefinitionId = T02_MLM, StageOrder = 4, StageName = "UAT Sign-off", StageType = StageType.Approval, AssignedRole = UserRole.IntegrationTeam, SlaBusinessHours = 8 }
         );
     }
 
