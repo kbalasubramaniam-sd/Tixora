@@ -32,17 +32,7 @@ export function DocumentsTab({ ticketId, inline = false }: DocumentsTabProps) {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2].map((i) => (
-          <div key={i} className="h-16 bg-surface-container-low rounded-xl animate-pulse" />
-        ))}
-      </div>
-    )
-  }
-
-  // Group documents by uploader (name + role)
+  // Group documents by uploader (name + role) — must be before any early returns
   const grouped = useMemo(() => {
     const map = new Map<string, { name: string; role: string; docs: DocumentResponse[] }>()
     for (const doc of documents) {
@@ -52,6 +42,16 @@ export function DocumentsTab({ ticketId, inline = false }: DocumentsTabProps) {
     }
     return Array.from(map.values())
   }, [documents])
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2].map((i) => (
+          <div key={i} className="h-16 bg-surface-container-low rounded-xl animate-pulse" />
+        ))}
+      </div>
+    )
+  }
 
   // Don't render inline card if no documents and no upload needed
   if (inline && documents.length === 0 && !uploadMutation.isPending) return null
