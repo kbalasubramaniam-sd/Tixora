@@ -44,7 +44,7 @@ const schemaT01: FormSchema = {
       label: 'Partner Name',
       type: 'select',
       required: true,
-      placeholder: 'Select an active partner...',
+      placeholder: 'Select a partner...',
       section: 'Partner Information',
     },
     {
@@ -100,7 +100,7 @@ const schemaT02: FormSchema = {
       label: 'Partner Name',
       type: 'select',
       required: true,
-      placeholder: 'Select onboarded partner...',
+      placeholder: 'Select a partner...',
       section: 'Partner Information',
     },
     {
@@ -166,7 +166,7 @@ const schemaT03: FormSchema = {
       label: 'Partner Name',
       type: 'select',
       required: true,
-      placeholder: 'Select Active UAT Partner',
+      placeholder: 'Select a partner...',
       section: 'Partner Information',
     },
     {
@@ -310,7 +310,7 @@ const schemaT04: FormSchema = {
       label: 'Partner Name',
       type: 'select',
       required: true,
-      placeholder: 'Select Live Partner...',
+      placeholder: 'Select a partner...',
       section: 'Partner Information',
     },
     {
