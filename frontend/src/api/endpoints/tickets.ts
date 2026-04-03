@@ -33,6 +33,7 @@ export interface DocumentResponse {
   contentType: string
   sizeBytes: number
   uploadedBy: string
+  uploadedByRole: string
   uploadedAt: string
   documentType: string
 }

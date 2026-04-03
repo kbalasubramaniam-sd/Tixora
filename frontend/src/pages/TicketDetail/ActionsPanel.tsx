@@ -72,6 +72,10 @@ export function ActionsPanel({ ticket, onActionComplete }: ActionsPanelProps) {
 
   const visibleActions = ACTION_ORDER.filter((a) => ticket.allowedActions.includes(a))
 
+  // Check if current stage is the last workflow stage (before the "Complete" pseudo-stage)
+  const realStages = ticket.workflowStages.filter((s) => s.name !== 'Complete')
+  const isLastStage = realStages.length > 0 && realStages[realStages.length - 1].status === 'current'
+
   if (visibleActions.length === 0) return null
 
   const handleConfirm = async () => {
@@ -119,8 +123,8 @@ export function ActionsPanel({ ticket, onActionComplete }: ActionsPanelProps) {
               onClick={() => setActiveAction(action)}
               className={config.style}
             >
-              <span className="material-symbols-outlined">{config.icon}</span>
-              {actionLabel[action]}
+              <span className="material-symbols-outlined">{action === 'approve' && isLastStage ? 'task_alt' : config.icon}</span>
+              {action === 'approve' && isLastStage ? 'Complete & Close' : actionLabel[action]}
             </button>
           )
         })}

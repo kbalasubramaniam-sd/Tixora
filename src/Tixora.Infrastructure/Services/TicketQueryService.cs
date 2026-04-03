@@ -256,7 +256,8 @@ public class TicketQueryService : ITicketQueryService
         var compliantCount = sla?.CompliantCount ?? 0;
         var compliancePercent = totalCompleted > 0
             ? Math.Round((double)compliantCount / totalCompleted * 100, 1)
-            : 100.0;
+            : 0.0;
+        var complianceDisplay = totalCompleted > 0 ? $"{compliancePercent}%" : "—";
         var avgHours = sla?.AvgHours != null ? Math.Round(sla.AvgHours.Value, 1) : 0.0;
         var avgDisplay = totalCompleted > 0 ? $"{avgHours}h" : "—";
 
@@ -266,7 +267,7 @@ public class TicketQueryService : ITicketQueryService
                 breachCount > 0 ? "ALERT" : null,
                 breachCount > 0 ? "bg-error text-white px-2 py-0.5 rounded text-[10px] font-bold" : null,
                 breachCount > 0 ? "text-error" : null),
-            Stat3: new StatEntryResponse("SLA Compliance", $"{compliancePercent}%", "verified", "bg-success-container/30", "text-success", "Rate"),
+            Stat3: new StatEntryResponse("SLA Compliance", complianceDisplay, "verified", "bg-success-container/30", "text-success", "Rate"),
             Stat4: new StatEntryResponse("Avg Resolution", avgDisplay, "schedule", "bg-secondary-container/30", "text-secondary", "Avg")
         );
     }

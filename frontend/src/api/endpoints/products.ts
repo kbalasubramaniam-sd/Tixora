@@ -198,9 +198,9 @@ const schemaT03: FormSchema = {
     {
       name: 'adminMobile',
       label: 'Mobile Number',
-      type: 'text',
+      type: 'tel',
       required: true,
-      placeholder: '+1 (555) 000-0000',
+      placeholder: '+971 50 000 0000',
       section: 'Portal Admin User',
     },
     {
@@ -241,9 +241,9 @@ const schemaT03: FormSchema = {
     {
       name: 'contactPhone',
       label: 'Phone',
-      type: 'text',
+      type: 'tel',
       required: true,
-      placeholder: '+1 (555) 123-4567',
+      placeholder: '+971 4 000 0000',
       section: 'Invoicing Contacts',
     },
     // Customer Support Contact (repeatable with role)
@@ -258,9 +258,9 @@ const schemaT03: FormSchema = {
     {
       name: 'contactMobile',
       label: 'Mobile',
-      type: 'text',
+      type: 'tel',
       required: true,
-      placeholder: '+1 (555) 000-0000',
+      placeholder: '+971 50 000 0000',
       section: 'Customer Support Contact',
     },
     {

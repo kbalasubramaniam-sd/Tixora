@@ -1,6 +1,7 @@
-import { useRef } from 'react'
+import { useRef, useMemo } from 'react'
 import { useDocuments, useUploadDocument } from '@/api/hooks/useTickets'
 import { getDocumentDownloadUrl } from '@/api/endpoints/tickets'
+import type { DocumentResponse } from '@/api/endpoints/tickets'
 
 interface DocumentsTabProps {
   ticketId: string
@@ -41,8 +42,46 @@ export function DocumentsTab({ ticketId, inline = false }: DocumentsTabProps) {
     )
   }
 
+  // Group documents by uploader (name + role)
+  const grouped = useMemo(() => {
+    const map = new Map<string, { name: string; role: string; docs: DocumentResponse[] }>()
+    for (const doc of documents) {
+      const key = `${doc.uploadedBy}|${doc.uploadedByRole}`
+      if (!map.has(key)) map.set(key, { name: doc.uploadedBy, role: doc.uploadedByRole, docs: [] })
+      map.get(key)!.docs.push(doc)
+    }
+    return Array.from(map.values())
+  }, [documents])
+
   // Don't render inline card if no documents and no upload needed
   if (inline && documents.length === 0 && !uploadMutation.isPending) return null
+
+  function renderDocCard(doc: DocumentResponse) {
+    return (
+      <div key={doc.id} className="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl">
+        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+          <span className="material-symbols-outlined text-primary">description</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-on-surface truncate">{doc.fileName}</p>
+          <p className="text-[10px] text-on-surface-variant">
+            {formatSize(doc.sizeBytes)} · {formatDate(doc.uploadedAt)}
+            {doc.documentType !== 'Other' && ` · ${doc.documentType}`}
+          </p>
+        </div>
+        <a
+          href={getDocumentDownloadUrl(doc.id)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:text-primary/80 transition-colors"
+        >
+          <span className="material-symbols-outlined">download</span>
+        </a>
+      </div>
+    )
+  }
+
+  const formatRole = (role: string) => role.replace(/([A-Z])/g, ' $1').trim()
 
   const content = (
     <>
@@ -65,33 +104,28 @@ export function DocumentsTab({ ticketId, inline = false }: DocumentsTabProps) {
         </button>
       </div>
 
-      {/* Document list */}
+      {/* Document list grouped by uploader */}
       {documents.length === 0 ? (
         <div className="text-center py-8">
           <span className="material-symbols-outlined text-4xl text-on-surface-variant/30 mb-2">folder_open</span>
           <p className="text-sm text-on-surface-variant">No documents uploaded</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {documents.map((doc) => (
-            <div key={doc.id} className="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl">
-              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="material-symbols-outlined text-primary">description</span>
+        <div className="space-y-6">
+          {grouped.map((group) => (
+            <div key={`${group.name}|${group.role}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
+                  {group.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                </div>
+                <span className="text-sm font-bold text-on-surface">{group.name}</span>
+                <span className="text-[10px] font-medium text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded-full">
+                  {formatRole(group.role)}
+                </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-on-surface truncate">{doc.fileName}</p>
-                <p className="text-[10px] text-on-surface-variant">
-                  {formatSize(doc.sizeBytes)} · {doc.uploadedBy} · {formatDate(doc.uploadedAt)}
-                </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {group.docs.map(renderDocCard)}
               </div>
-              <a
-                href={getDocumentDownloadUrl(doc.id)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:text-primary/80 transition-colors"
-              >
-                <span className="material-symbols-outlined">download</span>
-              </a>
             </div>
           ))}
         </div>

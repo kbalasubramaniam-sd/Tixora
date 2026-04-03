@@ -37,16 +37,16 @@ export function PartnerRow({ partner }: PartnerRowProps) {
             {partner.refId}
           </span>
         </div>
-        <div className="flex gap-3 mt-2">
+        <div className="flex gap-2 mt-2">
           {partner.productDetails.map((pd) => (
-            <div key={pd.productCode} className="flex items-center gap-1.5">
-              <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded text-[10px] font-extrabold tracking-wider">
+            <span key={pd.productCode} className="inline-flex items-center bg-surface-container-low rounded-full overflow-hidden text-[10px] font-bold">
+              <span className="bg-primary/10 text-primary px-2.5 py-1 tracking-wider">
                 {PRODUCT_LABELS[pd.productCode] ?? pd.productCode}
               </span>
-              <span className={`${statusBadge[pd.lifecycleState] ?? statusBadge[LifecycleState.None]} px-2 py-0.5 rounded text-[9px] font-bold`}>
+              <span className={`${statusBadge[pd.lifecycleState] ?? statusBadge[LifecycleState.None]} px-2 py-1`}>
                 {statusLabel[pd.lifecycleState] ?? '—'}
               </span>
-            </div>
+            </span>
           ))}
         </div>
       </div>

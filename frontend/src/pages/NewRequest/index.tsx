@@ -7,7 +7,8 @@ import { ReviewStep } from './ReviewStep'
 import { ConfirmationStep } from './ConfirmationStep'
 import { useSubmitTicket } from '@/api/hooks/useProducts'
 import { uploadDocument } from '@/api/endpoints/tickets'
-import { TaskType } from '@/types/enums'
+import { TaskType, UserRole } from '@/types/enums'
+import { useAuth } from '@/contexts/AuthContext'
 import type { Product, TaskOption } from '@/types/product'
 
 const STEPS = [
@@ -18,14 +19,29 @@ const STEPS = [
 ]
 
 export default function NewRequest() {
+  const { user } = useAuth()
   const [step, setStep] = useState(0)
   const [product, setProduct] = useState<Product | null>(null)
   const [task, setTask] = useState<TaskOption | null>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [result, setResult] = useState<{ id: string; ticketId: string; currentStageName: string | null } | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const submitMutation = useSubmitTicket()
+
+  // Block SystemAdministrator role from creating requests
+  if (user?.role === UserRole.SystemAdministrator) {
+    return (
+      <div className="max-w-2xl mx-auto mt-16 text-center space-y-4">
+        <span className="material-symbols-outlined text-5xl text-on-surface-variant/40">admin_panel_settings</span>
+        <h1 className="text-2xl font-bold text-on-surface">Not Available</h1>
+        <p className="text-on-surface-variant">
+          System Administrators cannot create requests. Please log in with an operational role to submit a new request.
+        </p>
+      </div>
+    )
+  }
 
   function handleProductSelect(p: Product) {
     setProduct(p)
@@ -45,8 +61,6 @@ export default function NewRequest() {
     setFormData(data)
     setStep(3)
   }
-
-  const [submitError, setSubmitError] = useState<string | null>(null)
 
   async function handleFinalSubmit() {
     if (!product || !task) return

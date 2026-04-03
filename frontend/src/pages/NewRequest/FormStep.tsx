@@ -125,16 +125,20 @@ function RadioCardField({
 function ToggleField({
   field,
   register,
+  checked,
 }: {
   field: FormFieldDefinition
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: any
+  checked?: boolean
 }) {
+  // Spread register but override checked so DOM stays in sync after reset()
+  const { ref, ...rest } = register(field.name)
   return (
     <div className="flex items-center justify-between">
       <p className="text-sm text-on-surface-variant font-medium max-w-lg">{field.label}</p>
       <label className="relative inline-flex items-center cursor-pointer shrink-0">
-        <input {...register(field.name)} type="checkbox" className="sr-only peer" />
+        <input ref={ref} {...rest} type="checkbox" checked={!!checked} className="sr-only peer" />
         <div className="w-14 h-7 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-container" />
       </label>
     </div>
@@ -148,6 +152,7 @@ function FormField({
   error,
   partnerOptions,
   companyCode,
+  watchedValue,
 }: {
   field: FormFieldDefinition
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -155,10 +160,11 @@ function FormField({
   error?: string
   partnerOptions?: { id: string; name: string }[]
   companyCode?: string | null
+  watchedValue?: unknown
 }) {
   if (field.type === 'readonly') return <ReadonlyField field={field} value={companyCode ?? undefined} />
   if (field.type === 'radio-card') return <RadioCardField field={field} register={register} error={error} />
-  if (field.type === 'toggle') return <ToggleField field={field} register={register} />
+  if (field.type === 'toggle') return <ToggleField field={field} register={register} checked={!!watchedValue} />
 
   const inputClass = cn(
     'w-full bg-surface-container-lowest border-none rounded-xl h-14 px-4',
@@ -496,7 +502,13 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
   }, [allPartners, product.code, task.type])
 
   // File upload: single shared <input> to avoid Windows file dialog perf issues
-  const [files, setFiles] = useState<Record<string, File | null>>({})
+  // Restore files from initialData when navigating back from Review step
+  const [files, setFiles] = useState<Record<string, File | null>>(() => {
+    if (initialData?._files && typeof initialData._files === 'object') {
+      return initialData._files as Record<string, File | null>
+    }
+    return {}
+  })
   const [fileSubmitAttempted, setFileSubmitAttempted] = useState(false)
   const [fileErrors, setFileErrors] = useState<Record<string, string | null>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -570,7 +582,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
 
     setRepeatableData(newRepData)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schema, repeatableSectionNames])
+  }, [schema, repeatableSectionNames, initialData])
 
   const zodSchema = useMemo(
     () => (schema ? buildZodSchema(schema.fields, repeatableSectionNames) : z.object({})),
@@ -777,7 +789,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                   </div>
                   {/* Toggle rendered inline for API Opt-In section */}
                   {isToggleOnlySection && (
-                    <ToggleField field={fields[0]} register={register} />
+                    <ToggleField field={fields[0]} register={register} checked={!!watch(fields[0].name)} />
                   )}
                 </div>
 
@@ -797,6 +809,7 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
                         error={errors[field.name]?.message as string | undefined}
                         partnerOptions={field.name === 'partnerName' ? eligiblePartners.map((p) => ({ id: p.id, name: p.name })) : undefined}
                         companyCode={field.name === 'companyCode' ? companyCode : undefined}
+                        watchedValue={field.type === 'toggle' ? watch(field.name) : undefined}
                       />
                     ))}
                   </div>
@@ -906,8 +919,9 @@ export function FormStep({ product, task, initialData, onSubmit, onBack }: FormS
           {/* Save as Draft */}
           <button
             type="button"
-            className="text-on-surface-variant text-sm font-medium hover:underline underline-offset-4 decoration-tertiary transition-colors"
+            className="px-6 py-3 border border-outline-variant rounded-xl text-on-surface-variant font-bold text-sm hover:bg-surface-container-low hover:border-primary/20 transition-colors flex items-center gap-2"
           >
+            <span className="material-symbols-outlined text-base">save</span>
             Save as Draft
           </button>
 

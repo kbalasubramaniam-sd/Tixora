@@ -103,17 +103,14 @@ function ShipmentPanelInner({ ticket }: ShipmentPanelProps) {
         postalCode: formData.postalCode || '00000',
         countryCode: 'AE',
       })
-      if (result.valid) {
-        if (result.correctedAddress) {
-          setFormData((prev) => ({
-            ...prev,
-            addressLine1: result.correctedAddress!.addressLine1,
-            addressLine2: result.correctedAddress!.addressLine2 ?? '',
-            city: result.correctedAddress!.city,
-            stateProvince: result.correctedAddress!.stateProvince,
-            postalCode: result.correctedAddress!.postalCode,
-          }))
-        }
+      if (result.isValid) {
+        setFormData((prev) => ({
+          ...prev,
+          addressLine1: result.correctedAddressLine1 ?? prev.addressLine1,
+          city: result.correctedCity ?? prev.city,
+          stateProvince: result.correctedStateProvince ?? prev.stateProvince,
+          postalCode: result.correctedPostalCode ?? prev.postalCode,
+        }))
         setState('validated')
       } else {
         setErrors(result.errors ?? ['Address validation failed'])

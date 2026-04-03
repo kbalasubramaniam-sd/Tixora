@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { usePartners } from '@/api/hooks/usePartners'
 import { ApiError } from '@/components/ui/ApiError'
 import { FilterBar } from '@/pages/TeamQueue/FilterBar'
@@ -26,14 +26,6 @@ export default function Partners() {
   // Total count (unfiltered) for "Showing X of Y"
   const { data: allPartners = [] } = usePartners()
 
-  // Build partner options for searchable filter chip
-  const partnerOptions = useMemo(
-    () => [
-      { label: 'All', value: 'All' },
-      ...allPartners.map((p) => ({ label: p.name, value: p.id })),
-    ],
-    [allPartners],
-  )
 
   const clearFilters = () => {
     setSelectedPartnerId('')

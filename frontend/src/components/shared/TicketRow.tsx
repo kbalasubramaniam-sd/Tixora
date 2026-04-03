@@ -32,8 +32,14 @@ const slaBorderColor: Record<string, string> = {
 function formatSlaShort(hours: number): string {
   if (hours <= 0) return '0h'
   if (hours < 1) return `${Math.round(hours * 60)}m`
-  if (hours >= 24) return `${Math.round(hours / 24)}d`
-  return `${Math.round(hours)}h`
+  if (hours >= 24) {
+    const d = Math.floor(hours / 24)
+    const remainH = Math.floor(hours % 24)
+    return remainH > 0 ? `${d}d ${remainH}h` : `${d}d`
+  }
+  const h = Math.floor(hours)
+  const m = Math.round((hours - h) * 60)
+  return m > 0 ? `${h}h ${m}m` : `${h}h`
 }
 
 export function TicketRow({ ticket }: TicketRowProps) {

@@ -90,10 +90,10 @@ export function ReviewStep({ product, task, formData, onSubmit, onBack, isSubmit
       {/* Product & Task */}
       <div className="bg-surface-container-lowest rounded-xl p-8 mb-8">
         <div className="flex items-center gap-3">
-          <span className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+          <span className="bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider">
             {product.name} · {product.code}
           </span>
-          <span className="text-on-surface-variant text-sm">
+          <span className="text-on-surface font-medium text-base">
             {task.name}
           </span>
         </div>

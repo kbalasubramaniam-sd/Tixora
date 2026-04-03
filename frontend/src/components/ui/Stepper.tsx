@@ -68,8 +68,8 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
         </div>
       </div>
 
-      {/* Progress bar strip */}
-      <div className="flex gap-2 h-1.5 w-full">
+      {/* Progress bar strip — thinner and lighter to differentiate from step circles */}
+      <div className="flex gap-2 h-0.5 w-full opacity-40">
         {steps.map((step, i) => (
           <div
             key={step.label}
