@@ -170,6 +170,114 @@ public class AdminController : ControllerBase
         return Ok(result);
     }
 
+    // --- Partners ---
+
+    /// <summary>
+    /// List all partners with their product links.
+    /// </summary>
+    [HttpGet("partners")]
+    public async Task<IActionResult> GetPartners()
+    {
+        if (RequireAdmin() is { } forbidden) return forbidden;
+        var result = await _adminService.GetPartnersAsync();
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Get a single partner by ID.
+    /// </summary>
+    [HttpGet("partners/{id:guid}")]
+    public async Task<IActionResult> GetPartner(Guid id)
+    {
+        if (RequireAdmin() is { } forbidden) return forbidden;
+        var result = await _adminService.GetPartnerAsync(id);
+        if (result is null) return NotFound();
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Create a new partner.
+    /// </summary>
+    [HttpPost("partners")]
+    public async Task<IActionResult> CreatePartner([FromBody] CreatePartnerRequest request)
+    {
+        if (RequireAdmin() is { } forbidden) return forbidden;
+        var result = await _adminService.CreatePartnerAsync(request);
+        return Created($"/api/admin/partners/{result.Id}", result);
+    }
+
+    /// <summary>
+    /// Update a partner's name and alias.
+    /// </summary>
+    [HttpPut("partners/{id:guid}")]
+    public async Task<IActionResult> UpdatePartner(Guid id, [FromBody] UpdatePartnerRequest request)
+    {
+        if (RequireAdmin() is { } forbidden) return forbidden;
+        try
+        {
+            await _adminService.UpdatePartnerAsync(id, request);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Delete a partner and all product links (fails if tickets exist).
+    /// </summary>
+    [HttpDelete("partners/{id:guid}")]
+    public async Task<IActionResult> DeletePartner(Guid id)
+    {
+        if (RequireAdmin() is { } forbidden) return forbidden;
+        try
+        {
+            await _adminService.DeletePartnerAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Link a product to a partner.
+    /// </summary>
+    [HttpPost("partners/{id:guid}/products")]
+    public async Task<IActionResult> LinkProduct(Guid id, [FromBody] LinkProductRequest request)
+    {
+        if (RequireAdmin() is { } forbidden) return forbidden;
+        try
+        {
+            var result = await _adminService.LinkProductAsync(id, request);
+            return Created($"/api/admin/partners/{id}/products/{result.Id}", result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Unlink a product from a partner (fails if tickets exist).
+    /// </summary>
+    [HttpDelete("partners/{id:guid}/products/{ppId:guid}")]
+    public async Task<IActionResult> UnlinkProduct(Guid id, Guid ppId)
+    {
+        if (RequireAdmin() is { } forbidden) return forbidden;
+        try
+        {
+            await _adminService.UnlinkProductAsync(id, ppId);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
     /// <summary>
     /// Reset database to seed state. Development environment only.
     /// Deletes all tickets and resets partner lifecycles to None.
