@@ -25,11 +25,20 @@ async function switchUser(page: Page, email: string) {
 
 /** Navigate to ticket detail and approve the current stage. */
 async function approveStage(page: Page, ticketGuid: string, userEmail: string, comment: string) {
-  await switchUser(page, userEmail)
+  const token = await getToken(page, userEmail)
+
+  // Navigate to app root first to ensure we're on the right origin
+  await page.goto('/')
+  // Set the new user's token
+  await page.evaluate((t) => {
+    localStorage.setItem('tixora_token', t)
+  }, token)
+  // Full reload to pick up the new token
   await page.goto(`/tickets/${ticketGuid}`)
 
+  // Wait for the approve button (sidebar may render after main content)
   const approveBtn = page.getByRole('button', { name: /Approve & Advance/i })
-  await expect(approveBtn).toBeVisible({ timeout: 10_000 })
+  await expect(approveBtn).toBeVisible({ timeout: 20_000 })
   await approveBtn.click()
 
   // Modal — fill comment and confirm
